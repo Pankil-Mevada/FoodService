@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/workspaces/FoodService/services/UserService/src/UserController.cpp" "services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o.d"
   "/workspaces/FoodService/services/UserService/src/main.cpp" "services/UserService/CMakeFiles/UserService.dir/src/main.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/main.cpp.o.d"
   )
 

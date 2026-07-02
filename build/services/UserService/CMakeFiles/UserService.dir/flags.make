@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/workspaces/FoodService/third_party/Crow/include
+CXX_INCLUDES = -I/workspaces/FoodService/services/UserService/include -I/workspaces/FoodService/third_party/Crow/include
 
 CXX_FLAGS = -std=gnu++20
 

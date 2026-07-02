@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/UserService.dir/src/main.cpp.o -o UserService 
+/usr/bin/c++ CMakeFiles/UserService.dir/src/main.cpp.o CMakeFiles/UserService.dir/src/UserController.cpp.o -o UserService 
