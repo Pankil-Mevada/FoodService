@@ -59,6 +59,11 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o: \
  /usr/include/c++/13/bits/ranges_util.h \
  /usr/include/c++/13/bits/ranges_base.h \
  /usr/include/c++/13/bits/max_size_type.h /usr/include/c++/13/numbers \
+ /usr/include/c++/13/optional /usr/include/c++/13/exception \
+ /usr/include/c++/13/bits/exception_ptr.h \
+ /usr/include/c++/13/bits/cxxabi_init_exception.h \
+ /usr/include/c++/13/typeinfo /usr/include/c++/13/bits/nested_exception.h \
+ /usr/include/c++/13/bits/enable_special_members.h \
  /workspaces/FoodService/services/UserService/include/UserRepository.h \
  /workspaces/FoodService/common/include/Database.h \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
@@ -87,9 +92,6 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
- /usr/include/c++/13/exception /usr/include/c++/13/bits/exception_ptr.h \
- /usr/include/c++/13/bits/cxxabi_init_exception.h \
- /usr/include/c++/13/typeinfo /usr/include/c++/13/bits/nested_exception.h \
  /usr/include/c++/13/bits/char_traits.h \
  /usr/include/c++/13/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
@@ -203,4 +205,5 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o: \
  /usr/include/c++/13/bits/ranges_algobase.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h /usr/include/sqlite3.h \
- /workspaces/FoodService/services/UserService/include/User.h
+ /workspaces/FoodService/services/UserService/include/User.h \
+ /workspaces/FoodService/common/include/Logger.h

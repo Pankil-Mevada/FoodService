@@ -154,6 +154,30 @@ src/Database.cpp.s:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/Database.cpp.s
 .PHONY : src/Database.cpp.s
 
+src/UserValidator.o: src/UserValidator.cpp.o
+.PHONY : src/UserValidator.o
+
+# target to build an object file
+src/UserValidator.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/UserValidator.cpp.o
+.PHONY : src/UserValidator.cpp.o
+
+src/UserValidator.i: src/UserValidator.cpp.i
+.PHONY : src/UserValidator.i
+
+# target to preprocess a source file
+src/UserValidator.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/UserValidator.cpp.i
+.PHONY : src/UserValidator.cpp.i
+
+src/UserValidator.s: src/UserValidator.cpp.s
+.PHONY : src/UserValidator.s
+
+# target to generate assembly for a file
+src/UserValidator.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/UserValidator.cpp.s
+.PHONY : src/UserValidator.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -166,6 +190,9 @@ help:
 	@echo "... src/Database.o"
 	@echo "... src/Database.i"
 	@echo "... src/Database.s"
+	@echo "... src/UserValidator.o"
+	@echo "... src/UserValidator.i"
+	@echo "... src/UserValidator.s"
 .PHONY : help
 
 

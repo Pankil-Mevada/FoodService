@@ -200,5 +200,9 @@ services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: \
  /workspaces/FoodService/services/UserService/include/User.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/iostream \
- /usr/include/c++/13/istream /usr/include/c++/13/bits/istream.tcc
+ /usr/include/c++/13/bits/vector.tcc \
+ /workspaces/FoodService/common/include/Logger.h \
+ /usr/include/c++/13/optional \
+ /usr/include/c++/13/bits/enable_special_members.h \
+ /usr/include/c++/13/iostream /usr/include/c++/13/istream \
+ /usr/include/c++/13/bits/istream.tcc

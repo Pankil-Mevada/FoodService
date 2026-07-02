@@ -1,2 +1,2 @@
-/usr/bin/ar qc libCommon.a CMakeFiles/Common.dir/src/Database.cpp.o
+/usr/bin/ar qc libCommon.a CMakeFiles/Common.dir/src/Database.cpp.o CMakeFiles/Common.dir/src/UserValidator.cpp.o
 /usr/bin/ranlib libCommon.a

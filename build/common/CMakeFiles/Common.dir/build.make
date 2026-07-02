@@ -83,17 +83,33 @@ common/CMakeFiles/Common.dir/src/Database.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Common.dir/src/Database.cpp.s"
 	cd /workspaces/FoodService/build/common && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/common/src/Database.cpp -o CMakeFiles/Common.dir/src/Database.cpp.s
 
+common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: common/CMakeFiles/Common.dir/flags.make
+common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: /workspaces/FoodService/common/src/UserValidator.cpp
+common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: common/CMakeFiles/Common.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object common/CMakeFiles/Common.dir/src/UserValidator.cpp.o"
+	cd /workspaces/FoodService/build/common && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT common/CMakeFiles/Common.dir/src/UserValidator.cpp.o -MF CMakeFiles/Common.dir/src/UserValidator.cpp.o.d -o CMakeFiles/Common.dir/src/UserValidator.cpp.o -c /workspaces/FoodService/common/src/UserValidator.cpp
+
+common/CMakeFiles/Common.dir/src/UserValidator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Common.dir/src/UserValidator.cpp.i"
+	cd /workspaces/FoodService/build/common && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/FoodService/common/src/UserValidator.cpp > CMakeFiles/Common.dir/src/UserValidator.cpp.i
+
+common/CMakeFiles/Common.dir/src/UserValidator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Common.dir/src/UserValidator.cpp.s"
+	cd /workspaces/FoodService/build/common && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/common/src/UserValidator.cpp -o CMakeFiles/Common.dir/src/UserValidator.cpp.s
+
 # Object files for target Common
 Common_OBJECTS = \
-"CMakeFiles/Common.dir/src/Database.cpp.o"
+"CMakeFiles/Common.dir/src/Database.cpp.o" \
+"CMakeFiles/Common.dir/src/UserValidator.cpp.o"
 
 # External object files for target Common
 Common_EXTERNAL_OBJECTS =
 
 common/libCommon.a: common/CMakeFiles/Common.dir/src/Database.cpp.o
+common/libCommon.a: common/CMakeFiles/Common.dir/src/UserValidator.cpp.o
 common/libCommon.a: common/CMakeFiles/Common.dir/build.make
 common/libCommon.a: common/CMakeFiles/Common.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library libCommon.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libCommon.a"
 	cd /workspaces/FoodService/build/common && $(CMAKE_COMMAND) -P CMakeFiles/Common.dir/cmake_clean_target.cmake
 	cd /workspaces/FoodService/build/common && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Common.dir/link.txt --verbose=$(VERBOSE)
 

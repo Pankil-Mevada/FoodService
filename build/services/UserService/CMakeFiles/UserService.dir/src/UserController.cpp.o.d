@@ -924,4 +924,6 @@ services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o: \
  /workspaces/FoodService/services/UserService/include/UserService.h \
  /workspaces/FoodService/services/UserService/include/UserRepository.h \
  /workspaces/FoodService/common/include/Database.h /usr/include/sqlite3.h \
- /workspaces/FoodService/services/UserService/include/User.h
+ /workspaces/FoodService/services/UserService/include/User.h \
+ /workspaces/FoodService/common/include/Logger.h \
+ /workspaces/FoodService/common/include/UserValidator.h

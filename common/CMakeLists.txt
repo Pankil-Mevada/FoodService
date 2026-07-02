@@ -1,5 +1,6 @@
 add_library(Common
     src/Database.cpp
+    src/UserValidator.cpp
 )
 
 target_include_directories(Common

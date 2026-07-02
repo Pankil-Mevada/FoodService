@@ -1074,6 +1074,8 @@ services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o: /works
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h \
   /workspaces/FoodService/common/include/Database.h \
+  /workspaces/FoodService/common/include/Logger.h \
+  /workspaces/FoodService/common/include/UserValidator.h \
   /workspaces/FoodService/services/UserService/include/User.h \
   /workspaces/FoodService/services/UserService/include/UserController.h \
   /workspaces/FoodService/services/UserService/include/UserRepository.h \
@@ -1134,6 +1136,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: /works
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
   /usr/include/c++/13/bits/cxxabi_init_exception.h \
+  /usr/include/c++/13/bits/enable_special_members.h \
   /usr/include/c++/13/bits/exception.h \
   /usr/include/c++/13/bits/exception_defines.h \
   /usr/include/c++/13/bits/exception_ptr.h \
@@ -1224,6 +1227,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: /works
   /usr/include/c++/13/memory \
   /usr/include/c++/13/new \
   /usr/include/c++/13/numbers \
+  /usr/include/c++/13/optional \
   /usr/include/c++/13/ostream \
   /usr/include/c++/13/pstl/execution_defs.h \
   /usr/include/c++/13/pstl/glue_memory_defs.h \
@@ -1359,6 +1363,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: /works
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h \
   /workspaces/FoodService/common/include/Database.h \
+  /workspaces/FoodService/common/include/Logger.h \
   /workspaces/FoodService/services/UserService/include/User.h \
   /workspaces/FoodService/services/UserService/include/UserRepository.h
 
@@ -1386,6 +1391,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o: /workspac
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
   /usr/include/c++/13/bits/cxxabi_init_exception.h \
+  /usr/include/c++/13/bits/enable_special_members.h \
   /usr/include/c++/13/bits/exception.h \
   /usr/include/c++/13/bits/exception_defines.h \
   /usr/include/c++/13/bits/exception_ptr.h \
@@ -1473,6 +1479,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o: /workspac
   /usr/include/c++/13/memory \
   /usr/include/c++/13/new \
   /usr/include/c++/13/numbers \
+  /usr/include/c++/13/optional \
   /usr/include/c++/13/ostream \
   /usr/include/c++/13/pstl/execution_defs.h \
   /usr/include/c++/13/pstl/glue_memory_defs.h \
@@ -1608,6 +1615,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o: /workspac
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h \
   /workspaces/FoodService/common/include/Database.h \
+  /workspaces/FoodService/common/include/Logger.h \
   /workspaces/FoodService/services/UserService/include/User.h \
   /workspaces/FoodService/services/UserService/include/UserRepository.h \
   /workspaces/FoodService/services/UserService/include/UserService.h
@@ -2536,6 +2544,7 @@ services/UserService/CMakeFiles/UserService.dir/src/main.cpp.o: /workspaces/Food
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h \
   /workspaces/FoodService/common/include/Database.h \
+  /workspaces/FoodService/common/include/Logger.h \
   /workspaces/FoodService/services/UserService/include/User.h \
   /workspaces/FoodService/services/UserService/include/UserController.h \
   /workspaces/FoodService/services/UserService/include/UserRepository.h \
@@ -2600,6 +2609,10 @@ services/UserService/CMakeFiles/UserService.dir/src/main.cpp.o: /workspaces/Food
 /workspaces/FoodService/third_party/Crow/include/crow.h:
 
 /workspaces/FoodService/services/UserService/include/UserService.h:
+
+/workspaces/FoodService/common/include/UserValidator.h:
+
+/workspaces/FoodService/common/include/Logger.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
 

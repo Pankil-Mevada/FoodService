@@ -27,6 +27,31 @@ int main()
     UserService service(repository);
     UserController controller(service);
 
+
+    CROW_ROUTE(app, "/users/<int>")
+	    .methods(crow::HTTPMethod::DELETE)
+	    ([&controller](int id)
+	     {
+	     return controller.deleteUser(id);
+	     });
+    CROW_ROUTE(app, "/users/<int>")
+	    .methods(crow::HTTPMethod::PUT)
+	    ([&controller](const crow::request& req, int id)
+	     {
+	     return controller.updateUser(id, req);
+	     });
+    CROW_ROUTE(app, "/login")
+	    .methods(crow::HTTPMethod::POST)
+	    ([&controller](const crow::request& req)
+	     {
+	     return controller.login(req);
+	     });
+    CROW_ROUTE(app,"/users/<int>")
+	    .methods(crow::HTTPMethod::GET)
+	    ([&controller](int id)
+	     {
+	     return controller.getUserById(id);
+	     });
     // Health endpoint
     CROW_ROUTE(app, "/health")
 	    ([&controller]()
