@@ -22,6 +22,7 @@ crow::response UserController::registerUser(const crow::request& req)
 	}
 
 	User user(
+			0,
 			json["name"].s(),
 			json["email"].s(),
 			json["password"].s()
@@ -43,4 +44,24 @@ crow::response UserController::registerUser(const crow::request& req)
 		response["message"] = "Registration failed";
 	}
 	return crow::response(response);
+}
+
+crow::response UserController::getAllUsers()
+{
+    auto users = m_service.getAllUsers();
+
+    crow::json::wvalue response;
+
+    std::size_t index = 0;
+
+    for (const auto& user : users)
+    {
+        response[index]["id"] = user.getId();
+        response[index]["name"] = user.getName();
+        response[index]["email"] = user.getEmail();
+
+        ++index;
+    }
+
+    return crow::response(response);
 }

@@ -12,6 +12,7 @@ public:
     crow::response registerUser(const crow::request& req);
 
     crow::response health();
+    crow::response getAllUsers();
 
 private:
     UserService& m_service;

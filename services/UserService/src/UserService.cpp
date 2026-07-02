@@ -9,3 +9,7 @@ bool UserService::registerUser(const User& user)
 {
     return m_repository.saveUser(user);
 }
+std::vector<User> UserService::getAllUsers()
+{
+    return m_repository.getAllUsers();
+}

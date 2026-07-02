@@ -15,12 +15,12 @@ int main()
 
     // Create users table
     database.execute(
-        "CREATE TABLE IF NOT EXISTS users ("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-        "name TEXT NOT NULL,"
-        "email TEXT UNIQUE NOT NULL,"
-        "password TEXT NOT NULL"
-        ");");
+		    "CREATE TABLE IF NOT EXISTS users ("
+		    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+		    "name TEXT NOT NULL,"
+		    "email TEXT UNIQUE NOT NULL,"
+		    "password TEXT NOT NULL"
+		    ");");
 
     // Dependency Injection
     UserRepository repository(database);
@@ -29,10 +29,17 @@ int main()
 
     // Health endpoint
     CROW_ROUTE(app, "/health")
-    ([&controller]()
-    {
-        return controller.health();
-    });
+	    ([&controller]()
+	     {
+	     return controller.health();
+	     });
+
+    CROW_ROUTE(app, "/users")
+	    .methods(crow::HTTPMethod::GET)
+	    ([&controller]()
+	     {
+	     return controller.getAllUsers();
+	     });
 
     // Register endpoint
     CROW_ROUTE(app, "/register")
