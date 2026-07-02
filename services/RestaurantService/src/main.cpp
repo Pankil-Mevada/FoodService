@@ -7,68 +7,64 @@
 
 int main()
 {
-    // Create Crow application
     crow::SimpleApp app;
 
-    // Open database
     Database database("restaurant.db");
 
-    // Create users table
     database.createRestaurantTable();
-    // Dependency Injection
+
     RestaurantRepository repository(database);
     RestaurantService service(repository);
     RestaurantController controller(service);
 
-
-    CROW_ROUTE(app, "/users/<int>")
-	    .methods(crow::HTTPMethod::DELETE)
-	    ([&controller](int id)
-	     {
-	     return controller.deleteRestaurant(id);
-	     });
-    CROW_ROUTE(app, "/users/<int>")
-	    .methods(crow::HTTPMethod::PUT)
-	    ([&controller](const crow::request& req, int id)
-	     {
-	     return controller.updateRestaurant(id, req);
-	     });
-    CROW_ROUTE(app, "/login")
-	    .methods(crow::HTTPMethod::POST)
-	    ([&controller](const crow::request& req)
-	     {
-	     return controller.login(req);
-	     });
-    CROW_ROUTE(app,"/users/<int>")
-	    .methods(crow::HTTPMethod::GET)
-	    ([&controller](int id)
-	     {
-	     return controller.getRestaurantById(id);
-	     });
-    // Health endpoint
+    // Health Check
     CROW_ROUTE(app, "/health")
-	    ([&controller]()
-	     {
-	     return controller.health();
-	     });
+    ([&controller]()
+    {
+        return controller.health();
+    });
 
-    CROW_ROUTE(app, "/users")
-	    .methods(crow::HTTPMethod::GET)
-	    ([&controller]()
-	     {
-	     return controller.getAllRestaurants();
-	     });
-
-    // Register endpoint
-    CROW_ROUTE(app, "/register")
+    // Create Restaurant
+    CROW_ROUTE(app, "/restaurants")
     .methods(crow::HTTPMethod::POST)
     ([&controller](const crow::request& req)
     {
         return controller.registerRestaurant(req);
     });
 
-    // Start server
-    app.port(8080)
+    // Get All Restaurants
+    CROW_ROUTE(app, "/restaurants")
+    .methods(crow::HTTPMethod::GET)
+    ([&controller]()
+    {
+        return controller.getAllRestaurants();
+    });
+
+    // Get Restaurant By Id
+    CROW_ROUTE(app, "/restaurants/<int>")
+    .methods(crow::HTTPMethod::GET)
+    ([&controller](int id)
+    {
+        return controller.getRestaurantById(id);
+    });
+
+    // Update Restaurant
+    CROW_ROUTE(app, "/restaurants/<int>")
+    .methods(crow::HTTPMethod::PUT)
+    ([&controller](const crow::request& req, int id)
+    {
+        return controller.updateRestaurant(id, req);
+    });
+
+    // Delete Restaurant
+    CROW_ROUTE(app, "/restaurants/<int>")
+    .methods(crow::HTTPMethod::DELETE)
+    ([&controller](int id)
+    {
+        return controller.deleteRestaurant(id);
+    });
+
+    app.port(8081)
        .multithreaded()
        .run();
 

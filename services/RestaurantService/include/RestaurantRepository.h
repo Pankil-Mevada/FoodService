@@ -10,15 +10,16 @@ class RestaurantRepository
 public:
     explicit RestaurantRepository(Database& database);
 
-    bool saveRestaurant(const Restaurant& user);
+    bool saveRestaurant(const Restaurant& restaurant);
+
     std::vector<Restaurant> getAllRestaurants();
-	std::optional<Restaurant> getRestaurantById(int id);
-	bool updateRestaurant(const Restaurant& user);
 
-bool deleteRestaurant(int id);
+    std::optional<Restaurant> getRestaurantById(int id);
 
-std::optional<Restaurant> findByEmail(
-    const std::string& email);
+    bool updateRestaurant(const Restaurant& restaurant);
+
+    bool deleteRestaurant(int id);
+
 private:
     Database& m_database;
 };

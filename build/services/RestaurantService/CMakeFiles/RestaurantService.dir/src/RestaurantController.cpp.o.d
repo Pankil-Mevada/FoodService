@@ -926,5 +926,4 @@ services/RestaurantService/CMakeFiles/RestaurantService.dir/src/RestaurantContro
  /workspaces/FoodService/common/include/Database.h /usr/include/sqlite3.h \
  /workspaces/FoodService/services/RestaurantService/include/Restaurant.h \
  /workspaces/FoodService/common/include/Logger.h \
- /workspaces/FoodService/services/RestaurantService/include/Restaurant.h \
  /workspaces/FoodService/common/include/UserValidator.h

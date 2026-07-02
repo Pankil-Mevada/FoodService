@@ -22,29 +22,19 @@ crow::response RestaurantController::registerRestaurant(const crow::request& req
 		return crow::response(400, "Invalid JSON");
 	}
 
-	Restaurant user(
+	Restaurant restaurant(
 			0,
 			json["name"].s(),
-			json["email"].s(),
-			json["password"].s()
-		 );
-
-	if (!UserValidator::validateName(user.getName()))
+			json["address"].s(),
+			json["phone"].s(),
+			json["rating"].d()
+			);
+	if (!UserValidator::validateName(restaurant.getName()))
 	{
 		return crow::response(400, "Invalid name");
 	}
 
-	if (!UserValidator::validateEmail(user.getAddress()))
-	{
-		return crow::response(400, "Invalid address");
-	}
-
-	if (!UserValidator::validatePassword(user.getPhone()))
-	{
-		return crow::response(400, "Phone must be at least 6 characters");
-	}
-
-	bool status = m_service.registerRestaurant(user);
+	bool status = m_service.registerRestaurant(restaurant);
 
 	crow::json::wvalue response;
 
@@ -67,29 +57,29 @@ crow::response RestaurantController::registerRestaurant(const crow::request& req
 
 crow::response RestaurantController::getAllRestaurants()
 {
-    auto users = m_service.getAllRestaurants();
+    auto restaurants  = m_service.getAllRestaurants();
 
     crow::json::wvalue response;
 
     std::size_t index = 0;
 
-    for (const auto& user : users)
+    for (const auto& restaurant : restaurants)
     {
-        response[index]["id"] = user.getId();
-        response[index]["address"] = user.getAddress();
-        response[index]["phone"] = user.getPhone();
-        response[index]["rating"] = user.getRating();
+	    response[index]["id"] = restaurant.getId();
+	    response[index]["name"] = restaurant.getName();
+	    response[index]["address"] = restaurant.getAddress();
+	    response[index]["phone"] = restaurant.getPhone();
+	    response[index]["rating"] = restaurant.getRating();
 
-        ++index;
+	    ++index;
     }
-
     return crow::response(response);
 }
 crow::response RestaurantController::getRestaurantById(int id)
 {
-    auto user = m_service.getRestaurantById(id);
+    auto restaurant = m_service.getRestaurantById(id);
 
-    if(!user.has_value())
+    if(!restaurant.has_value())
     {
         crow::json::wvalue response;
 
@@ -101,11 +91,12 @@ crow::response RestaurantController::getRestaurantById(int id)
 
     crow::json::wvalue response;
 
-    response["id"] = user->getId();
-    response["address"] = user->getAddress();
-    response["phone"] = user->getPhone();
-    response["rating"] = user->getRating();
-
+    response["id"] = restaurant->getId();
+    response["name"] = restaurant->getName();
+    response["address"] = restaurant->getAddress();
+    response["phone"] = restaurant->getPhone();
+    response["rating"] = restaurant->getRating();
+    
     return crow::response(response);
 }
 
@@ -120,28 +111,19 @@ crow::response RestaurantController::updateRestaurant(
         return crow::response(400, "Invalid JSON");
     }
 
-    Restaurant user(
+    Restaurant restaurant(
         id,
         json["name"].s(),
         json["address"].s(),
         json["phone"].s(),
-        json["rating"].s());
+        json["rating"].d());
 	
-    if (!UserValidator::validateName(user.getName()))
+    if (!UserValidator::validateName(restaurant.getName()))
     {
 	    return crow::response(400, "Invalid name");
     }
 
-    if (!UserValidator::validateEmail(user.getAddress()))
-    {
-	    return crow::response(400, "Invalid email");
-    }
-
-    if (!UserValidator::validatePassword(user.getPhone()))
-    {
-	    return crow::response(400, "Password must be at least 6 characters");
-    }
-    bool status = m_service.updateRestaurant(user);
+    bool status = m_service.updateRestaurant(restaurant);
 
     crow::json::wvalue response;
 
@@ -174,37 +156,6 @@ crow::response RestaurantController::deleteRestaurant(int id)
     {
         response["success"] = false;
         response["message"] = "Restaurant not found";
-    }
-
-    return crow::response(response);
-}
-
-crow::response RestaurantController::login(
-    const crow::request& req)
-{
-    auto json = crow::json::load(req.body);
-
-    if (!json)
-    {
-        return crow::response(400, "Invalid JSON");
-    }
-
-    bool status =
-        m_service.login(
-            json["email"].s(),
-            json["password"].s());
-
-    crow::json::wvalue response;
-
-    if (status)
-    {
-        response["success"] = true;
-        response["message"] = "Login successful";
-    }
-    else
-    {
-        response["success"] = false;
-        response["message"] = "Invalid email or password";
     }
 
     return crow::response(response);
