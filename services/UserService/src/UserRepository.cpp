@@ -10,6 +10,7 @@ UserRepository::UserRepository(Database& database)
 
 bool UserRepository::saveUser(const User& user)
 {
+	std::cout<<" Save User "<<std::endl;
     const char* sql =
         "INSERT INTO users(name,email,password)"
         "VALUES(?,?,?);";
@@ -43,6 +44,7 @@ bool UserRepository::saveUser(const User& user)
     }
 
     sqlite3_finalize(stmt);
+	std::cout<<" Save User "<<std::endl;
 
     return true;
 }
