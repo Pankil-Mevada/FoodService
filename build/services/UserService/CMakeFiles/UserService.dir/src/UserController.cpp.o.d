@@ -922,4 +922,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o: \
  /workspaces/FoodService/third_party/Crow/include/crow/version.h \
  /workspaces/FoodService/third_party/Crow/include/crow/app.h \
  /workspaces/FoodService/services/UserService/include/UserService.h \
+ /workspaces/FoodService/services/UserService/include/UserRepository.h \
+ /workspaces/FoodService/services/UserService/include/Database.h \
+ /usr/include/sqlite3.h \
  /workspaces/FoodService/services/UserService/include/User.h

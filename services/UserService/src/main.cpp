@@ -1,29 +1,51 @@
 #include <crow.h>
+
 #include "Database.h"
 #include "UserController.h"
+#include "UserRepository.h"
+#include "UserService.h"
 
 int main()
 {
+    // Create Crow application
     crow::SimpleApp app;
 
-    Database database("users.db");
+    // Open database
+    Database database("foodservice.db");
 
-database.execute(
-    "CREATE TABLE IF NOT EXISTS users("
-    "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-    "name TEXT NOT NULL,"
-    "email TEXT UNIQUE NOT NULL,"
-    "password TEXT NOT NULL"
-    ");");
+    // Create users table
+    database.execute(
+        "CREATE TABLE IF NOT EXISTS users ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "name TEXT NOT NULL,"
+        "email TEXT UNIQUE NOT NULL,"
+        "password TEXT NOT NULL"
+        ");");
 
+    // Dependency Injection
+    UserRepository repository(database);
+    UserService service(repository);
+    UserController controller(service);
+
+    // Health endpoint
     CROW_ROUTE(app, "/health")
-    (&UserController::health);
+    ([&controller]()
+    {
+        return controller.health();
+    });
 
+    // Register endpoint
     CROW_ROUTE(app, "/register")
     .methods(crow::HTTPMethod::POST)
-    (&UserController::registerUser);
+    ([&controller](const crow::request& req)
+    {
+        return controller.registerUser(req);
+    });
 
-    app.port(8080).multithreaded().run();
+    // Start server
+    app.port(8080)
+       .multithreaded()
+       .run();
 
     return 0;
 }

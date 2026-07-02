@@ -3,6 +3,10 @@
 #include "User.h"
 #include <iostream>
 
+UserController::UserController(UserService& service)
+    : m_service(service)
+{
+}
 crow::response UserController::health()
 {
     return crow::response("User Service is Healthy!");
@@ -23,9 +27,8 @@ crow::response UserController::registerUser(const crow::request& req)
 			json["password"].s()
 		 );
 
-	UserService service;
 
-	bool status = service.registerUser(user);
+	bool status = m_service.registerUser(user);
 
 	crow::json::wvalue response;
 

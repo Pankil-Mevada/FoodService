@@ -2,10 +2,17 @@
 
 #include <crow.h>
 
+#include "UserService.h"
+
 class UserController
 {
 public:
-    static crow::response registerUser(const crow::request& req);
+    explicit UserController(UserService& service);
 
-    static crow::response health();
+    crow::response registerUser(const crow::request& req);
+
+    crow::response health();
+
+private:
+    UserService& m_service;
 };
