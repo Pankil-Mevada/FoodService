@@ -155,6 +155,19 @@ RestaurantService/fast:
 	$(MAKE) $(MAKESILENT) -f services/RestaurantService/CMakeFiles/RestaurantService.dir/build.make services/RestaurantService/CMakeFiles/RestaurantService.dir/build
 .PHONY : RestaurantService/fast
 
+#=============================================================================
+# Target rules for targets named OrderService
+
+# Build rule for target.
+OrderService: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 OrderService
+.PHONY : OrderService
+
+# fast build rule for target.
+OrderService/fast:
+	$(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/build
+.PHONY : OrderService/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -164,6 +177,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Common"
+	@echo "... OrderService"
 	@echo "... RestaurantService"
 	@echo "... UserService"
 .PHONY : help

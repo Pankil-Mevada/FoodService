@@ -82,3 +82,34 @@ void Database::createRestaurantTable()
         sqlite3_free(errMsg);
     }
 }
+
+void Database::createOrderTable()
+{
+    const char* sql = R"(
+        CREATE TABLE IF NOT EXISTS orders
+        (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            restaurant_id INTEGER NOT NULL,
+            total_amount REAL NOT NULL,
+            status TEXT NOT NULL
+        );
+    )";
+
+    char* errMsg = nullptr;
+
+    int rc = sqlite3_exec(
+        m_database.get(),
+        sql,
+        nullptr,
+        nullptr,
+        &errMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        std::cerr << "Failed to create orders table: "
+                  << errMsg << std::endl;
+
+        sqlite3_free(errMsg);
+    }
+}

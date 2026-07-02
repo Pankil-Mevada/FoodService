@@ -13,3 +13,5 @@ find_package(jwt-cpp CONFIG REQUIRED)
 add_subdirectory(common)
 add_subdirectory(services/UserService)
 add_subdirectory(services/RestaurantService)
+add_subdirectory(services/OrderService)
+

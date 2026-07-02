@@ -9,3 +9,6 @@
 /workspaces/FoodService/build/services/RestaurantService/CMakeFiles/RestaurantService.dir
 /workspaces/FoodService/build/services/RestaurantService/CMakeFiles/edit_cache.dir
 /workspaces/FoodService/build/services/RestaurantService/CMakeFiles/rebuild_cache.dir
+/workspaces/FoodService/build/services/OrderService/CMakeFiles/OrderService.dir
+/workspaces/FoodService/build/services/OrderService/CMakeFiles/edit_cache.dir
+/workspaces/FoodService/build/services/OrderService/CMakeFiles/rebuild_cache.dir

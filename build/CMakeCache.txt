@@ -224,8 +224,8 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 //Path to a program.
 CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 
-//No help, variable specified on the command line.
-CMAKE_TOOLCHAIN_FILE:UNINITIALIZED=/workspaces/vcpkg/scripts/buildsystems/vcpkg.cmake
+//The CMake toolchain file
+CMAKE_TOOLCHAIN_FILE:FILEPATH=/workspaces/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console
@@ -253,6 +253,15 @@ OPENSSL_INCLUDE_DIR:PATH=/workspaces/vcpkg/installed/x64-linux/include
 
 //Path to a library.
 OPENSSL_SSL_LIBRARY:FILEPATH=/workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
+
+//Value Computed by CMake
+OrderService_BINARY_DIR:STATIC=/workspaces/FoodService/build/services/OrderService
+
+//Value Computed by CMake
+OrderService_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+OrderService_SOURCE_DIR:STATIC=/workspaces/FoodService/services/OrderService
 
 //Arguments to supply to pkg-config
 PKG_CONFIG_ARGN:STRING=
@@ -437,7 +446,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=4
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=5
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
