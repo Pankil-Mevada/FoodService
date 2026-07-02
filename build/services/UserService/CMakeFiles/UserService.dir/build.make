@@ -158,6 +158,9 @@ services/UserService/UserService: services/UserService/CMakeFiles/UserService.di
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/build.make
 services/UserService/UserService: common/libCommon.a
 services/UserService/UserService: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+services/UserService/UserService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
+services/UserService/UserService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
+services/UserService/UserService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable UserService"
 	cd /workspaces/FoodService/build/services/UserService && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/UserService.dir/link.txt --verbose=$(VERBOSE)

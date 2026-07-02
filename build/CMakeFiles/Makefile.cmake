@@ -10,18 +10,27 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.28/Modules/CMakeCInformation.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeCXXInformation.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeCommonLanguageInclude.cmake"
+  "/usr/share/cmake-3.28/Modules/CMakeDependentOption.cmake"
+  "/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeGenericSystem.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeInitializeConfigs.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeLanguageInformation.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeSystemSpecificInformation.cmake"
   "/usr/share/cmake-3.28/Modules/CMakeSystemSpecificInitialize.cmake"
+  "/usr/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake"
+  "/usr/share/cmake-3.28/Modules/CheckIncludeFile.cmake"
+  "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake"
   "/usr/share/cmake-3.28/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
   "/usr/share/cmake-3.28/Modules/Compiler/GNU-C.cmake"
   "/usr/share/cmake-3.28/Modules/Compiler/GNU-CXX.cmake"
   "/usr/share/cmake-3.28/Modules/Compiler/GNU.cmake"
+  "/usr/share/cmake-3.28/Modules/FindOpenSSL.cmake"
   "/usr/share/cmake-3.28/Modules/FindPackageHandleStandardArgs.cmake"
   "/usr/share/cmake-3.28/Modules/FindPackageMessage.cmake"
+  "/usr/share/cmake-3.28/Modules/FindPkgConfig.cmake"
   "/usr/share/cmake-3.28/Modules/FindSQLite3.cmake"
+  "/usr/share/cmake-3.28/Modules/FindThreads.cmake"
+  "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake"
   "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU-C.cmake"
   "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU-CXX.cmake"
   "/usr/share/cmake-3.28/Modules/Platform/Linux-GNU.cmake"
@@ -33,7 +42,17 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeSystem.cmake"
   "/workspaces/FoodService/common/CMakeLists.txt"
+  "/workspaces/FoodService/services/RestaurantService/CMakeLists.txt"
   "/workspaces/FoodService/services/UserService/CMakeLists.txt"
+  "/workspaces/vcpkg/installed/x64-linux/share/jwt-cpp/jwt-cpp-config-version.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/jwt-cpp/jwt-cpp-config.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/jwt-cpp/jwt-cpp-targets.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/openssl/vcpkg-cmake-wrapper.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/unofficial-argon2/unofficial-argon2-config.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/unofficial-argon2/unofficial-argon2-targets-debug.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/unofficial-argon2/unofficial-argon2-targets-release.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/unofficial-argon2/unofficial-argon2-targets.cmake"
+  "/workspaces/vcpkg/scripts/buildsystems/vcpkg.cmake"
   )
 
 # The corresponding makefile is:
@@ -47,10 +66,12 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "common/CMakeFiles/CMakeDirectoryInformation.cmake"
   "services/UserService/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "services/RestaurantService/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "common/CMakeFiles/Common.dir/DependInfo.cmake"
   "services/UserService/CMakeFiles/UserService.dir/DependInfo.cmake"
+  "services/RestaurantService/CMakeFiles/RestaurantService.dir/DependInfo.cmake"
   )

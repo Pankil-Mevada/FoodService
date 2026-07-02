@@ -6,3 +6,6 @@
 /workspaces/FoodService/build/services/UserService/CMakeFiles/UserService.dir
 /workspaces/FoodService/build/services/UserService/CMakeFiles/edit_cache.dir
 /workspaces/FoodService/build/services/UserService/CMakeFiles/rebuild_cache.dir
+/workspaces/FoodService/build/services/RestaurantService/CMakeFiles/RestaurantService.dir
+/workspaces/FoodService/build/services/RestaurantService/CMakeFiles/edit_cache.dir
+/workspaces/FoodService/build/services/RestaurantService/CMakeFiles/rebuild_cache.dir

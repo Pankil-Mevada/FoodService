@@ -21,6 +21,7 @@ class Database
 public:
     explicit Database(const std::string& databaseName);
 
+    void createRestaurantTable();
     Database(const Database&) = delete;
     Database& operator=(const Database&) = delete;
 

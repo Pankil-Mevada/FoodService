@@ -142,6 +142,19 @@ UserService/fast:
 	$(MAKE) $(MAKESILENT) -f services/UserService/CMakeFiles/UserService.dir/build.make services/UserService/CMakeFiles/UserService.dir/build
 .PHONY : UserService/fast
 
+#=============================================================================
+# Target rules for targets named RestaurantService
+
+# Build rule for target.
+RestaurantService: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 RestaurantService
+.PHONY : RestaurantService
+
+# fast build rule for target.
+RestaurantService/fast:
+	$(MAKE) $(MAKESILENT) -f services/RestaurantService/CMakeFiles/RestaurantService.dir/build.make services/RestaurantService/CMakeFiles/RestaurantService.dir/build
+.PHONY : RestaurantService/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -151,6 +164,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Common"
+	@echo "... RestaurantService"
 	@echo "... UserService"
 .PHONY : help
 

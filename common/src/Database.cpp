@@ -51,3 +51,34 @@ bool Database::execute(const std::string& sql)
 
     return true;
 }
+
+void Database::createRestaurantTable()
+{
+    const char* sql = R"(
+        CREATE TABLE IF NOT EXISTS restaurants
+        (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            address TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            rating REAL DEFAULT 0.0
+        );
+    )";
+
+    char* errMsg = nullptr;
+
+    int rc = sqlite3_exec(
+        m_database.get(),
+        sql,
+        nullptr,
+        nullptr,
+        &errMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        std::cerr << "Failed to create restaurants table: "
+                  << errMsg << std::endl;
+
+        sqlite3_free(errMsg);
+    }
+}
