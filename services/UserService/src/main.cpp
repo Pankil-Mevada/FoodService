@@ -1,7 +1,14 @@
 #include <iostream>
-
+#include <crow.h>  
 int main()
 {
-    std::cout << "User Service Started..." << std::endl;
+    crow::SimpleApp app;
+
+    CROW_ROUTE(app, "/health")
+    ([]() {
+        return "User Service is Healthy!";
+    });
+
+    app.port(8080).multithreaded().run();
     return 0;
 }
