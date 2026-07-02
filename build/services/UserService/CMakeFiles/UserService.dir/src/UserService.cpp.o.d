@@ -60,7 +60,7 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o: \
  /usr/include/c++/13/bits/ranges_base.h \
  /usr/include/c++/13/bits/max_size_type.h /usr/include/c++/13/numbers \
  /workspaces/FoodService/services/UserService/include/UserRepository.h \
- /workspaces/FoodService/services/UserService/include/Database.h \
+ /workspaces/FoodService/common/include/Database.h \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/bits/stl_raw_storage_iter.h \
  /usr/include/c++/13/bits/align.h \

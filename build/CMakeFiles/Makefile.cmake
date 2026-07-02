@@ -32,6 +32,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.28.3/CMakeCCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeSystem.cmake"
+  "/workspaces/FoodService/common/CMakeLists.txt"
   "/workspaces/FoodService/services/UserService/CMakeLists.txt"
   )
 
@@ -44,10 +45,12 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
+  "common/CMakeFiles/CMakeDirectoryInformation.cmake"
   "services/UserService/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "common/CMakeFiles/Common.dir/DependInfo.cmake"
   "services/UserService/CMakeFiles/UserService.dir/DependInfo.cmake"
   )

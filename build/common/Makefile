@@ -87,14 +87,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/FoodService/build/CMakeFiles /workspaces/FoodService/build//CMakeFiles/progress.marks
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
+	cd /workspaces/FoodService/build && $(CMAKE_COMMAND) -E cmake_progress_start /workspaces/FoodService/build/CMakeFiles /workspaces/FoodService/build/common//CMakeFiles/progress.marks
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 common/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/FoodService/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 clean
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 common/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,44 +103,56 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preinstall
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 common/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preinstall
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 common/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /workspaces/FoodService/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named Common
+# Convenience name for target.
+common/CMakeFiles/Common.dir/rule:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 common/CMakeFiles/Common.dir/rule
+.PHONY : common/CMakeFiles/Common.dir/rule
 
-# Build rule for target.
-Common: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Common
+# Convenience name for target.
+Common: common/CMakeFiles/Common.dir/rule
 .PHONY : Common
 
 # fast build rule for target.
 Common/fast:
-	$(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/build
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/build
 .PHONY : Common/fast
 
-#=============================================================================
-# Target rules for targets named UserService
+src/Database.o: src/Database.cpp.o
+.PHONY : src/Database.o
 
-# Build rule for target.
-UserService: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 UserService
-.PHONY : UserService
+# target to build an object file
+src/Database.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/Database.cpp.o
+.PHONY : src/Database.cpp.o
 
-# fast build rule for target.
-UserService/fast:
-	$(MAKE) $(MAKESILENT) -f services/UserService/CMakeFiles/UserService.dir/build.make services/UserService/CMakeFiles/UserService.dir/build
-.PHONY : UserService/fast
+src/Database.i: src/Database.cpp.i
+.PHONY : src/Database.i
+
+# target to preprocess a source file
+src/Database.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/Database.cpp.i
+.PHONY : src/Database.cpp.i
+
+src/Database.s: src/Database.cpp.s
+.PHONY : src/Database.s
+
+# target to generate assembly for a file
+src/Database.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/Database.cpp.s
+.PHONY : src/Database.cpp.s
 
 # Help Target
 help:
@@ -151,7 +163,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Common"
-	@echo "... UserService"
+	@echo "... src/Database.o"
+	@echo "... src/Database.i"
+	@echo "... src/Database.s"
 .PHONY : help
 
 
@@ -163,6 +177,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /workspaces/FoodService/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

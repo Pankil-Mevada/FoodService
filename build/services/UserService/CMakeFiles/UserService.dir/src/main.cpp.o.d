@@ -920,8 +920,7 @@ services/UserService/CMakeFiles/UserService.dir/src/main.cpp.o: \
  /workspaces/FoodService/third_party/Crow/include/crow/http_server.h \
  /workspaces/FoodService/third_party/Crow/include/crow/version.h \
  /workspaces/FoodService/third_party/Crow/include/crow/app.h \
- /workspaces/FoodService/services/UserService/include/Database.h \
- /usr/include/sqlite3.h \
+ /workspaces/FoodService/common/include/Database.h /usr/include/sqlite3.h \
  /workspaces/FoodService/services/UserService/include/UserController.h \
  /workspaces/FoodService/services/UserService/include/UserService.h \
  /workspaces/FoodService/services/UserService/include/UserRepository.h \

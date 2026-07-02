@@ -1,7 +1,7 @@
-services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o: \
- /workspaces/FoodService/services/UserService/src/Database.cpp \
+common/CMakeFiles/Common.dir/src/Database.cpp.o: \
+ /workspaces/FoodService/common/src/Database.cpp \
  /usr/include/stdc-predef.h \
- /workspaces/FoodService/services/UserService/include/Database.h \
+ /workspaces/FoodService/common/include/Database.h \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
