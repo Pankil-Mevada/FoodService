@@ -1,5 +1,6 @@
 #include "UserController.h"
-
+#include "UserService.h"
+#include "User.h"
 #include <iostream>
 
 crow::response UserController::health()
@@ -9,25 +10,34 @@ crow::response UserController::health()
 
 crow::response UserController::registerUser(const crow::request& req)
 {
-    auto json = crow::json::load(req.body);
+	auto json = crow::json::load(req.body);
 
-    if (!json)
-    {
-        return crow::response(400, "Invalid JSON");
-    }
+	if (!json)
+	{
+		return crow::response(400, "Invalid JSON");
+	}
 
-    std::string name = json["name"].s();
-    std::string email = json["email"].s();
-    std::string password = json["password"].s();
+	User user(
+			json["name"].s(),
+			json["email"].s(),
+			json["password"].s()
+		 );
 
-    std::cout << "Name     : " << name << std::endl;
-    std::cout << "Email    : " << email << std::endl;
-    std::cout << "Password : " << password << std::endl;
+	UserService service;
 
-    crow::json::wvalue response;
+	bool status = service.registerUser(user);
 
-    response["status"] = "success";
-    response["message"] = "User registered";
+	crow::json::wvalue response;
 
-    return crow::response(response);
+	if (status)
+	{
+		response["status"] = "success";
+		response["message"] = "User registered";
+	}
+	else
+	{
+		response["status"] = "failure";
+		response["message"] = "Registration failed";
+	}
+	return crow::response(response);
 }
