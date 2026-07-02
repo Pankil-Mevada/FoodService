@@ -125,12 +125,42 @@ services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.s: cmake_for
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/UserService.dir/src/UserService.cpp.s"
 	cd /workspaces/FoodService/build/services/UserService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/UserService/src/UserService.cpp -o CMakeFiles/UserService.dir/src/UserService.cpp.s
 
+services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: services/UserService/CMakeFiles/UserService.dir/flags.make
+services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: /workspaces/FoodService/services/UserService/src/UserRepository.cpp
+services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: services/UserService/CMakeFiles/UserService.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o"
+	cd /workspaces/FoodService/build/services/UserService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o -MF CMakeFiles/UserService.dir/src/UserRepository.cpp.o.d -o CMakeFiles/UserService.dir/src/UserRepository.cpp.o -c /workspaces/FoodService/services/UserService/src/UserRepository.cpp
+
+services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/UserService.dir/src/UserRepository.cpp.i"
+	cd /workspaces/FoodService/build/services/UserService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/FoodService/services/UserService/src/UserRepository.cpp > CMakeFiles/UserService.dir/src/UserRepository.cpp.i
+
+services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/UserService.dir/src/UserRepository.cpp.s"
+	cd /workspaces/FoodService/build/services/UserService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/UserService/src/UserRepository.cpp -o CMakeFiles/UserService.dir/src/UserRepository.cpp.s
+
+services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o: services/UserService/CMakeFiles/UserService.dir/flags.make
+services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o: /workspaces/FoodService/services/UserService/src/Database.cpp
+services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o: services/UserService/CMakeFiles/UserService.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o"
+	cd /workspaces/FoodService/build/services/UserService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o -MF CMakeFiles/UserService.dir/src/Database.cpp.o.d -o CMakeFiles/UserService.dir/src/Database.cpp.o -c /workspaces/FoodService/services/UserService/src/Database.cpp
+
+services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/UserService.dir/src/Database.cpp.i"
+	cd /workspaces/FoodService/build/services/UserService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/FoodService/services/UserService/src/Database.cpp > CMakeFiles/UserService.dir/src/Database.cpp.i
+
+services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/UserService.dir/src/Database.cpp.s"
+	cd /workspaces/FoodService/build/services/UserService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/UserService/src/Database.cpp -o CMakeFiles/UserService.dir/src/Database.cpp.s
+
 # Object files for target UserService
 UserService_OBJECTS = \
 "CMakeFiles/UserService.dir/src/main.cpp.o" \
 "CMakeFiles/UserService.dir/src/UserController.cpp.o" \
 "CMakeFiles/UserService.dir/src/User.cpp.o" \
-"CMakeFiles/UserService.dir/src/UserService.cpp.o"
+"CMakeFiles/UserService.dir/src/UserService.cpp.o" \
+"CMakeFiles/UserService.dir/src/UserRepository.cpp.o" \
+"CMakeFiles/UserService.dir/src/Database.cpp.o"
 
 # External object files for target UserService
 UserService_EXTERNAL_OBJECTS =
@@ -139,9 +169,12 @@ services/UserService/UserService: services/UserService/CMakeFiles/UserService.di
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/src/User.cpp.o
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o
+services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o
+services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/build.make
+services/UserService/UserService: /usr/lib/x86_64-linux-gnu/libsqlite3.so
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable UserService"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable UserService"
 	cd /workspaces/FoodService/build/services/UserService && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/UserService.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

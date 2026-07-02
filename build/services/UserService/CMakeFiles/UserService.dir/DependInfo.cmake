@@ -8,8 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/workspaces/FoodService/services/UserService/src/Database.cpp" "services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/Database.cpp.o.d"
   "/workspaces/FoodService/services/UserService/src/User.cpp" "services/UserService/CMakeFiles/UserService.dir/src/User.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/User.cpp.o.d"
   "/workspaces/FoodService/services/UserService/src/UserController.cpp" "services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/UserController.cpp.o.d"
+  "/workspaces/FoodService/services/UserService/src/UserRepository.cpp" "services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o.d"
   "/workspaces/FoodService/services/UserService/src/UserService.cpp" "services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/UserService.cpp.o.d"
   "/workspaces/FoodService/services/UserService/src/main.cpp" "services/UserService/CMakeFiles/UserService.dir/src/main.cpp.o" "gcc" "services/UserService/CMakeFiles/UserService.dir/src/main.cpp.o.d"
   )
