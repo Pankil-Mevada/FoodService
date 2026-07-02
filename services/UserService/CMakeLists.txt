@@ -1,6 +1,7 @@
 add_executable(UserService
     src/main.cpp
     src/UserController.cpp
+    src/User.cpp
 )
 
 

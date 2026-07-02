@@ -130,6 +130,30 @@ UserService/fast:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/UserService/CMakeFiles/UserService.dir/build.make services/UserService/CMakeFiles/UserService.dir/build
 .PHONY : UserService/fast
 
+src/User.o: src/User.cpp.o
+.PHONY : src/User.o
+
+# target to build an object file
+src/User.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/UserService/CMakeFiles/UserService.dir/build.make services/UserService/CMakeFiles/UserService.dir/src/User.cpp.o
+.PHONY : src/User.cpp.o
+
+src/User.i: src/User.cpp.i
+.PHONY : src/User.i
+
+# target to preprocess a source file
+src/User.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/UserService/CMakeFiles/UserService.dir/build.make services/UserService/CMakeFiles/UserService.dir/src/User.cpp.i
+.PHONY : src/User.cpp.i
+
+src/User.s: src/User.cpp.s
+.PHONY : src/User.s
+
+# target to generate assembly for a file
+src/User.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/UserService/CMakeFiles/UserService.dir/build.make services/UserService/CMakeFiles/UserService.dir/src/User.cpp.s
+.PHONY : src/User.cpp.s
+
 src/UserController.o: src/UserController.cpp.o
 .PHONY : src/UserController.o
 
@@ -187,6 +211,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... UserService"
+	@echo "... src/User.o"
+	@echo "... src/User.i"
+	@echo "... src/User.s"
 	@echo "... src/UserController.o"
 	@echo "... src/UserController.i"
 	@echo "... src/UserController.s"

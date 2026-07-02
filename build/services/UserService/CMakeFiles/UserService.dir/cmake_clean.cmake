@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/UserService.dir/src/User.cpp.o"
+  "CMakeFiles/UserService.dir/src/User.cpp.o.d"
   "CMakeFiles/UserService.dir/src/UserController.cpp.o"
   "CMakeFiles/UserService.dir/src/UserController.cpp.o.d"
   "CMakeFiles/UserService.dir/src/main.cpp.o"
