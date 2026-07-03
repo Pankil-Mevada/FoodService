@@ -113,3 +113,68 @@ void Database::createOrderTable()
         sqlite3_free(errMsg);
     }
 }
+
+void Database::createPaymentTable()
+{
+    const char* sql = R"(
+        CREATE TABLE IF NOT EXISTS payments
+        (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL,
+            amount REAL NOT NULL,
+            payment_method TEXT NOT NULL,
+            transaction_id TEXT NOT NULL,
+            status TEXT NOT NULL
+        );
+    )";
+
+    char* errMsg = nullptr;
+
+    int rc = sqlite3_exec(
+        connection(),
+        sql,
+        nullptr,
+        nullptr,
+        &errMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        std::cerr << "Failed to create payments table: "
+                  << errMsg << std::endl;
+
+        sqlite3_free(errMsg);
+    }
+}
+void Database::createNotificationTable()
+{
+    const char* sql = R"(
+        CREATE TABLE IF NOT EXISTS notifications
+        (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            status TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+    )";
+
+    char* errMsg = nullptr;
+
+    int rc = sqlite3_exec(
+        connection(),
+        sql,
+        nullptr,
+        nullptr,
+        &errMsg);
+
+    if (rc != SQLITE_OK)
+    {
+        std::cerr
+            << "Failed to create notifications table: "
+            << errMsg
+            << std::endl;
+
+        sqlite3_free(errMsg);
+    }
+}

@@ -12,3 +12,9 @@
 /workspaces/FoodService/build/services/OrderService/CMakeFiles/OrderService.dir
 /workspaces/FoodService/build/services/OrderService/CMakeFiles/edit_cache.dir
 /workspaces/FoodService/build/services/OrderService/CMakeFiles/rebuild_cache.dir
+/workspaces/FoodService/build/services/PaymentService/CMakeFiles/PaymentService.dir
+/workspaces/FoodService/build/services/PaymentService/CMakeFiles/edit_cache.dir
+/workspaces/FoodService/build/services/PaymentService/CMakeFiles/rebuild_cache.dir
+/workspaces/FoodService/build/services/NotificationService/CMakeFiles/NotificationService.dir
+/workspaces/FoodService/build/services/NotificationService/CMakeFiles/edit_cache.dir
+/workspaces/FoodService/build/services/NotificationService/CMakeFiles/rebuild_cache.dir

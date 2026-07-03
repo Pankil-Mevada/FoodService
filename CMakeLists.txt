@@ -14,4 +14,5 @@ add_subdirectory(common)
 add_subdirectory(services/UserService)
 add_subdirectory(services/RestaurantService)
 add_subdirectory(services/OrderService)
-
+add_subdirectory(services/PaymentService)
+add_subdirectory(services/NotificationService)

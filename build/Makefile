@@ -168,6 +168,32 @@ OrderService/fast:
 	$(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/build
 .PHONY : OrderService/fast
 
+#=============================================================================
+# Target rules for targets named PaymentService
+
+# Build rule for target.
+PaymentService: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 PaymentService
+.PHONY : PaymentService
+
+# fast build rule for target.
+PaymentService/fast:
+	$(MAKE) $(MAKESILENT) -f services/PaymentService/CMakeFiles/PaymentService.dir/build.make services/PaymentService/CMakeFiles/PaymentService.dir/build
+.PHONY : PaymentService/fast
+
+#=============================================================================
+# Target rules for targets named NotificationService
+
+# Build rule for target.
+NotificationService: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 NotificationService
+.PHONY : NotificationService
+
+# fast build rule for target.
+NotificationService/fast:
+	$(MAKE) $(MAKESILENT) -f services/NotificationService/CMakeFiles/NotificationService.dir/build.make services/NotificationService/CMakeFiles/NotificationService.dir/build
+.PHONY : NotificationService/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -177,7 +203,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Common"
+	@echo "... NotificationService"
 	@echo "... OrderService"
+	@echo "... PaymentService"
 	@echo "... RestaurantService"
 	@echo "... UserService"
 .PHONY : help

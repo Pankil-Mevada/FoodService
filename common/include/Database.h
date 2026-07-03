@@ -23,6 +23,9 @@ public:
 
     void createRestaurantTable();
     void createOrderTable();
+    void createPaymentTable();
+    void createNotificationTable();
+
     Database(const Database&) = delete;
     Database& operator=(const Database&) = delete;
 
