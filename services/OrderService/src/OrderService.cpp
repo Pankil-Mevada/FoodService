@@ -8,34 +8,42 @@ OrderService::OrderService(OrderRepository& repository)
 
 bool OrderService::createOrder(const Order& order)
 {
-	bool restaurantFound =
-		m_restaurantClient.restaurantExists(
-				order.getRestaurantId());
+    bool restaurantFound =
+        m_restaurantClient.restaurantExists(
+            order.getRestaurantId());
 
-	if (!restaurantFound)
-	{
-		return false;
-	}
-
-	bool status = m_repository.saveOrder(order);
-
-	if (!status)
-	{
-		return false;
-    }
-
-    bool paymentStatus =
-        m_paymentClient.createPayment(
-            order.getId(),
-            order.getTotalAmount());
-
-    if (!paymentStatus)
+    if (!restaurantFound)
     {
-        // Later we'll update the order status to PAYMENT_FAILED.
         return false;
     }
 
-    return true;
+    auto orderId =
+    m_repository.saveOrder(order);
+
+    if (!orderId.has_value())
+    {
+        return false;
+    }
+
+    bool paymentStatus =
+    m_paymentClient.createPayment(
+        *orderId,
+        order.getTotalAmount());
+
+    if (paymentStatus)
+    {
+        m_repository.updateOrderStatus(
+            *orderId,
+            "PAID");
+    }
+else
+{
+    m_repository.updateOrderStatus(
+    *orderId,
+    "PAYMENT_FAILED");
+}
+
+return paymentStatus;
 }
 std::vector<Order> OrderService::getAllOrders()
 {
@@ -55,4 +63,13 @@ bool OrderService::updateOrder(const Order& order)
 bool OrderService::deleteOrder(int id)
 {
     return m_repository.deleteOrder(id);
+}
+
+bool OrderService::updateOrderStatus(
+    int orderId,
+    const std::string& status)
+{
+    return m_repository.updateOrderStatus(
+        orderId,
+        status);
 }

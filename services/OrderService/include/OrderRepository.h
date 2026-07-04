@@ -12,7 +12,7 @@ public:
 
     explicit OrderRepository(Database& database);
 
-    bool saveOrder(const Order& order);
+   std::optional<int> saveOrder(const Order& order);
 
     std::vector<Order> getAllOrders();
 
@@ -21,6 +21,10 @@ public:
     bool updateOrder(const Order& order);
 
     bool deleteOrder(int id);
+
+    bool updateOrderStatus(
+    int orderId,
+    const std::string& status);
 
 private:
 

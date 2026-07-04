@@ -23,6 +23,10 @@ public:
 
     bool deleteOrder(int id);
 
+    bool updateOrderStatus(
+    int orderId,
+    const std::string& status);
+
 private:
 
     OrderRepository& m_repository;

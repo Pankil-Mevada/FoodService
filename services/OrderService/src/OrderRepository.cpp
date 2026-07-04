@@ -8,7 +8,7 @@ OrderRepository::OrderRepository(Database& database)
 {
 }
 
-bool OrderRepository::saveOrder(const Order& order)
+std::optional<int> OrderRepository::saveOrder(const Order& order)
 {
     const char* sql =
         "INSERT INTO orders(user_id,restaurant_id,total_amount,status)"
@@ -42,7 +42,16 @@ bool OrderRepository::saveOrder(const Order& order)
 
     sqlite3_finalize(stmt);
 
-    return rc == SQLITE_DONE;
+    if (rc != SQLITE_DONE)
+    {
+        return std::nullopt;
+    }
+
+    int orderId =
+        sqlite3_last_insert_rowid(
+            m_database.connection());
+
+    return orderId;
 }
 
 std::vector<Order> OrderRepository::getAllOrders()
@@ -199,4 +208,44 @@ bool OrderRepository::deleteOrder(int id)
     }
 
     return sqlite3_changes(m_database.connection()) > 0;
+}
+
+bool OrderRepository::updateOrderStatus(
+    int orderId,
+    const std::string& status)
+{
+    const char* sql =
+        "UPDATE orders SET status=? WHERE id=?;";
+
+    sqlite3_stmt* stmt = nullptr;
+
+    int rc = sqlite3_prepare_v2(
+        m_database.connection(),
+        sql,
+        -1,
+        &stmt,
+        nullptr);
+
+    if (rc != SQLITE_OK)
+    {
+        return false;
+    }
+
+    sqlite3_bind_text(
+        stmt,
+        1,
+        status.c_str(),
+        -1,
+        SQLITE_TRANSIENT);
+
+    sqlite3_bind_int(
+        stmt,
+        2,
+        orderId);
+
+    rc = sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+
+    return rc == SQLITE_DONE;
 }
