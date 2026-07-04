@@ -13,6 +13,7 @@ PaymentService::PaymentService(PaymentRepository& repository)
 
 bool PaymentService::createPayment(
     int orderId,
+    int userId,
     double amount,
     const std::string& paymentMethod)
 {
@@ -32,9 +33,9 @@ bool PaymentService::createPayment(
     }
 
     bool notificationStatus =
-        m_notificationClient.createNotification(
-            1,
-            "Payment Successful");
+       m_notificationClient.createNotification(
+    userId,
+    "Payment Successful");
 
     if (!notificationStatus)
     {

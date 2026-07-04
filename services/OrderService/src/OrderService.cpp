@@ -27,8 +27,9 @@ bool OrderService::createOrder(const Order& order)
 
     bool paymentStatus =
     m_paymentClient.createPayment(
-        *orderId,
-        order.getTotalAmount());
+    *orderId,
+    order.getUserId(),
+    order.getTotalAmount());
 
     if (paymentStatus)
     {

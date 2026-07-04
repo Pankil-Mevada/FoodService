@@ -5,6 +5,7 @@
 
 bool PaymentClient::createPayment(
     int orderId,
+    int userId,
     double amount)
 {
     CURL* curl = curl_easy_init();
@@ -19,6 +20,7 @@ bool PaymentClient::createPayment(
         "{"
         "\"orderId\":" + std::to_string(orderId) + ","
         "\"amount\":" + std::to_string(amount) + ","
+        "\"userId\":" + std::to_string(userId) + ","
         "\"paymentMethod\":\"CARD\""
         "}";
 

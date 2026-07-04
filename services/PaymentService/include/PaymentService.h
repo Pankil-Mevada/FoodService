@@ -15,9 +15,10 @@ public:
     explicit PaymentService(PaymentRepository& repository);
 
     bool createPayment(
-        int orderId,
-        double amount,
-        const std::string& paymentMethod);
+    int orderId,
+    int userId,
+    double amount,
+    const std::string& paymentMethod);
 
     std::vector<Payment> getAllPayments();
 

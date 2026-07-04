@@ -21,10 +21,11 @@ crow::response PaymentController::createPayment(
     }
 
     bool status =
-        m_service.createPayment(
-            json["orderId"].i(),
-            json["amount"].d(),
-            json["paymentMethod"].s());
+      m_service.createPayment(
+    json["orderId"].i(),
+    json["userId"].i(),
+    json["amount"].d(),
+    json["paymentMethod"].s());
 
     crow::json::wvalue response;
 

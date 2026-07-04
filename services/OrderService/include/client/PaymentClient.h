@@ -7,6 +7,7 @@ public:
     PaymentClient() = default;
 
     bool createPayment(
-        int orderId,
-        double amount);
+    int orderId,
+    int userId,
+    double amount);
 };
