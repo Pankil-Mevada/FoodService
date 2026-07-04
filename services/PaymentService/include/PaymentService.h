@@ -6,6 +6,7 @@
 
 #include "Payment.h"
 #include "PaymentRepository.h"
+#include "client/NotificationClient.h"
 
 class PaymentService
 {
@@ -33,4 +34,7 @@ private:
     PaymentRepository& m_repository;
 
     static int m_transactionCounter;
+
+
+    NotificationClient m_notificationClient;
 };

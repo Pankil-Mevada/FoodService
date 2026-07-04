@@ -139,13 +139,43 @@ services/OrderService/CMakeFiles/OrderService.dir/src/OrderRepository.cpp.s: cma
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/OrderService.dir/src/OrderRepository.cpp.s"
 	cd /workspaces/FoodService/build/services/OrderService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/OrderService/src/OrderRepository.cpp -o CMakeFiles/OrderService.dir/src/OrderRepository.cpp.s
 
+services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o: services/OrderService/CMakeFiles/OrderService.dir/flags.make
+services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o: /workspaces/FoodService/services/OrderService/src/client/PaymentClient.cpp
+services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o: services/OrderService/CMakeFiles/OrderService.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o"
+	cd /workspaces/FoodService/build/services/OrderService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o -MF CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o.d -o CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o -c /workspaces/FoodService/services/OrderService/src/client/PaymentClient.cpp
+
+services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.i"
+	cd /workspaces/FoodService/build/services/OrderService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/FoodService/services/OrderService/src/client/PaymentClient.cpp > CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.i
+
+services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.s"
+	cd /workspaces/FoodService/build/services/OrderService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/OrderService/src/client/PaymentClient.cpp -o CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.s
+
+services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o: services/OrderService/CMakeFiles/OrderService.dir/flags.make
+services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o: /workspaces/FoodService/services/OrderService/src/client/RestaurantClient.cpp
+services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o: services/OrderService/CMakeFiles/OrderService.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o"
+	cd /workspaces/FoodService/build/services/OrderService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o -MF CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o.d -o CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o -c /workspaces/FoodService/services/OrderService/src/client/RestaurantClient.cpp
+
+services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.i"
+	cd /workspaces/FoodService/build/services/OrderService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/FoodService/services/OrderService/src/client/RestaurantClient.cpp > CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.i
+
+services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.s"
+	cd /workspaces/FoodService/build/services/OrderService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/OrderService/src/client/RestaurantClient.cpp -o CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.s
+
 # Object files for target OrderService
 OrderService_OBJECTS = \
 "CMakeFiles/OrderService.dir/src/main.cpp.o" \
 "CMakeFiles/OrderService.dir/src/OrderController.cpp.o" \
 "CMakeFiles/OrderService.dir/src/Order.cpp.o" \
 "CMakeFiles/OrderService.dir/src/OrderService.cpp.o" \
-"CMakeFiles/OrderService.dir/src/OrderRepository.cpp.o"
+"CMakeFiles/OrderService.dir/src/OrderRepository.cpp.o" \
+"CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o" \
+"CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o"
 
 # External object files for target OrderService
 OrderService_EXTERNAL_OBJECTS =
@@ -155,14 +185,18 @@ services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderServic
 services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/src/Order.cpp.o
 services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/src/OrderService.cpp.o
 services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/src/OrderRepository.cpp.o
+services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o
+services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o
 services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/build.make
 services/OrderService/OrderService: common/libCommon.a
+services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcurl-d.a
 services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
 services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
 services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a
+services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/lib/libz.a
 services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable OrderService"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable OrderService"
 	cd /workspaces/FoodService/build/services/OrderService && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/OrderService.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

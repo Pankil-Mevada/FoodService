@@ -226,6 +226,54 @@ src/OrderService.cpp.s:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/src/OrderService.cpp.s
 .PHONY : src/OrderService.cpp.s
 
+src/client/PaymentClient.o: src/client/PaymentClient.cpp.o
+.PHONY : src/client/PaymentClient.o
+
+# target to build an object file
+src/client/PaymentClient.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.o
+.PHONY : src/client/PaymentClient.cpp.o
+
+src/client/PaymentClient.i: src/client/PaymentClient.cpp.i
+.PHONY : src/client/PaymentClient.i
+
+# target to preprocess a source file
+src/client/PaymentClient.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.i
+.PHONY : src/client/PaymentClient.cpp.i
+
+src/client/PaymentClient.s: src/client/PaymentClient.cpp.s
+.PHONY : src/client/PaymentClient.s
+
+# target to generate assembly for a file
+src/client/PaymentClient.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/src/client/PaymentClient.cpp.s
+.PHONY : src/client/PaymentClient.cpp.s
+
+src/client/RestaurantClient.o: src/client/RestaurantClient.cpp.o
+.PHONY : src/client/RestaurantClient.o
+
+# target to build an object file
+src/client/RestaurantClient.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.o
+.PHONY : src/client/RestaurantClient.cpp.o
+
+src/client/RestaurantClient.i: src/client/RestaurantClient.cpp.i
+.PHONY : src/client/RestaurantClient.i
+
+# target to preprocess a source file
+src/client/RestaurantClient.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.i
+.PHONY : src/client/RestaurantClient.cpp.i
+
+src/client/RestaurantClient.s: src/client/RestaurantClient.cpp.s
+.PHONY : src/client/RestaurantClient.s
+
+# target to generate assembly for a file
+src/client/RestaurantClient.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/OrderService/CMakeFiles/OrderService.dir/build.make services/OrderService/CMakeFiles/OrderService.dir/src/client/RestaurantClient.cpp.s
+.PHONY : src/client/RestaurantClient.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -271,6 +319,12 @@ help:
 	@echo "... src/OrderService.o"
 	@echo "... src/OrderService.i"
 	@echo "... src/OrderService.s"
+	@echo "... src/client/PaymentClient.o"
+	@echo "... src/client/PaymentClient.i"
+	@echo "... src/client/PaymentClient.s"
+	@echo "... src/client/RestaurantClient.o"
+	@echo "... src/client/RestaurantClient.i"
+	@echo "... src/client/RestaurantClient.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

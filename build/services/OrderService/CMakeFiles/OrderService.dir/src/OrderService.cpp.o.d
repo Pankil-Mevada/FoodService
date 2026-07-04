@@ -210,4 +210,6 @@ services/OrderService/CMakeFiles/OrderService.dir/src/OrderService.cpp.o: \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
  /workspaces/vcpkg/installed/x64-linux/include/sqlite3.h \
- /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h
+ /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h \
+ /workspaces/FoodService/services/OrderService/include/client/PaymentClient.h \
+ /workspaces/FoodService/services/OrderService/include/client/RestaurantClient.h

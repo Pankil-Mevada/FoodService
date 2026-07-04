@@ -12,6 +12,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspaces/FoodService/services/PaymentService/src/PaymentController.cpp" "services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentController.cpp.o" "gcc" "services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentController.cpp.o.d"
   "/workspaces/FoodService/services/PaymentService/src/PaymentRepository.cpp" "services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.o" "gcc" "services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.o.d"
   "/workspaces/FoodService/services/PaymentService/src/PaymentService.cpp" "services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentService.cpp.o" "gcc" "services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentService.cpp.o.d"
+  "/workspaces/FoodService/services/PaymentService/src/client/NotificationClient.cpp" "services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o" "gcc" "services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o.d"
   "/workspaces/FoodService/services/PaymentService/src/main.cpp" "services/PaymentService/CMakeFiles/PaymentService.dir/src/main.cpp.o" "gcc" "services/PaymentService/CMakeFiles/PaymentService.dir/src/main.cpp.o.d"
   )
 

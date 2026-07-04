@@ -1,5 +1,5 @@
 #include "PaymentService.h"
-
+#include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <ctime>
@@ -24,9 +24,25 @@ bool PaymentService::createPayment(
         generateTransactionId(),
         "SUCCESS");
 
-    return m_repository.savePayment(payment);
-}
+    bool status = m_repository.savePayment(payment);
 
+    if (!status)
+    {
+        return false;
+    }
+
+    bool notificationStatus =
+        m_notificationClient.createNotification(
+            1,
+            "Payment Successful");
+
+    if (!notificationStatus)
+    {
+        std::cout << "Notification failed" << std::endl;
+    }
+
+    return true;
+}
 std::vector<Payment> PaymentService::getAllPayments()
 {
     return m_repository.getAllPayments();

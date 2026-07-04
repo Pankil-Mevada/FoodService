@@ -12,5 +12,6 @@
     },
     "asio",
     "argon2"
+    "curl"
   ]
 }

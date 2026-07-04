@@ -952,4 +952,5 @@ services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentController.cpp.
  /workspaces/FoodService/services/PaymentService/include/PaymentRepository.h \
  /workspaces/FoodService/common/include/Database.h \
  /workspaces/vcpkg/installed/x64-linux/include/sqlite3.h \
- /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h
+ /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h \
+ /workspaces/FoodService/services/PaymentService/include/client/NotificationClient.h

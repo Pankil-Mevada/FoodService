@@ -952,4 +952,6 @@ services/OrderService/CMakeFiles/OrderService.dir/src/OrderController.cpp.o: \
  /workspaces/FoodService/services/OrderService/include/OrderRepository.h \
  /workspaces/FoodService/common/include/Database.h \
  /workspaces/vcpkg/installed/x64-linux/include/sqlite3.h \
- /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h
+ /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h \
+ /workspaces/FoodService/services/OrderService/include/client/PaymentClient.h \
+ /workspaces/FoodService/services/OrderService/include/client/RestaurantClient.h

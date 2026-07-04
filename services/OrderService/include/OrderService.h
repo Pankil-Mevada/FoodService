@@ -5,7 +5,8 @@
 
 #include "Order.h"
 #include "OrderRepository.h"
-
+#include "client/PaymentClient.h"
+#include "client/RestaurantClient.h"
 class OrderService
 {
 public:
@@ -25,4 +26,6 @@ public:
 private:
 
     OrderRepository& m_repository;
+    PaymentClient m_paymentClient;
+    RestaurantClient m_restaurantClient;
 };

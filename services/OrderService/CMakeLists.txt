@@ -8,6 +8,8 @@ add_executable(OrderService
     src/Order.cpp
     src/OrderService.cpp
     src/OrderRepository.cpp
+    src/client/PaymentClient.cpp
+    src/client/RestaurantClient.cpp
 )
 
 target_include_directories(OrderService PRIVATE
@@ -15,7 +17,8 @@ target_include_directories(OrderService PRIVATE
     ${PROJECT_SOURCE_DIR}/common/include
     ${CMAKE_SOURCE_DIR}/third_party/Crow/include
 )
-
+find_package(CURL CONFIG REQUIRED)
 target_link_libraries(OrderService PRIVATE
     Common
+    CURL::libcurl
 )

@@ -139,13 +139,28 @@ services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.s"
 	cd /workspaces/FoodService/build/services/PaymentService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/PaymentService/src/PaymentRepository.cpp -o CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.s
 
+services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o: services/PaymentService/CMakeFiles/PaymentService.dir/flags.make
+services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o: /workspaces/FoodService/services/PaymentService/src/client/NotificationClient.cpp
+services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o: services/PaymentService/CMakeFiles/PaymentService.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o"
+	cd /workspaces/FoodService/build/services/PaymentService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o -MF CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o.d -o CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o -c /workspaces/FoodService/services/PaymentService/src/client/NotificationClient.cpp
+
+services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.i"
+	cd /workspaces/FoodService/build/services/PaymentService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/FoodService/services/PaymentService/src/client/NotificationClient.cpp > CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.i
+
+services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.s"
+	cd /workspaces/FoodService/build/services/PaymentService && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/FoodService/services/PaymentService/src/client/NotificationClient.cpp -o CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.s
+
 # Object files for target PaymentService
 PaymentService_OBJECTS = \
 "CMakeFiles/PaymentService.dir/src/main.cpp.o" \
 "CMakeFiles/PaymentService.dir/src/Payment.cpp.o" \
 "CMakeFiles/PaymentService.dir/src/PaymentController.cpp.o" \
 "CMakeFiles/PaymentService.dir/src/PaymentService.cpp.o" \
-"CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.o"
+"CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.o" \
+"CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o"
 
 # External object files for target PaymentService
 PaymentService_EXTERNAL_OBJECTS =
@@ -155,14 +170,17 @@ services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/Payme
 services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentController.cpp.o
 services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentService.cpp.o
 services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.o
+services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o
 services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/build.make
 services/PaymentService/PaymentService: common/libCommon.a
+services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcurl-d.a
 services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
 services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
 services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a
+services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/lib/libz.a
 services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable PaymentService"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/FoodService/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable PaymentService"
 	cd /workspaces/FoodService/build/services/PaymentService && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/PaymentService.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

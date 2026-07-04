@@ -226,6 +226,30 @@ src/PaymentService.cpp.s:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/PaymentService/CMakeFiles/PaymentService.dir/build.make services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentService.cpp.s
 .PHONY : src/PaymentService.cpp.s
 
+src/client/NotificationClient.o: src/client/NotificationClient.cpp.o
+.PHONY : src/client/NotificationClient.o
+
+# target to build an object file
+src/client/NotificationClient.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/PaymentService/CMakeFiles/PaymentService.dir/build.make services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o
+.PHONY : src/client/NotificationClient.cpp.o
+
+src/client/NotificationClient.i: src/client/NotificationClient.cpp.i
+.PHONY : src/client/NotificationClient.i
+
+# target to preprocess a source file
+src/client/NotificationClient.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/PaymentService/CMakeFiles/PaymentService.dir/build.make services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.i
+.PHONY : src/client/NotificationClient.cpp.i
+
+src/client/NotificationClient.s: src/client/NotificationClient.cpp.s
+.PHONY : src/client/NotificationClient.s
+
+# target to generate assembly for a file
+src/client/NotificationClient.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/PaymentService/CMakeFiles/PaymentService.dir/build.make services/PaymentService/CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.s
+.PHONY : src/client/NotificationClient.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -271,6 +295,9 @@ help:
 	@echo "... src/PaymentService.o"
 	@echo "... src/PaymentService.i"
 	@echo "... src/PaymentService.s"
+	@echo "... src/client/NotificationClient.o"
+	@echo "... src/client/NotificationClient.i"
+	@echo "... src/client/NotificationClient.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

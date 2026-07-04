@@ -952,4 +952,6 @@ services/OrderService/CMakeFiles/OrderService.dir/src/main.cpp.o: \
  /workspaces/FoodService/services/OrderService/include/OrderController.h \
  /workspaces/FoodService/services/OrderService/include/OrderService.h \
  /workspaces/FoodService/services/OrderService/include/Order.h \
- /workspaces/FoodService/services/OrderService/include/OrderRepository.h
+ /workspaces/FoodService/services/OrderService/include/OrderRepository.h \
+ /workspaces/FoodService/services/OrderService/include/client/PaymentClient.h \
+ /workspaces/FoodService/services/OrderService/include/client/RestaurantClient.h

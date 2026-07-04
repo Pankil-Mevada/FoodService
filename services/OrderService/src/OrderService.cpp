@@ -5,11 +5,38 @@ OrderService::OrderService(OrderRepository& repository)
 {
 }
 
+
 bool OrderService::createOrder(const Order& order)
 {
-    return m_repository.saveOrder(order);
-}
+	bool restaurantFound =
+		m_restaurantClient.restaurantExists(
+				order.getRestaurantId());
 
+	if (!restaurantFound)
+	{
+		return false;
+	}
+
+	bool status = m_repository.saveOrder(order);
+
+	if (!status)
+	{
+		return false;
+    }
+
+    bool paymentStatus =
+        m_paymentClient.createPayment(
+            order.getId(),
+            order.getTotalAmount());
+
+    if (!paymentStatus)
+    {
+        // Later we'll update the order status to PAYMENT_FAILED.
+        return false;
+    }
+
+    return true;
+}
 std::vector<Order> OrderService::getAllOrders()
 {
     return m_repository.getAllOrders();

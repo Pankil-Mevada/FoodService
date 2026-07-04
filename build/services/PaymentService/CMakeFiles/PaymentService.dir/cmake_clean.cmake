@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.o.d"
   "CMakeFiles/PaymentService.dir/src/PaymentService.cpp.o"
   "CMakeFiles/PaymentService.dir/src/PaymentService.cpp.o.d"
+  "CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o"
+  "CMakeFiles/PaymentService.dir/src/client/NotificationClient.cpp.o.d"
   "CMakeFiles/PaymentService.dir/src/main.cpp.o"
   "CMakeFiles/PaymentService.dir/src/main.cpp.o.d"
   "PaymentService"
