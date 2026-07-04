@@ -1,0 +1,16 @@
+{
+  "name": "foodservice",
+  "version": "1.0.0",
+  "dependencies": [
+    "sqlite3",
+    "openssl",
+    {
+      "name": "jwt-cpp",
+      "features": [
+        "picojson"
+      ]
+    },
+    "asio",
+    "argon2"
+  ]
+}
