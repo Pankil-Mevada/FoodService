@@ -194,6 +194,19 @@ NotificationService/fast:
 	$(MAKE) $(MAKESILENT) -f services/NotificationService/CMakeFiles/NotificationService.dir/build.make services/NotificationService/CMakeFiles/NotificationService.dir/build
 .PHONY : NotificationService/fast
 
+#=============================================================================
+# Target rules for targets named ApiGateway
+
+# Build rule for target.
+ApiGateway: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ApiGateway
+.PHONY : ApiGateway
+
+# fast build rule for target.
+ApiGateway/fast:
+	$(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/build
+.PHONY : ApiGateway/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -202,6 +215,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... ApiGateway"
 	@echo "... Common"
 	@echo "... NotificationService"
 	@echo "... OrderService"

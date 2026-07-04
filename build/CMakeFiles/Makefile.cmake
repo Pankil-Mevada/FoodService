@@ -44,6 +44,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.28.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.28.3/CMakeSystem.cmake"
   "/workspaces/FoodService/common/CMakeLists.txt"
+  "/workspaces/FoodService/services/ApiGateway/CMakeLists.txt"
   "/workspaces/FoodService/services/NotificationService/CMakeLists.txt"
   "/workspaces/FoodService/services/OrderService/CMakeLists.txt"
   "/workspaces/FoodService/services/PaymentService/CMakeLists.txt"
@@ -83,6 +84,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "services/OrderService/CMakeFiles/CMakeDirectoryInformation.cmake"
   "services/PaymentService/CMakeFiles/CMakeDirectoryInformation.cmake"
   "services/NotificationService/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "services/ApiGateway/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -93,4 +95,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "services/OrderService/CMakeFiles/OrderService.dir/DependInfo.cmake"
   "services/PaymentService/CMakeFiles/PaymentService.dir/DependInfo.cmake"
   "services/NotificationService/CMakeFiles/NotificationService.dir/DependInfo.cmake"
+  "services/ApiGateway/CMakeFiles/ApiGateway.dir/DependInfo.cmake"
   )
