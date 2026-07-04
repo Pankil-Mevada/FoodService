@@ -35,21 +35,39 @@ bool UserService::deleteUser(int id)
     return m_repository.deleteUser(id);
 }
 
-bool UserService::login(
+std::optional<std::string> UserService::login(
     const std::string& email,
     const std::string& password)
 {
+    std::cout << "Login email    : " << email << std::endl;
+    std::cout << "Login password : " << password << std::endl;
+
     auto user = m_repository.findByEmail(email);
 
     if (!user.has_value())
     {
-        return false;
+        std::cout << "User not found" << std::endl;
+        return std::nullopt;
     }
+
+    std::cout << "DB email       : " << user->getEmail() << std::endl;
+    std::cout << "DB password    : " << user->getPassword() << std::endl;
 
     if (user->getPassword() != password)
     {
-        return false;
+        std::cout << "Password mismatch" << std::endl;
+        return std::nullopt;
     }
 
-    return true;
+    std::cout << "Password matched" << std::endl;
+
+    JwtManager jwt;
+
+    auto token = jwt.generateToken(
+        user->getId(),
+        user->getEmail());
+
+    std::cout << "JWT generated" << std::endl;
+
+    return token;
 }

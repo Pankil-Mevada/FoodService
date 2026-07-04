@@ -196,7 +196,9 @@ services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o: \
  /usr/include/c++/13/bits/ranges_uninitialized.h \
  /usr/include/c++/13/bits/ranges_algobase.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h /usr/include/sqlite3.h \
+ /usr/include/c++/13/pstl/execution_defs.h \
+ /workspaces/vcpkg/installed/x64-linux/include/sqlite3.h \
+ /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h \
  /workspaces/FoodService/services/UserService/include/User.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \

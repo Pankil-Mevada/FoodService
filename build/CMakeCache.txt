@@ -270,10 +270,10 @@ PKG_CONFIG_ARGN:STRING=
 PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
 
 //Path to a file.
-SQLite3_INCLUDE_DIR:PATH=/usr/include
+SQLite3_INCLUDE_DIR:PATH=/workspaces/vcpkg/installed/x64-linux/include
 
 //Path to a library.
-SQLite3_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libsqlite3.so
+SQLite3_LIBRARY:FILEPATH=/workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 
 //Automatically copy dependencies into the output directory for
 // executables.
@@ -496,7 +496,7 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding OpenSSL
 FIND_PACKAGE_MESSAGE_DETAILS_OpenSSL:INTERNAL=[/workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a][/workspaces/vcpkg/installed/x64-linux/include][c ][v3.6.3()]
 //Details about finding SQLite3
-FIND_PACKAGE_MESSAGE_DETAILS_SQLite3:INTERNAL=[/usr/include][/usr/lib/x86_64-linux-gnu/libsqlite3.so][v3.45.1()]
+FIND_PACKAGE_MESSAGE_DETAILS_SQLite3:INTERNAL=[/workspaces/vcpkg/installed/x64-linux/include][/workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a][v3.53.3()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //ADVANCED property for variable: OPENSSL_CRYPTO_LIBRARY

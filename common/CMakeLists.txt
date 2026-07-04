@@ -1,6 +1,7 @@
 add_library(Common
     src/Database.cpp
     src/UserValidator.cpp
+    src/JwtManager.cpp
 )
 
 target_include_directories(Common

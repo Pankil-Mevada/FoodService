@@ -136,7 +136,6 @@ common/CMakeFiles/Common.dir/src/Database.cpp.o: /workspaces/FoodService/common/
   /usr/include/locale.h \
   /usr/include/pthread.h \
   /usr/include/sched.h \
-  /usr/include/sqlite3.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
   /usr/include/stdio.h \
@@ -245,7 +244,12 @@ common/CMakeFiles/Common.dir/src/Database.cpp.o: /workspaces/FoodService/common/
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h \
-  /workspaces/FoodService/common/include/Database.h
+  /workspaces/FoodService/common/include/Database.h \
+  /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h \
+  /workspaces/vcpkg/installed/x64-linux/include/sqlite3.h
+
+common/CMakeFiles/Common.dir/src/JwtManager.cpp.o: /workspaces/FoodService/common/src/JwtManager.cpp \
+  /usr/include/stdc-predef.h
 
 common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: /workspaces/FoodService/common/src/UserValidator.cpp \
   /usr/include/alloca.h \
@@ -399,6 +403,8 @@ common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: /workspaces/FoodService/co
 
 /workspaces/FoodService/common/include/UserValidator.h:
 
+/workspaces/vcpkg/installed/x64-linux/include/sqlite3.h:
+
 /workspaces/FoodService/common/include/Database.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
@@ -523,8 +529,6 @@ common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: /workspaces/FoodService/co
 
 /usr/include/stdc-predef.h:
 
-/usr/include/sqlite3.h:
-
 /usr/include/sched.h:
 
 /usr/include/pthread.h:
@@ -625,6 +629,8 @@ common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: /workspaces/FoodService/co
 
 /usr/include/c++/13/bits/string_view.tcc:
 
+/workspaces/FoodService/common/src/JwtManager.cpp:
+
 /usr/include/c++/13/backward/binders.h:
 
 /usr/include/c++/13/bits/stringfwd.h:
@@ -680,6 +686,8 @@ common/CMakeFiles/Common.dir/src/UserValidator.cpp.o: /workspaces/FoodService/co
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
 
 /usr/include/c++/13/pstl/glue_memory_defs.h:
+
+/workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h:
 
 /usr/include/c++/13/string_view:
 

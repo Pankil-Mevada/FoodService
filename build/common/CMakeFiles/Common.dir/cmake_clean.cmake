@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/Common.dir/src/Database.cpp.o"
   "CMakeFiles/Common.dir/src/Database.cpp.o.d"
+  "CMakeFiles/Common.dir/src/JwtManager.cpp.o"
+  "CMakeFiles/Common.dir/src/JwtManager.cpp.o.d"
   "CMakeFiles/Common.dir/src/UserValidator.cpp.o"
   "CMakeFiles/Common.dir/src/UserValidator.cpp.o.d"
   "libCommon.a"

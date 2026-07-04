@@ -1,13 +1,27 @@
+#pragma once
+
+#include <string>
+
 class JwtManager
 {
 public:
-	static std::string generateToken(
+
+    JwtManager();
+
+    std::string generateToken(
         int userId,
         const std::string& email);
 
-    static bool verifyToken(
+    bool verifyToken(
         const std::string& token);
 
-    static jwt::decoded_jwt<> decodeToken(
+    int getUserId(
         const std::string& token);
+
+    std::string getEmail(
+        const std::string& token);
+
+private:
+
+    std::string m_secret;
 };

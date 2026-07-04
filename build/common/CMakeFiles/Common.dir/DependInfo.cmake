@@ -9,6 +9,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspaces/FoodService/common/src/Database.cpp" "common/CMakeFiles/Common.dir/src/Database.cpp.o" "gcc" "common/CMakeFiles/Common.dir/src/Database.cpp.o.d"
+  "/workspaces/FoodService/common/src/JwtManager.cpp" "common/CMakeFiles/Common.dir/src/JwtManager.cpp.o" "gcc" "common/CMakeFiles/Common.dir/src/JwtManager.cpp.o.d"
   "/workspaces/FoodService/common/src/UserValidator.cpp" "common/CMakeFiles/Common.dir/src/UserValidator.cpp.o" "gcc" "common/CMakeFiles/Common.dir/src/UserValidator.cpp.o.d"
   )
 

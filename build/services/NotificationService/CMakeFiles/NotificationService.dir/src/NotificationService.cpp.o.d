@@ -207,7 +207,9 @@ services/NotificationService/CMakeFiles/NotificationService.dir/src/Notification
  /usr/include/c++/13/bits/ranges_uninitialized.h \
  /usr/include/c++/13/bits/ranges_algobase.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h /usr/include/sqlite3.h \
+ /usr/include/c++/13/pstl/execution_defs.h \
+ /workspaces/vcpkg/installed/x64-linux/include/sqlite3.h \
+ /workspaces/vcpkg/installed/x64-linux/include/sqlite3-vcpkg-config.h \
  /usr/include/c++/13/ctime /usr/include/c++/13/iomanip \
  /usr/include/c++/13/locale \
  /usr/include/c++/13/bits/locale_facets_nonio.h \

@@ -186,23 +186,25 @@ crow::response UserController::login(
         return crow::response(400, "Invalid JSON");
     }
 
-    bool status =
-        m_service.login(
-            json["email"].s(),
-            json["password"].s());
+
+    auto token =
+    m_service.login(
+        json["email"].s(),
+        json["password"].s());
 
     crow::json::wvalue response;
 
-    if (status)
+
+    if (token.has_value())
     {
-        response["success"] = true;
-        response["message"] = "Login successful";
+	    response["success"] = true;
+	    response["message"] = "Login successful";
+	    response["token"] = *token;
     }
     else
     {
-        response["success"] = false;
-        response["message"] = "Invalid email or password";
+	    response["success"] = false;
+	    response["message"] = "Invalid email or password";
     }
-
     return crow::response(response);
 }

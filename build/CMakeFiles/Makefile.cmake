@@ -51,6 +51,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/workspaces/vcpkg/installed/x64-linux/share/jwt-cpp/jwt-cpp-config.cmake"
   "/workspaces/vcpkg/installed/x64-linux/share/jwt-cpp/jwt-cpp-targets.cmake"
   "/workspaces/vcpkg/installed/x64-linux/share/openssl/vcpkg-cmake-wrapper.cmake"
+  "/workspaces/vcpkg/installed/x64-linux/share/sqlite3/vcpkg-cmake-wrapper.cmake"
   "/workspaces/vcpkg/installed/x64-linux/share/unofficial-argon2/unofficial-argon2-config.cmake"
   "/workspaces/vcpkg/installed/x64-linux/share/unofficial-argon2/unofficial-argon2-targets-debug.cmake"
   "/workspaces/vcpkg/installed/x64-linux/share/unofficial-argon2/unofficial-argon2-targets-release.cmake"

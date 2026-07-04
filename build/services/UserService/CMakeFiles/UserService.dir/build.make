@@ -157,7 +157,7 @@ services/UserService/UserService: services/UserService/CMakeFiles/UserService.di
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/src/UserRepository.cpp.o
 services/UserService/UserService: services/UserService/CMakeFiles/UserService.dir/build.make
 services/UserService/UserService: common/libCommon.a
-services/UserService/UserService: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+services/UserService/UserService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 services/UserService/UserService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
 services/UserService/UserService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
 services/UserService/UserService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a

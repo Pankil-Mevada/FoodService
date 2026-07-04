@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <iostream>
+#include "JwtManager.h"
 #include <optional>
 #include "UserRepository.h"
 
@@ -15,7 +17,7 @@ public:
 
 bool deleteUser(int id);
 
-bool login(
+std::optional<std::string> login(
     const std::string& email,
     const std::string& password);
 private:

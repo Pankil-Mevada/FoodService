@@ -157,7 +157,7 @@ services/RestaurantService/RestaurantService: services/RestaurantService/CMakeFi
 services/RestaurantService/RestaurantService: services/RestaurantService/CMakeFiles/RestaurantService.dir/src/RestaurantRepository.cpp.o
 services/RestaurantService/RestaurantService: services/RestaurantService/CMakeFiles/RestaurantService.dir/build.make
 services/RestaurantService/RestaurantService: common/libCommon.a
-services/RestaurantService/RestaurantService: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+services/RestaurantService/RestaurantService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 services/RestaurantService/RestaurantService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
 services/RestaurantService/RestaurantService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
 services/RestaurantService/RestaurantService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a

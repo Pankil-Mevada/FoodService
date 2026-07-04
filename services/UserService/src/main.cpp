@@ -1,5 +1,5 @@
 #include <crow.h>
-
+#include "JwtMiddleware.h"
 #include "Database.h"
 #include "UserController.h"
 #include "UserRepository.h"
@@ -8,9 +8,10 @@
 int main()
 {
     // Create Crow application
-    crow::SimpleApp app;
+//    crow::SimpleApp app;
+	using App = crow::App<JwtMiddleware>;
 
-    // Open database
+	App app;
     Database database("foodservice.db");
 
     // Create users table

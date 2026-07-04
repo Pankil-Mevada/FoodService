@@ -154,6 +154,30 @@ src/Database.cpp.s:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/Database.cpp.s
 .PHONY : src/Database.cpp.s
 
+src/JwtManager.o: src/JwtManager.cpp.o
+.PHONY : src/JwtManager.o
+
+# target to build an object file
+src/JwtManager.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/JwtManager.cpp.o
+.PHONY : src/JwtManager.cpp.o
+
+src/JwtManager.i: src/JwtManager.cpp.i
+.PHONY : src/JwtManager.i
+
+# target to preprocess a source file
+src/JwtManager.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/JwtManager.cpp.i
+.PHONY : src/JwtManager.cpp.i
+
+src/JwtManager.s: src/JwtManager.cpp.s
+.PHONY : src/JwtManager.s
+
+# target to generate assembly for a file
+src/JwtManager.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f common/CMakeFiles/Common.dir/build.make common/CMakeFiles/Common.dir/src/JwtManager.cpp.s
+.PHONY : src/JwtManager.cpp.s
+
 src/UserValidator.o: src/UserValidator.cpp.o
 .PHONY : src/UserValidator.o
 
@@ -190,6 +214,9 @@ help:
 	@echo "... src/Database.o"
 	@echo "... src/Database.i"
 	@echo "... src/Database.s"
+	@echo "... src/JwtManager.o"
+	@echo "... src/JwtManager.i"
+	@echo "... src/JwtManager.s"
 	@echo "... src/UserValidator.o"
 	@echo "... src/UserValidator.i"
 	@echo "... src/UserValidator.s"

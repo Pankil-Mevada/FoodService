@@ -157,7 +157,7 @@ services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderServic
 services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/src/OrderRepository.cpp.o
 services/OrderService/OrderService: services/OrderService/CMakeFiles/OrderService.dir/build.make
 services/OrderService/OrderService: common/libCommon.a
-services/OrderService/OrderService: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
 services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
 services/OrderService/OrderService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a

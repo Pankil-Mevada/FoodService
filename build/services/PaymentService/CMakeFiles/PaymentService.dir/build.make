@@ -157,7 +157,7 @@ services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/Payme
 services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/src/PaymentRepository.cpp.o
 services/PaymentService/PaymentService: services/PaymentService/CMakeFiles/PaymentService.dir/build.make
 services/PaymentService/PaymentService: common/libCommon.a
-services/PaymentService/PaymentService: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
 services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
 services/PaymentService/PaymentService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a

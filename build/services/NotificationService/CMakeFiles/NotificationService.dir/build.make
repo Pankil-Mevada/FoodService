@@ -157,7 +157,7 @@ services/NotificationService/NotificationService: services/NotificationService/C
 services/NotificationService/NotificationService: services/NotificationService/CMakeFiles/NotificationService.dir/src/NotificationRepository.cpp.o
 services/NotificationService/NotificationService: services/NotificationService/CMakeFiles/NotificationService.dir/build.make
 services/NotificationService/NotificationService: common/libCommon.a
-services/NotificationService/NotificationService: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+services/NotificationService/NotificationService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libsqlite3.a
 services/NotificationService/NotificationService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libargon2.a
 services/NotificationService/NotificationService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libssl.a
 services/NotificationService/NotificationService: /workspaces/vcpkg/installed/x64-linux/debug/lib/libcrypto.a
