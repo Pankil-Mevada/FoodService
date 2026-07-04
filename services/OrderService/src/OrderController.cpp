@@ -25,7 +25,7 @@ crow::response OrderController::createOrder(
         json["userId"].i(),
         json["restaurantId"].i(),
         json["totalAmount"].d(),
-        json["status"].s());
+         "PENDING");
 
     bool status = m_service.createOrder(order);
 
@@ -108,7 +108,7 @@ crow::response OrderController::updateOrder(
         json["userId"].i(),
         json["restaurantId"].i(),
         json["totalAmount"].d(),
-        json["status"].s());
+     "PENDING");
 
     bool status = m_service.updateOrder(order);
 
