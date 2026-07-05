@@ -122,6 +122,7 @@ services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/OrderClient.cpp.o: \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
  /usr/include/c++/13/bits/ranges_util.h \
+ /workspaces/FoodService/services/ApiGateway/include/client/HttpClient.h \
  /workspaces/vcpkg/installed/x64-linux/include/curl/curl.h \
  /workspaces/vcpkg/installed/x64-linux/include/curl/curlver.h \
  /workspaces/vcpkg/installed/x64-linux/include/curl/system.h \

@@ -946,4 +946,6 @@ services/ApiGateway/CMakeFiles/ApiGateway.dir/src/main.cpp.o: \
  /workspaces/FoodService/third_party/Crow/include/crow/http_server.h \
  /workspaces/FoodService/third_party/Crow/include/crow/version.h \
  /workspaces/FoodService/third_party/Crow/include/crow/app.h \
- /workspaces/FoodService/services/ApiGateway/include/client/OrderClient.h
+ /workspaces/FoodService/services/ApiGateway/include/client/OrderClient.h \
+ /workspaces/FoodService/services/ApiGateway/include/client/HttpClient.h \
+ /workspaces/FoodService/services/ApiGateway/include/client/RestaurantClient.h

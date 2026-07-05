@@ -130,6 +130,30 @@ ApiGateway/fast:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/build
 .PHONY : ApiGateway/fast
 
+src/client/HttpClient.o: src/client/HttpClient.cpp.o
+.PHONY : src/client/HttpClient.o
+
+# target to build an object file
+src/client/HttpClient.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/HttpClient.cpp.o
+.PHONY : src/client/HttpClient.cpp.o
+
+src/client/HttpClient.i: src/client/HttpClient.cpp.i
+.PHONY : src/client/HttpClient.i
+
+# target to preprocess a source file
+src/client/HttpClient.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/HttpClient.cpp.i
+.PHONY : src/client/HttpClient.cpp.i
+
+src/client/HttpClient.s: src/client/HttpClient.cpp.s
+.PHONY : src/client/HttpClient.s
+
+# target to generate assembly for a file
+src/client/HttpClient.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/HttpClient.cpp.s
+.PHONY : src/client/HttpClient.cpp.s
+
 src/client/OrderClient.o: src/client/OrderClient.cpp.o
 .PHONY : src/client/OrderClient.o
 
@@ -153,6 +177,30 @@ src/client/OrderClient.s: src/client/OrderClient.cpp.s
 src/client/OrderClient.cpp.s:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/OrderClient.cpp.s
 .PHONY : src/client/OrderClient.cpp.s
+
+src/client/RestaurantClient.o: src/client/RestaurantClient.cpp.o
+.PHONY : src/client/RestaurantClient.o
+
+# target to build an object file
+src/client/RestaurantClient.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/RestaurantClient.cpp.o
+.PHONY : src/client/RestaurantClient.cpp.o
+
+src/client/RestaurantClient.i: src/client/RestaurantClient.cpp.i
+.PHONY : src/client/RestaurantClient.i
+
+# target to preprocess a source file
+src/client/RestaurantClient.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/RestaurantClient.cpp.i
+.PHONY : src/client/RestaurantClient.cpp.i
+
+src/client/RestaurantClient.s: src/client/RestaurantClient.cpp.s
+.PHONY : src/client/RestaurantClient.s
+
+# target to generate assembly for a file
+src/client/RestaurantClient.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/RestaurantClient.cpp.s
+.PHONY : src/client/RestaurantClient.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -187,9 +235,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... ApiGateway"
+	@echo "... src/client/HttpClient.o"
+	@echo "... src/client/HttpClient.i"
+	@echo "... src/client/HttpClient.s"
 	@echo "... src/client/OrderClient.o"
 	@echo "... src/client/OrderClient.i"
 	@echo "... src/client/OrderClient.s"
+	@echo "... src/client/RestaurantClient.o"
+	@echo "... src/client/RestaurantClient.i"
+	@echo "... src/client/RestaurantClient.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

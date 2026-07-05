@@ -5,6 +5,8 @@ project(ApiGateway)
 add_executable(ApiGateway
     src/main.cpp
     src/client/OrderClient.cpp
+    src/client/HttpClient.cpp
+    src/client/RestaurantClient.cpp
 )
 
 target_include_directories(ApiGateway PRIVATE

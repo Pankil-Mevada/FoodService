@@ -21,49 +21,39 @@ size_t WriteCallback(
 std::string OrderClient::createOrder(
     const std::string& jsonBody)
 {
-    CURL* curl = curl_easy_init();
+       return m_httpClient.post(
+        "http://localhost:8082/orders",
+        jsonBody);
+}
 
-    std::string response;
+std::string OrderClient::getAllOrders()
+{
+     return m_httpClient.get(
+        "http://localhost:8082/orders");
+}
 
-    if (curl)
-    {
-        struct curl_slist* headers = nullptr;
+std::string OrderClient::getOrderById(int id)
+{
+ return m_httpClient.get(
+        "http://localhost:8082/orders/" +
+        std::to_string(id));
+}
 
-        headers = curl_slist_append(
-            headers,
-            "Content-Type: application/json");
 
-        curl_easy_setopt(
-            curl,
-            CURLOPT_URL,
-            "http://localhost:8082/orders");
+std::string OrderClient::updateOrder(
+    int id,
+    const std::string& jsonBody)
+{
+    return m_httpClient.put(
+        "http://localhost:8082/orders/" +
+        std::to_string(id),
+        jsonBody);
+}
 
-        curl_easy_setopt(
-            curl,
-            CURLOPT_HTTPHEADER,
-            headers);
-
-        curl_easy_setopt(
-            curl,
-            CURLOPT_POSTFIELDS,
-            jsonBody.c_str());
-
-        curl_easy_setopt(
-            curl,
-            CURLOPT_WRITEFUNCTION,
-            WriteCallback);
-
-        curl_easy_setopt(
-            curl,
-            CURLOPT_WRITEDATA,
-            &response);
-
-        curl_easy_perform(curl);
-
-        curl_slist_free_all(headers);
-
-        curl_easy_cleanup(curl);
-    }
-
-    return response;
+std::string OrderClient::deleteOrder(
+    int id)
+{
+return m_httpClient.remove(
+        "http://localhost:8082/orders/" +
+        std::to_string(id));
 }

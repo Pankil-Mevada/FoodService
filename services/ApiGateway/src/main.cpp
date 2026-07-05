@@ -1,9 +1,56 @@
 #include <crow.h>
 #include "client/OrderClient.h"
+#include "client/RestaurantClient.h"
 int main()
 {
     crow::SimpleApp app;
 
+RestaurantClient restaurantClient;
+
+CROW_ROUTE(app, "/restaurants")
+.methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
+([&restaurantClient](const crow::request& req)
+{
+    switch (req.method)
+    {
+        case crow::HTTPMethod::GET:
+            return crow::response(
+                restaurantClient.getAllRestaurants());
+
+        case crow::HTTPMethod::POST:
+            return crow::response(
+                restaurantClient.registerRestaurant(req.body));
+
+        default:
+            return crow::response(405);
+    }
+});
+
+CROW_ROUTE(app, "/restaurants/<int>")
+.methods(
+    crow::HTTPMethod::GET,
+    crow::HTTPMethod::PUT,
+    crow::HTTPMethod::DELETE)
+([&restaurantClient](const crow::request& req, int id)
+{
+    switch (req.method)
+    {
+        case crow::HTTPMethod::GET:
+            return crow::response(
+                restaurantClient.getRestaurantById(id));
+
+        case crow::HTTPMethod::PUT:
+            return crow::response(
+                restaurantClient.updateRestaurant(id, req.body));
+
+        case crow::HTTPMethod::DELETE:
+            return crow::response(
+                restaurantClient.deleteRestaurant(id));
+
+        default:
+            return crow::response(405);
+    }
+});
     CROW_ROUTE(app, "/health")
     ([]()
     {
@@ -20,6 +67,40 @@ int main()
             client.createOrder(req.body));
     });
 
+CROW_ROUTE(app, "/orders")
+.methods(crow::HTTPMethod::GET)
+([&client]()
+{
+    return crow::response(
+        client.getAllOrders());
+});
+
+CROW_ROUTE(app, "/orders/<int>")
+.methods(crow::HTTPMethod::GET)
+([&client](int id)
+{
+    return crow::response(
+        client.getOrderById(id));
+});
+
+CROW_ROUTE(app, "/orders/<int>")
+.methods(crow::HTTPMethod::PUT)
+([&client](const crow::request& req,
+           int id)
+{
+    return crow::response(
+        client.updateOrder(
+            id,
+            req.body));
+});
+
+CROW_ROUTE(app, "/orders/<int>")
+.methods(crow::HTTPMethod::DELETE)
+([&client](int id)
+{
+    return crow::response(
+        client.deleteOrder(id));
+});
 
     app.port(8085)
        .multithreaded()
