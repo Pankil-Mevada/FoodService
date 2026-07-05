@@ -1,12 +1,75 @@
 #include <crow.h>
 #include "client/OrderClient.h"
 #include "client/RestaurantClient.h"
+#include "client/UserClient.h"
 int main()
 {
     crow::SimpleApp app;
 
 RestaurantClient restaurantClient;
+UserClient userClient;
 
+
+CROW_ROUTE(app, "/register")
+.methods(crow::HTTPMethod::POST)
+([&userClient](const crow::request& req)
+{
+    return crow::response(
+        userClient.registerUser(req.body));
+});
+
+CROW_ROUTE(app, "/login")
+.methods(crow::HTTPMethod::POST)
+([&userClient](const crow::request& req)
+{
+    return crow::response(
+        userClient.login(req.body));
+});
+
+
+CROW_ROUTE(app, "/users")
+([&userClient](const crow::request& req)
+{
+    switch (req.method)
+    {
+        case crow::HTTPMethod::GET:
+            return crow::response(
+                userClient.getAllUsers(
+    req.get_header_value("Authorization")););
+
+        default:
+            return crow::response(405);
+    }
+});
+
+CROW_ROUTE(app, "/users/<int>")
+([&userClient](const crow::request& req, int id)
+{
+    switch (req.method)
+    {
+        case crow::HTTPMethod::GET:
+            return crow::response(
+                userClient.getUserById(
+    id,
+    req.get_header_value("Authorization")));
+
+        case crow::HTTPMethod::PUT:
+            return crow::response(
+                userClient.updateUser(
+    id,
+    req.body,
+    req.get_header_value("Authorization")));
+
+        case crow::HTTPMethod::DELETE:
+            return crow::response(
+                userClient.deleteUser(
+    id,
+    req.get_header_value("Authorization")));
+
+        default:
+            return crow::response(405);
+    }
+});
 CROW_ROUTE(app, "/restaurants")
 .methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
 ([&restaurantClient](const crow::request& req)

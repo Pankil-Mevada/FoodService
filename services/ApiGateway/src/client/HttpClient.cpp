@@ -19,7 +19,8 @@ size_t WriteCallback(
 }
 
 std::string HttpClient::get(
-    const std::string& url)
+    const std::string& url,
+    const std::string& authHeader)
 {
     CURL* curl = curl_easy_init();
 
@@ -27,6 +28,20 @@ std::string HttpClient::get(
 
     if (curl)
     {
+        struct curl_slist* headers = nullptr;
+
+        if (!authHeader.empty())
+        {
+            headers = curl_slist_append(
+                headers,
+                authHeader.c_str());
+
+            curl_easy_setopt(
+                curl,
+                CURLOPT_HTTPHEADER,
+                headers);
+        }
+
         curl_easy_setopt(
             curl,
             CURLOPT_URL,
@@ -44,6 +59,11 @@ std::string HttpClient::get(
 
         curl_easy_perform(curl);
 
+        if (headers)
+        {
+            curl_slist_free_all(headers);
+        }
+
         curl_easy_cleanup(curl);
     }
 
@@ -52,7 +72,8 @@ std::string HttpClient::get(
 
 std::string HttpClient::post(
     const std::string& url,
-    const std::string& body)
+    const std::string& body,
+    const std::string& authHeader)
 {
     CURL* curl = curl_easy_init();
 
@@ -102,7 +123,8 @@ std::string HttpClient::post(
 }
 std::string HttpClient::put(
     const std::string& url,
-    const std::string& body)
+    const std::string& body,
+    const std::string& authHeader)
 {
     CURL* curl = curl_easy_init();
 
@@ -115,6 +137,13 @@ std::string HttpClient::put(
         headers = curl_slist_append(
             headers,
             "Content-Type: application/json");
+
+        if (!authHeader.empty())
+        {
+            headers = curl_slist_append(
+                headers,
+                authHeader.c_str());
+        }
 
         curl_easy_setopt(
             curl,
@@ -157,7 +186,8 @@ std::string HttpClient::put(
 }
 
 std::string HttpClient::remove(
-    const std::string& url)
+    const std::string& url,
+    const std::string& authHeader)
 {
     CURL* curl = curl_easy_init();
 

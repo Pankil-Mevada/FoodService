@@ -11,6 +11,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/workspaces/FoodService/services/ApiGateway/src/client/HttpClient.cpp" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/HttpClient.cpp.o" "gcc" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/HttpClient.cpp.o.d"
   "/workspaces/FoodService/services/ApiGateway/src/client/OrderClient.cpp" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/OrderClient.cpp.o" "gcc" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/OrderClient.cpp.o.d"
   "/workspaces/FoodService/services/ApiGateway/src/client/RestaurantClient.cpp" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/RestaurantClient.cpp.o" "gcc" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/RestaurantClient.cpp.o.d"
+  "/workspaces/FoodService/services/ApiGateway/src/client/UserClient.cpp" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/UserClient.cpp.o" "gcc" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/UserClient.cpp.o.d"
   "/workspaces/FoodService/services/ApiGateway/src/main.cpp" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/main.cpp.o" "gcc" "services/ApiGateway/CMakeFiles/ApiGateway.dir/src/main.cpp.o.d"
   )
 

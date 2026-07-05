@@ -202,6 +202,30 @@ src/client/RestaurantClient.cpp.s:
 	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/RestaurantClient.cpp.s
 .PHONY : src/client/RestaurantClient.cpp.s
 
+src/client/UserClient.o: src/client/UserClient.cpp.o
+.PHONY : src/client/UserClient.o
+
+# target to build an object file
+src/client/UserClient.cpp.o:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/UserClient.cpp.o
+.PHONY : src/client/UserClient.cpp.o
+
+src/client/UserClient.i: src/client/UserClient.cpp.i
+.PHONY : src/client/UserClient.i
+
+# target to preprocess a source file
+src/client/UserClient.cpp.i:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/UserClient.cpp.i
+.PHONY : src/client/UserClient.cpp.i
+
+src/client/UserClient.s: src/client/UserClient.cpp.s
+.PHONY : src/client/UserClient.s
+
+# target to generate assembly for a file
+src/client/UserClient.cpp.s:
+	cd /workspaces/FoodService/build && $(MAKE) $(MAKESILENT) -f services/ApiGateway/CMakeFiles/ApiGateway.dir/build.make services/ApiGateway/CMakeFiles/ApiGateway.dir/src/client/UserClient.cpp.s
+.PHONY : src/client/UserClient.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -244,6 +268,9 @@ help:
 	@echo "... src/client/RestaurantClient.o"
 	@echo "... src/client/RestaurantClient.i"
 	@echo "... src/client/RestaurantClient.s"
+	@echo "... src/client/UserClient.o"
+	@echo "... src/client/UserClient.i"
+	@echo "... src/client/UserClient.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
