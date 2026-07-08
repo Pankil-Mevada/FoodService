@@ -35,7 +35,7 @@ CROW_ROUTE(app, "/users")
         case crow::HTTPMethod::GET:
             return crow::response(
                 userClient.getAllUsers(
-    req.get_header_value("Authorization")););
+    req.get_header_value("Authorization")));
 
         default:
             return crow::response(405);

@@ -1,15 +1,36 @@
-std::string getAllUsers(
-    const std::string& authHeader);
+#pragma once
 
-std::string getUserById(
-    int id,
-    const std::string& authHeader);
+#include <string>
 
-std::string updateUser(
-    int id,
-    const std::string& jsonBody,
-    const std::string& authHeader);
+#include "client/HttpClient.h"
 
-std::string deleteUser(
-    int id,
-    const std::string& authHeader); 
+class UserClient
+{
+public:
+
+    std::string registerUser(
+        const std::string& jsonBody);
+
+    std::string login(
+        const std::string& jsonBody);
+
+    std::string getAllUsers(
+        const std::string& authHeader);
+
+    std::string getUserById(
+        int id,
+        const std::string& authHeader);
+
+    std::string updateUser(
+        int id,
+        const std::string& jsonBody,
+        const std::string& authHeader);
+
+    std::string deleteUser(
+        int id,
+        const std::string& authHeader);
+
+private:
+
+    HttpClient m_httpClient;
+};
