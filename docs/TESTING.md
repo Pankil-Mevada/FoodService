@@ -26,6 +26,11 @@ The location scenario creates a geocoded restaurant, places an order at a
 serviceable delivery point, persists its address/coordinates, and verifies the
 explicitly simulated driver-location and ETA response.
 
+Live provider discovery is intentionally a manual test so the automated suite
+does not repeatedly consume a public service. Click **Bengaluru demo**, wait for
+the provider status to finish, and verify that nearby OpenStreetMap restaurants
+show distance and **Order here**, while Ahmedabad fixtures show **Outside area**.
+
 ## Manual checks
 
 - Invalid JSON and missing required fields return 4xx rather than crashing.
@@ -38,6 +43,7 @@ explicitly simulated driver-location and ETA response.
 - Provider timeout leaves a recoverable pending/failed payment.
 - Amount and order identity cannot be overridden by client input.
 - Restarting services preserves SQLite state.
+- Provider timeout leaves existing database restaurants available and shows a recoverable error.
 
 ## Scope and limitations
 

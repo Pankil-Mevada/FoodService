@@ -259,7 +259,13 @@ sequenceDiagram
     participant OS as Order Service
     participant ODB as order.db
 
-    Customer->>UI: Allow browser location or choose Ahmedabad demo
+    Customer->>UI: Allow browser location or choose Bengaluru demo
+    UI->>GW: GET /restaurants/discover?lat&lon
+    GW->>GW: Identify Bengaluru/Ahmedabad coordinate region
+    GW->>OSM: One capped nearby restaurant query
+    OSM-->>GW: Public restaurant POIs
+    GW->>RS: Import up to 20 restaurants with coordinates
+    GW-->>UI: City, provider, discovered count
     UI->>UI: Save coordinates locally and calculate restaurant distances
     Customer->>UI: Enter address and place order
     UI->>GW: POST /orders + JWT + destination
@@ -281,6 +287,10 @@ The current driver feed is an explicit local simulator for functional testing.
 It does not dispatch a real courier or call an external maps/geocoding service.
 Production work still requires driver authentication, consent, coordinate
 ingestion, retention limits, and a selected maps/routing provider.
+
+Nearby discovery is user-triggered and displays OpenStreetMap attribution. The
+public endpoint is a development dependency only; production must use a
+contracted or self-hosted provider with caching, monitoring, and privacy review.
 
 - Browser orchestration: `frontend/app.js`
 - API Gateway routes: `services/ApiGateway/src/main.cpp`

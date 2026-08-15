@@ -15,6 +15,7 @@ JSON requests require `Content-Type: application/json`.
 | Users | `PUT /users/{id}` | `name`, `email`, `password` | JWT required |
 | Users | `DELETE /users/{id}` | — | JWT required |
 | Restaurants | `GET /restaurants` | — | Lists restaurants |
+| Restaurants | `GET /restaurants/discover?lat={lat}&lon={lon}` | — | User-triggered OpenStreetMap lookup; deduplicates/imports up to 20 nearby restaurants and returns city/provider metadata |
 | Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating`, optional `latitude`, `longitude`, `deliveryRadiusKm` | Creates restaurant and delivery zone |
 | Restaurants | `GET/PUT/DELETE /restaurants/{id}` | same fields for PUT | CRUD |
 | Orders | `GET /orders` | — | Lists orders |
@@ -31,6 +32,11 @@ JSON requests require `Content-Type: application/json`.
 | Notifications | `POST /notifications` | `userId`, `type`, `message` | Normally called by payment service |
 | Notifications | `GET/PUT/DELETE /notifications/{id}` | notification fields for PUT | Operational CRUD |
 | Every service | `GET /health` | — | Liveness check |
+
+Nearby discovery uses the configurable development provider endpoint in the
+gateway and sends only the selected latitude/longitude. The bundled public
+OpenStreetMap endpoint is for low-volume local testing, must retain attribution,
+and must be replaced by a contracted or self-hosted provider for production.
 
 `POST /payments` accepts an `Idempotency-Key` header or `idempotencyKey` JSON
 field. Reusing a key must return the existing payment rather than charge twice.

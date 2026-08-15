@@ -21,6 +21,10 @@ public:
     std::string deleteRestaurant(
         int id);
 
+    std::string discoverNearby(
+        double latitude,
+        double longitude);
+
 private:
 
     HttpClient m_httpClient;

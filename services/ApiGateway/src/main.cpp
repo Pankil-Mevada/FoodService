@@ -9,6 +9,7 @@
 #include <cmath>
 #include <mutex>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace
 {
@@ -241,6 +242,73 @@ CROW_ROUTE(app, "/orders/<int>")
 {
     return crow::response(
         client.getOrderById(id));
+});
+
+CROW_ROUTE(app, "/restaurants/discover")
+.methods(crow::HTTPMethod::GET)
+([&restaurantClient](const crow::request& req)
+{
+    const char* latParam = req.url_params.get("lat");
+    const char* lonParam = req.url_params.get("lon");
+    if (!latParam || !lonParam) return jsonError(400, "lat and lon are required");
+    double latitude = 0.0;
+    double longitude = 0.0;
+    try { latitude = std::stod(latParam); longitude = std::stod(lonParam); }
+    catch (const std::exception&) { return jsonError(422, "Coordinates are invalid"); }
+    if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180)
+        return jsonError(422, "Coordinates are invalid");
+
+    const auto provider = crow::json::load(restaurantClient.discoverNearby(latitude, longitude));
+    if (!provider || !provider.has("elements"))
+        return jsonError(503, "Nearby restaurant provider is temporarily unavailable");
+
+    std::unordered_set<std::string> existingNames;
+    const auto existing = crow::json::load(restaurantClient.getAllRestaurants());
+    if (existing)
+        for (const auto& restaurant : existing)
+            if (restaurant.has("name")) existingNames.insert(std::string(restaurant["name"].s()));
+
+    int discovered = 0;
+    int imported = 0;
+    for (const auto& element : provider["elements"])
+    {
+        if (discovered >= 20 || !element.has("tags") || !element["tags"].has("name")) continue;
+        const auto tags = element["tags"];
+        ++discovered;
+        const std::string name = std::string(tags["name"].s());
+        if (existingNames.count(name)) continue;
+        double restaurantLat = element.has("lat") ? element["lat"].d() :
+            (element.has("center") && element["center"].has("lat") ? element["center"]["lat"].d() : latitude);
+        double restaurantLon = element.has("lon") ? element["lon"].d() :
+            (element.has("center") && element["center"].has("lon") ? element["center"]["lon"].d() : longitude);
+        std::string address = tags.has("addr:full") ? std::string(tags["addr:full"].s()) :
+            (tags.has("addr:street") ? std::string(tags["addr:street"].s()) : "OpenStreetMap nearby listing");
+        std::string phone = tags.has("phone") ? std::string(tags["phone"].s()) : "Not listed";
+        crow::json::wvalue body;
+        body["name"] = name;
+        body["address"] = address;
+        body["phone"] = phone;
+        body["rating"] = 4.3;
+        body["latitude"] = restaurantLat;
+        body["longitude"] = restaurantLon;
+        body["deliveryRadiusKm"] = 8.0;
+        restaurantClient.registerRestaurant(body.dump());
+        existingNames.insert(name);
+        ++imported;
+    }
+
+    std::string city = "Current area";
+    if (latitude >= 12.7 && latitude <= 13.3 && longitude >= 77.3 && longitude <= 77.9)
+        city = "Bengaluru";
+    else if (latitude >= 22.8 && latitude <= 23.3 && longitude >= 72.3 && longitude <= 72.8)
+        city = "Ahmedabad";
+    crow::json::wvalue response;
+    response["city"] = city;
+    response["discovered"] = discovered;
+    response["imported"] = imported;
+    response["provider"] = "OpenStreetMap Overpass";
+    response["attribution"] = "© OpenStreetMap contributors";
+    return crow::response(response);
 });
 
 CROW_ROUTE(app, "/orders/<int>/tracking")

@@ -53,6 +53,10 @@ std::string HttpClient::get(
             CURLOPT_URL,
             url.c_str());
 
+        curl_easy_setopt(curl, CURLOPT_USERAGENT,
+            "FoodService-local-development/0.1 (https://github.com/Pankil-Mevada/FoodService)");
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
+
         curl_easy_setopt(
             curl,
             CURLOPT_WRITEFUNCTION,

@@ -98,7 +98,7 @@ token. Clients must not be trusted to submit arbitrary `userId` values.
 #### P1
 
 - map-based address picker and geocoding
-- live location permission with manual-address fallback
+- [x] live location permission with manual-address fallback and user-triggered nearby discovery (development MVP)
 - configurable restaurant delivery radius or polygon
 - surge, rain, late-night, and distance-based delivery rules
 
