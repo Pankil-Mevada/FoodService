@@ -1,5 +1,8 @@
 # Architecture and design
 
+For request-by-request frontend and backend interactions, see
+[End-to-end sequence diagrams](SEQUENCE_DIAGRAMS.md).
+
 FoodService is a C++20/Crow microservice application. Each domain service owns
 its HTTP controller, business service, repository, and SQLite persistence. The
 API Gateway is the browser-facing façade.
