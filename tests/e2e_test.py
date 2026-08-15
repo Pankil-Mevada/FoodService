@@ -120,10 +120,28 @@ class Suite:
         self.created["user"] = int(match["id"])
         return f"user id {match['id']}"
 
+    def current_user(self) -> str:
+        status, payload = self.api.request("GET", f"{self.args.gateway}/me", token=self.token)
+        self.expect(status, (200,), payload)
+        if not isinstance(payload, dict) or payload.get("email") != self.email:
+            raise AssertionError(f"JWT resolved to the wrong user: {payload}")
+        if int(payload.get("id", 0)) != self.created.get("user"):
+            raise AssertionError(f"JWT user ID did not match registered user: {payload}")
+        return f"JWT resolves to user {payload.get('id')}"
+
+    def reject_anonymous_order(self) -> str:
+        status, payload = self.api.request("POST", f"{self.args.gateway}/orders", {
+            "restaurantId": 1, "totalAmount": 1.0
+        })
+        if status != 401:
+            raise AssertionError(f"anonymous order was accepted: HTTP {status}, {payload}")
+        return "HTTP 401"
+
     def restaurant(self) -> str:
         name = f"E2E Kitchen {uuid.uuid4().hex[:8]}"
         status, payload = self.api.request("POST", f"{self.args.gateway}/restaurants", {
-            "name": name, "address": "Test Mode Street", "phone": "+10000000000", "rating": 4.5
+            "name": name, "address": "Test Mode Street", "phone": "+10000000000", "rating": 4.5,
+            "latitude": 23.0225, "longitude": 72.5714, "deliveryRadiusKm": 8.0
         })
         self.expect(status, (200, 201), payload)
         if not isinstance(payload, dict) or payload.get("success") is not True:
@@ -142,9 +160,10 @@ class Suite:
         before_status, before = self.api.request("GET", f"{self.args.payments}/payments")
         self.expect(before_status, (200,), before)
         status, payload = self.api.request("POST", f"{self.args.gateway}/orders", {
-            "userId": self.created["user"], "restaurantId": self.created["restaurant"],
-            "totalAmount": 12.34
-        })
+            "userId": self.created["user"] + 999999, "restaurantId": self.created["restaurant"],
+            "totalAmount": 12.34, "deliveryLatitude": 23.0240,
+            "deliveryLongitude": 72.5730, "deliveryAddress": "E2E Test Address"
+        }, token=self.token)
         self.expect(status, (200, 201), payload)
         if not isinstance(payload, dict) or payload.get("success") is not True:
             raise AssertionError(f"order creation was not accepted: {payload}")
@@ -169,6 +188,47 @@ class Suite:
             raise AssertionError("no payment record created for order")
         self.created["payment"] = int(payment["id"])
         return f"order {order['id']} -> payment {payment['id']} ({payment.get('status')})"
+
+    def reject_outside_delivery_zone(self) -> str:
+        if "restaurant" not in self.created:
+            raise SkipTest("requires successful restaurant setup")
+        status, payload = self.api.request("POST", f"{self.args.gateway}/orders", {
+            "restaurantId": self.created["restaurant"], "totalAmount": 9.99,
+            "deliveryLatitude": 28.6139, "deliveryLongitude": 77.2090,
+            "deliveryAddress": "Outside test delivery zone"
+        }, token=self.token)
+        if status != 422 or "outside" not in str(payload).lower():
+            raise AssertionError(f"out-of-zone order was not rejected: HTTP {status}, {payload}")
+        return "HTTP 422 outside delivery area"
+
+    def delivery_tracking(self) -> str:
+        if "order" not in self.created:
+            raise SkipTest("requires successful order setup")
+        status, payload = self.api.request(
+            "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
+            token=self.token)
+        self.expect(status, (200,), payload)
+        required = ("driverId", "driverName", "driverContact", "driverRating",
+                    "vehicleType", "vehiclePlate", "driverLatitude", "driverLongitude",
+                    "etaMinutes", "remainingSeconds", "progressPercent", "timeline",
+                    "customerLatitude", "customerLongitude")
+        if not isinstance(payload, dict) or any(key not in payload for key in required):
+            raise AssertionError(f"incomplete tracking response: {payload}")
+        if payload.get("simulated") is not True:
+            raise AssertionError(f"test tracking must be explicitly marked simulated: {payload}")
+        if payload.get("status") != "ASSIGNED" or payload.get("etaMinutes") != 3:
+            raise AssertionError(f"tracking did not start assigned with three-minute ETA: {payload}")
+        status, advanced = self.api.request(
+            "POST", f"{self.args.orders}/orders/{self.created['order']}/status",
+            {"status": "DELIVERED"})
+        self.expect(status, (200,), advanced)
+        status, delivered = self.api.request(
+            "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
+            token=self.token)
+        self.expect(status, (200,), delivered)
+        if delivered.get("status") != "DELIVERED" or delivered.get("progressPercent") != 100:
+            raise AssertionError(f"delivered status was not persisted: {delivered}")
+        return f"driver {payload['driverId']} assigned -> delivered, ETA 3 -> 0 min"
 
     def notifications(self) -> str:
         status, payload = self.api.request("GET", f"{self.args.notifications}/notifications")
@@ -281,8 +341,12 @@ class Suite:
         self.run("auth:login", self.login)
         self.run("auth:reject-missing-token", self.negative_auth)
         self.run("users:list", self.users)
+        self.run("auth:current-user", self.current_user)
+        self.run("orders:reject-anonymous", self.reject_anonymous_order)
         self.run("restaurants:create-and-list", self.restaurant)
+        self.run("orders:reject-outside-delivery-zone", self.reject_outside_delivery_zone)
         self.run("orders:payment-eventual-consistency", self.order_and_payment)
+        self.run("orders:live-delivery-tracking", self.delivery_tracking)
         self.run("payments:idempotency", self.payment_idempotency)
         self.run("payments:realtime-snapshot", self.realtime_payment_snapshot)
         self.run("payments:reject-unsigned-webhook", self.reject_unsigned_webhook)

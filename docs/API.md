@@ -9,18 +9,26 @@ JSON requests require `Content-Type: application/json`.
 | Gateway | `GET /health` | — | Gateway health |
 | Auth | `POST /register` | `name`, `email`, `password` | Creates user; 201 or 409 |
 | Auth | `POST /login` | `email`, `password` | Returns JWT in `token` |
+| Auth | `GET /me` | — | JWT required; returns the signed-in user |
 | Users | `GET /users` | — | `Authorization: Bearer <JWT>` |
 | Users | `GET /users/{id}` | — | JWT required |
 | Users | `PUT /users/{id}` | `name`, `email`, `password` | JWT required |
 | Users | `DELETE /users/{id}` | — | JWT required |
 | Restaurants | `GET /restaurants` | — | Lists restaurants |
-| Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating` | Creates restaurant |
+| Restaurants | `GET /restaurants/discover?lat={lat}&lon={lon}` | — | User-triggered OpenStreetMap lookup; deduplicates/imports up to 20 nearby restaurants and returns city/provider metadata |
+| Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating`, optional `latitude`, `longitude`, `deliveryRadiusKm` | Creates restaurant and delivery zone |
 | Restaurants | `GET/PUT/DELETE /restaurants/{id}` | same fields for PUT | CRUD |
 | Orders | `GET /orders` | — | Lists orders |
-| Orders | `POST /orders` | `userId`, `restaurantId`, `totalAmount` | Creates order and starts payment |
+| Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress` | JWT required; validates delivery zone and derives customer ID |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
+| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership required; returns simulated driver/vehicle details, coordinates, timeline, three-minute progress and ETA; persists `DELIVERED` |
+
+The local lifecycle is `ASSIGNED -> PICKED_UP -> ON_THE_WAY -> ARRIVING -> DELIVERED`.
+Tracking begins on the first tracking request, refreshes every five seconds, and
+reaches `DELIVERED` after 180 seconds. Driver contacts and vehicle plates are
+test values and do not identify real people or vehicles.
 | Payments | `GET /payments` | — | Direct service; lists payment state |
-| Payments | `POST /payments` | `orderId`, `userId`, `amount`, `paymentMethod` | Returns `{success,message,payment}` in test mode |
+| Payments | `POST /payments` | `orderId`, `amount`, `paymentMethod` | Gateway requires JWT and derives customer ID; test mode |
 | Payments | `GET /payments/order/{orderId}` | — | Latest payment for an order |
 | Payments | `GET/PUT/DELETE /payments/{id}` | payment fields for PUT | Operational CRUD |
 | Payments | `GET /payments/stream?orderId={id}` | — | SSE-compatible current-state event with retry hint |
@@ -29,6 +37,11 @@ JSON requests require `Content-Type: application/json`.
 | Notifications | `POST /notifications` | `userId`, `type`, `message` | Normally called by payment service |
 | Notifications | `GET/PUT/DELETE /notifications/{id}` | notification fields for PUT | Operational CRUD |
 | Every service | `GET /health` | — | Liveness check |
+
+Nearby discovery uses the configurable development provider endpoint in the
+gateway and sends only the selected latitude/longitude. The bundled public
+OpenStreetMap endpoint is for low-volume local testing, must retain attribution,
+and must be replaced by a contracted or self-hosted provider for production.
 
 `POST /payments` accepts an `Idempotency-Key` header or `idempotencyKey` JSON
 field. Reusing a key must return the existing payment rather than charge twice.

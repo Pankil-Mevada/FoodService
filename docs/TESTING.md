@@ -20,6 +20,19 @@ eventual timeout and 500-ms interval.
 The suite also sends the same test payment twice with one `Idempotency-Key`,
 checks order-based payment lookup, reads the finite SSE-compatible snapshot, and
 submits an unsigned/unknown webhook that must be rejected without mutation.
+It resolves `GET /me`, rejects anonymous order creation, and submits a forged
+`userId` to prove the gateway ignores client identity and uses the JWT claim.
+The location scenario creates a geocoded restaurant, places an order at a
+serviceable delivery point, persists its address/coordinates, and verifies the
+explicitly simulated driver-location and ETA response.
+It verifies driver/contact/vehicle details, then uses the internal local test
+endpoint to advance the order without waiting three minutes and proves that
+`DELIVERED`, 100% progress, and zero ETA are persisted and returned.
+
+Live provider discovery is intentionally a manual test so the automated suite
+does not repeatedly consume a public service. Click **Bengaluru demo**, wait for
+the provider status to finish, and verify that nearby OpenStreetMap restaurants
+show distance and **Order here**, while Ahmedabad fixtures show **Outside area**.
 
 ## Manual checks
 
@@ -33,6 +46,7 @@ submits an unsigned/unknown webhook that must be rejected without mutation.
 - Provider timeout leaves a recoverable pending/failed payment.
 - Amount and order identity cannot be overridden by client input.
 - Restarting services preserves SQLite state.
+- Provider timeout leaves existing database restaurants available and shows a recoverable error.
 
 ## Scope and limitations
 

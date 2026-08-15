@@ -13,7 +13,10 @@ public:
         int userId,
         int restaurantId,
         double totalAmount,
-        const std::string& status);
+        const std::string& status,
+        double deliveryLatitude = 0.0,
+        double deliveryLongitude = 0.0,
+        const std::string& deliveryAddress = "");
 
     int getId() const;
 
@@ -24,6 +27,9 @@ public:
     double getTotalAmount() const;
 
     const std::string& getStatus() const;
+    double getDeliveryLatitude() const;
+    double getDeliveryLongitude() const;
+    const std::string& getDeliveryAddress() const;
 
 private:
 
@@ -36,4 +42,7 @@ private:
     double m_totalAmount{0.0};
 
     std::string m_status;
+    double m_deliveryLatitude{0.0};
+    double m_deliveryLongitude{0.0};
+    std::string m_deliveryAddress;
 };

@@ -1,5 +1,9 @@
 # Setup and run guide
 
+For low-volume nearby discovery, the gateway defaults to the public Overpass
+development endpoint. Set `FOODSERVICE_OVERPASS_URL` before startup to use a
+contracted or self-hosted instance.
+
 ## Requirements
 
 - CMake 3.16+

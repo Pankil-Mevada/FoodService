@@ -27,7 +27,10 @@ crow::response RestaurantController::registerRestaurant(const crow::request& req
 			json["name"].s(),
 			json["address"].s(),
 			json["phone"].s(),
-			json["rating"].d()
+			json["rating"].d(),
+			json.has("latitude") ? json["latitude"].d() : 23.0225,
+			json.has("longitude") ? json["longitude"].d() : 72.5714,
+			json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0
 			);
 	if (!UserValidator::validateName(restaurant.getName()))
 	{
@@ -70,6 +73,9 @@ crow::response RestaurantController::getAllRestaurants()
 	    response[index]["address"] = restaurant.getAddress();
 	    response[index]["phone"] = restaurant.getPhone();
 	    response[index]["rating"] = restaurant.getRating();
+	    response[index]["latitude"] = restaurant.getLatitude();
+	    response[index]["longitude"] = restaurant.getLongitude();
+	    response[index]["deliveryRadiusKm"] = restaurant.getDeliveryRadiusKm();
 
 	    ++index;
     }
@@ -96,6 +102,9 @@ crow::response RestaurantController::getRestaurantById(int id)
     response["address"] = restaurant->getAddress();
     response["phone"] = restaurant->getPhone();
     response["rating"] = restaurant->getRating();
+    response["latitude"] = restaurant->getLatitude();
+    response["longitude"] = restaurant->getLongitude();
+    response["deliveryRadiusKm"] = restaurant->getDeliveryRadiusKm();
     
     return crow::response(response);
 }
@@ -116,7 +125,10 @@ crow::response RestaurantController::updateRestaurant(
         json["name"].s(),
         json["address"].s(),
         json["phone"].s(),
-        json["rating"].d());
+        json["rating"].d(),
+        json.has("latitude") ? json["latitude"].d() : 23.0225,
+        json.has("longitude") ? json["longitude"].d() : 72.5714,
+        json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0);
 	
     if (!UserValidator::validateName(restaurant.getName()))
     {
