@@ -43,6 +43,18 @@ development, and never store raw card data.
 
 ## Known boundaries
 
+### Local delivery simulation
+
+API Gateway owns the in-memory three-minute simulation clock. It verifies JWT
+order ownership, selects a stable test driver profile from the order ID,
+interpolates coordinates between restaurant and destination, and calls Order
+Service's internal status endpoint. Order Service persists lifecycle state in
+`order.db`; once `DELIVERED` is stored, gateway restarts cannot revert it.
+
+Before production, a Delivery Service must own driver authentication,
+assignment, consented location ingestion, durable events, dispatch rules, and
+retention. Current driver/contact/vehicle values and the map are simulated.
+
 - Services use fixed localhost ports and direct HTTP discovery.
 - SQLite databases are service-local files; there is no distributed transaction.
 - Order/payment/notification updates therefore use eventual consistency.

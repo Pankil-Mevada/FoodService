@@ -21,7 +21,12 @@ JSON requests require `Content-Type: application/json`.
 | Orders | `GET /orders` | — | Lists orders |
 | Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress` | JWT required; validates delivery zone and derives customer ID |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
-| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership required; returns simulated driver coordinates, progress and ETA |
+| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership required; returns simulated driver/vehicle details, coordinates, timeline, three-minute progress and ETA; persists `DELIVERED` |
+
+The local lifecycle is `ASSIGNED -> PICKED_UP -> ON_THE_WAY -> ARRIVING -> DELIVERED`.
+Tracking begins on the first tracking request, refreshes every five seconds, and
+reaches `DELIVERED` after 180 seconds. Driver contacts and vehicle plates are
+test values and do not identify real people or vehicles.
 | Payments | `GET /payments` | — | Direct service; lists payment state |
 | Payments | `POST /payments` | `orderId`, `amount`, `paymentMethod` | Gateway requires JWT and derives customer ID; test mode |
 | Payments | `GET /payments/order/{orderId}` | — | Latest payment for an order |

@@ -336,13 +336,25 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
         auto [entry, inserted] = trackingStarted.emplace(id, now);
         started = entry->second;
     }
-    const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - started).count();
-    const double progress = std::min(0.95, 0.15 + (elapsed / 5) * 0.05);
-    const double remainingKm = distanceKm(startLat, startLon, endLat, endLon) * (1.0 - progress);
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - started).count();
+    if (std::string(order["status"].s()) == "DELIVERED") elapsed = 180;
+    double progress = 0.05;
+    std::string deliveryStatus = "ASSIGNED";
+    if (elapsed >= 180) { progress = 1.0; deliveryStatus = "DELIVERED"; }
+    else if (elapsed >= 135) { progress = 0.75 + ((elapsed - 135) / 45.0) * 0.25; deliveryStatus = "ARRIVING"; }
+    else if (elapsed >= 45) { progress = 0.25 + ((elapsed - 45) / 90.0) * 0.50; deliveryStatus = "ON_THE_WAY"; }
+    else if (elapsed >= 15) { progress = 0.15 + ((elapsed - 15) / 30.0) * 0.10; deliveryStatus = "PICKED_UP"; }
+    if (std::string(order["status"].s()) != deliveryStatus)
+        client.updateOrderStatus(id, deliveryStatus);
+    const int remainingSeconds = std::max(0, 180 - static_cast<int>(elapsed));
     crow::json::wvalue response;
     response["orderId"] = id;
     response["driverId"] = 1000 + (id % 7);
     response["driverName"] = std::string("Delivery Partner ") + char('A' + (id % 7));
+    response["driverContact"] = std::string("TEST-DRIVER-") + std::to_string(1000 + (id % 7));
+    response["driverRating"] = 4.8;
+    response["vehicleType"] = "Electric test scooter";
+    response["vehiclePlate"] = std::string("TEST-KA-") + std::to_string(1000 + (id % 9000));
     response["driverLatitude"] = startLat + (endLat - startLat) * progress;
     response["driverLongitude"] = startLon + (endLon - startLon) * progress;
     response["restaurantLatitude"] = startLat;
@@ -350,8 +362,19 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
     response["customerLatitude"] = endLat;
     response["customerLongitude"] = endLon;
     response["progressPercent"] = static_cast<int>(progress * 100);
-    response["etaMinutes"] = std::max(1, static_cast<int>(std::ceil(remainingKm / 0.35)));
-    response["status"] = progress > 0.8 ? "ARRIVING" : "ON_THE_WAY";
+    response["etaMinutes"] = remainingSeconds == 0 ? 0 : static_cast<int>(std::ceil(remainingSeconds / 60.0));
+    response["remainingSeconds"] = remainingSeconds;
+    response["status"] = deliveryStatus;
+    response["lastUpdatedEpoch"] = static_cast<long long>(std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count());
+    const std::string stages[] = {"ASSIGNED", "PICKED_UP", "ON_THE_WAY", "ARRIVING", "DELIVERED"};
+    int currentStage = deliveryStatus == "ASSIGNED" ? 0 : deliveryStatus == "PICKED_UP" ? 1 :
+        deliveryStatus == "ON_THE_WAY" ? 2 : deliveryStatus == "ARRIVING" ? 3 : 4;
+    for (int i = 0; i < 5; ++i)
+    {
+        response["timeline"][i]["status"] = stages[i];
+        response["timeline"][i]["complete"] = i <= currentStage;
+    }
     response["simulated"] = true;
     return crow::response(response);
 });

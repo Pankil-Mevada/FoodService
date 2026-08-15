@@ -57,3 +57,10 @@ return m_httpClient.remove(
         "http://localhost:8082/orders/" +
         std::to_string(id));
 }
+
+std::string OrderClient::updateOrderStatus(int id, const std::string& status)
+{
+    return m_httpClient.post(
+        "http://localhost:8082/orders/" + std::to_string(id) + "/status",
+        "{\"status\":\"" + status + "\"}");
+}

@@ -281,6 +281,11 @@ sequenceDiagram
         GW-->>UI: Driver coordinates, progress, ETA, simulated=true
         UI->>UI: Move driver marker on local schematic map
     end
+    Note over GW,UI: ASSIGNED 0-15s → PICKED_UP 15-45s →<br/>ON_THE_WAY 45-135s → ARRIVING 135-180s
+    GW->>OS: POST /orders/{id}/status {DELIVERED}
+    OS->>ODB: Persist DELIVERED
+    GW-->>UI: 100% progress, ETA 0, completed timeline
+    UI->>UI: Mark order Delivered and stop polling
 ```
 
 The current driver feed is an explicit local simulator for functional testing.

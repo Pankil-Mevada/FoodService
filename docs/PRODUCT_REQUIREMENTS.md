@@ -495,7 +495,7 @@ No test may charge real money or use production customer data.
 
 ### Phase 3 — Growth
 
-- delivery-partner workflow and tracking
+- [x] delivery-partner workflow and tracking (three-minute local simulator MVP; production dispatch remains required)
 - ratings/reviews, favourites, coupons, recommendations, and scheduled orders
 - restaurant analytics and settlements
 - stronger search and personalized discovery

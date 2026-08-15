@@ -23,6 +23,10 @@ public:
     std::string deleteOrder(
         int id);
 
+    std::string updateOrderStatus(
+        int id,
+        const std::string& status);
+
 private:
 
     HttpClient m_httpClient;

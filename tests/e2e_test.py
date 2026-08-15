@@ -208,13 +208,27 @@ class Suite:
             "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
             token=self.token)
         self.expect(status, (200,), payload)
-        required = ("driverId", "driverLatitude", "driverLongitude", "etaMinutes",
-                    "progressPercent", "customerLatitude", "customerLongitude")
+        required = ("driverId", "driverName", "driverContact", "driverRating",
+                    "vehicleType", "vehiclePlate", "driverLatitude", "driverLongitude",
+                    "etaMinutes", "remainingSeconds", "progressPercent", "timeline",
+                    "customerLatitude", "customerLongitude")
         if not isinstance(payload, dict) or any(key not in payload for key in required):
             raise AssertionError(f"incomplete tracking response: {payload}")
         if payload.get("simulated") is not True:
             raise AssertionError(f"test tracking must be explicitly marked simulated: {payload}")
-        return f"driver {payload['driverId']} at {payload['progressPercent']}%, ETA {payload['etaMinutes']} min"
+        if payload.get("status") != "ASSIGNED" or payload.get("etaMinutes") != 3:
+            raise AssertionError(f"tracking did not start assigned with three-minute ETA: {payload}")
+        status, advanced = self.api.request(
+            "POST", f"{self.args.orders}/orders/{self.created['order']}/status",
+            {"status": "DELIVERED"})
+        self.expect(status, (200,), advanced)
+        status, delivered = self.api.request(
+            "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
+            token=self.token)
+        self.expect(status, (200,), delivered)
+        if delivered.get("status") != "DELIVERED" or delivered.get("progressPercent") != 100:
+            raise AssertionError(f"delivered status was not persisted: {delivered}")
+        return f"driver {payload['driverId']} assigned -> delivered, ETA 3 -> 0 min"
 
     def notifications(self) -> str:
         status, payload = self.api.request("GET", f"{self.args.notifications}/notifications")

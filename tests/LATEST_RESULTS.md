@@ -18,7 +18,7 @@ Run on 2026-08-15 against the locally running WSL services.
 [PASS] restaurants:create-and-list - persisted restaurant found
 [PASS] orders:reject-outside-delivery-zone - out-of-zone address returned 422
 [PASS] orders:payment-eventual-consistency - order created a pending payment
-[PASS] orders:live-delivery-tracking - simulated driver coordinates and ETA returned
+[PASS] orders:live-delivery-tracking - driver details returned; assigned -> delivered persisted, ETA 3 -> 0
 [PASS] payments:idempotency - repeated key returned the same payment
 [PASS] payments:realtime-snapshot - order lookup and SSE returned pending
 [PASS] payments:reject-unsigned-webhook - unsigned mutation rejected

@@ -25,6 +25,9 @@ It resolves `GET /me`, rejects anonymous order creation, and submits a forged
 The location scenario creates a geocoded restaurant, places an order at a
 serviceable delivery point, persists its address/coordinates, and verifies the
 explicitly simulated driver-location and ETA response.
+It verifies driver/contact/vehicle details, then uses the internal local test
+endpoint to advance the order without waiting three minutes and proves that
+`DELIVERED`, 100% progress, and zero ETA are persisted and returned.
 
 Live provider discovery is intentionally a manual test so the automated suite
 does not repeatedly consume a public service. Click **Bengaluru demo**, wait for
