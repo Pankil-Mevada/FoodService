@@ -469,7 +469,7 @@ No test may charge real money or use production customer data.
 ### Phase 0 — Stabilize the current foundation
 
 - fix gateway status propagation and standardize errors
-- derive customer identity from JWT and remove manual user ID
+- [x] derive customer identity from JWT and remove manual user ID (gateway order/payment creation and E2E verified)
 - protect restaurant, order, payment, and notification routes by role
 - make payment webhooks update order status consistently
 - add database migrations, unit tests, and CI

@@ -3,6 +3,28 @@
 These diagrams describe how the browser frontend, API Gateway, C++
 microservices, and SQLite databases communicate in the current implementation.
 
+## Authenticated customer identity
+
+```mermaid
+sequenceDiagram
+    participant UI as Web UI
+    participant GW as API Gateway
+    participant JWT as JWT verifier
+    participant Order as Order Service
+    UI->>GW: POST /orders + Bearer JWT<br/>{restaurantId, totalAmount}
+    GW->>JWT: Verify token and read userId claim
+    alt missing or invalid token
+        GW-->>UI: 401 valid bearer token required
+    else valid token
+        GW->>Order: POST /orders<br/>{userId from JWT, restaurantId, totalAmount}
+        Order-->>GW: Order result
+        GW-->>UI: Order result
+    end
+```
+
+The gateway is the public identity trust boundary. It ignores any client-sent
+`userId` for order and payment creation and injects the verified JWT claim.
+
 ## Components and ports
 
 | Component | Port | Storage |

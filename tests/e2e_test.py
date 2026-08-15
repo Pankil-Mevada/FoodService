@@ -120,6 +120,23 @@ class Suite:
         self.created["user"] = int(match["id"])
         return f"user id {match['id']}"
 
+    def current_user(self) -> str:
+        status, payload = self.api.request("GET", f"{self.args.gateway}/me", token=self.token)
+        self.expect(status, (200,), payload)
+        if not isinstance(payload, dict) or payload.get("email") != self.email:
+            raise AssertionError(f"JWT resolved to the wrong user: {payload}")
+        if int(payload.get("id", 0)) != self.created.get("user"):
+            raise AssertionError(f"JWT user ID did not match registered user: {payload}")
+        return f"JWT resolves to user {payload.get('id')}"
+
+    def reject_anonymous_order(self) -> str:
+        status, payload = self.api.request("POST", f"{self.args.gateway}/orders", {
+            "restaurantId": 1, "totalAmount": 1.0
+        })
+        if status != 401:
+            raise AssertionError(f"anonymous order was accepted: HTTP {status}, {payload}")
+        return "HTTP 401"
+
     def restaurant(self) -> str:
         name = f"E2E Kitchen {uuid.uuid4().hex[:8]}"
         status, payload = self.api.request("POST", f"{self.args.gateway}/restaurants", {
@@ -142,9 +159,9 @@ class Suite:
         before_status, before = self.api.request("GET", f"{self.args.payments}/payments")
         self.expect(before_status, (200,), before)
         status, payload = self.api.request("POST", f"{self.args.gateway}/orders", {
-            "userId": self.created["user"], "restaurantId": self.created["restaurant"],
+            "userId": self.created["user"] + 999999, "restaurantId": self.created["restaurant"],
             "totalAmount": 12.34
-        })
+        }, token=self.token)
         self.expect(status, (200, 201), payload)
         if not isinstance(payload, dict) or payload.get("success") is not True:
             raise AssertionError(f"order creation was not accepted: {payload}")
@@ -281,6 +298,8 @@ class Suite:
         self.run("auth:login", self.login)
         self.run("auth:reject-missing-token", self.negative_auth)
         self.run("users:list", self.users)
+        self.run("auth:current-user", self.current_user)
+        self.run("orders:reject-anonymous", self.reject_anonymous_order)
         self.run("restaurants:create-and-list", self.restaurant)
         self.run("orders:payment-eventual-consistency", self.order_and_payment)
         self.run("payments:idempotency", self.payment_idempotency)

@@ -20,6 +20,8 @@ eventual timeout and 500-ms interval.
 The suite also sends the same test payment twice with one `Idempotency-Key`,
 checks order-based payment lookup, reads the finite SSE-compatible snapshot, and
 submits an unsigned/unknown webhook that must be rejected without mutation.
+It resolves `GET /me`, rejects anonymous order creation, and submits a forged
+`userId` to prove the gateway ignores client identity and uses the JWT claim.
 
 ## Manual checks
 

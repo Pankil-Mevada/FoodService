@@ -9,6 +9,7 @@ JSON requests require `Content-Type: application/json`.
 | Gateway | `GET /health` | — | Gateway health |
 | Auth | `POST /register` | `name`, `email`, `password` | Creates user; 201 or 409 |
 | Auth | `POST /login` | `email`, `password` | Returns JWT in `token` |
+| Auth | `GET /me` | — | JWT required; returns the signed-in user |
 | Users | `GET /users` | — | `Authorization: Bearer <JWT>` |
 | Users | `GET /users/{id}` | — | JWT required |
 | Users | `PUT /users/{id}` | `name`, `email`, `password` | JWT required |
@@ -17,10 +18,10 @@ JSON requests require `Content-Type: application/json`.
 | Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating` | Creates restaurant |
 | Restaurants | `GET/PUT/DELETE /restaurants/{id}` | same fields for PUT | CRUD |
 | Orders | `GET /orders` | — | Lists orders |
-| Orders | `POST /orders` | `userId`, `restaurantId`, `totalAmount` | Creates order and starts payment |
+| Orders | `POST /orders` | `restaurantId`, `totalAmount` | JWT required; derives customer ID from the token |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
 | Payments | `GET /payments` | — | Direct service; lists payment state |
-| Payments | `POST /payments` | `orderId`, `userId`, `amount`, `paymentMethod` | Returns `{success,message,payment}` in test mode |
+| Payments | `POST /payments` | `orderId`, `amount`, `paymentMethod` | Gateway requires JWT and derives customer ID; test mode |
 | Payments | `GET /payments/order/{orderId}` | — | Latest payment for an order |
 | Payments | `GET/PUT/DELETE /payments/{id}` | payment fields for PUT | Operational CRUD |
 | Payments | `GET /payments/stream?orderId={id}` | — | SSE-compatible current-state event with retry hint |

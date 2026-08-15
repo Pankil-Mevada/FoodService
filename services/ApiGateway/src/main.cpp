@@ -4,6 +4,31 @@
 #include "client/RestaurantClient.h"
 #include "client/UserClient.h"
 #include "client/PaymentClient.h"
+#include "JwtManager.h"
+
+namespace
+{
+std::optional<int> authenticatedUserId(const crow::request& req)
+{
+    const std::string header = req.get_header_value("Authorization");
+    const std::string prefix = "Bearer ";
+    if (header.rfind(prefix, 0) != 0) return std::nullopt;
+    const std::string token = header.substr(prefix.size());
+    JwtManager jwt;
+    if (!jwt.verifyToken(token)) return std::nullopt;
+    try { return jwt.getUserId(token); }
+    catch (const std::exception&) { return std::nullopt; }
+}
+
+crow::response unauthorized()
+{
+    crow::json::wvalue body;
+    body["success"] = false;
+    body["message"] = "A valid bearer token is required";
+    return crow::response(401, body);
+}
+}
+
 int main()
 {
     crow::App<crow::CORSHandler> app;
@@ -40,6 +65,15 @@ CROW_ROUTE(app, "/login")
         userClient.login(req.body));
 });
 
+CROW_ROUTE(app, "/me")
+.methods(crow::HTTPMethod::GET)
+([&userClient](const crow::request& req)
+{
+    const auto userId = authenticatedUserId(req);
+    if (!userId) return unauthorized();
+    return crow::response(userClient.getUserById(
+        *userId, req.get_header_value("Authorization")));
+});
 
 CROW_ROUTE(app, "/users")
 ([&userClient](const crow::request& req)
@@ -140,8 +174,16 @@ CROW_ROUTE(app, "/restaurants/<int>")
         .methods(crow::HTTPMethod::POST)
     ([&client](const crow::request& req)
     {
-        return crow::response(
-            client.createOrder(req.body));
+        const auto userId = authenticatedUserId(req);
+        if (!userId) return unauthorized();
+        const auto input = crow::json::load(req.body);
+        if (!input || !input.has("restaurantId") || !input.has("totalAmount"))
+            return crow::response(400, "Missing restaurantId or totalAmount");
+        crow::json::wvalue body;
+        body["userId"] = *userId;
+        body["restaurantId"] = input["restaurantId"].i();
+        body["totalAmount"] = input["totalAmount"].d();
+        return crow::response(client.createOrder(body.dump()));
     });
 
 CROW_ROUTE(app, "/orders")
@@ -161,7 +203,20 @@ CROW_ROUTE(app, "/orders/<int>")
 });
 
 CROW_ROUTE(app, "/payments").methods(crow::HTTPMethod::POST)
-([&paymentClient](const crow::request& req) { return crow::response(paymentClient.createPayment(req.body, req.get_header_value("Idempotency-Key"))); });
+([&paymentClient](const crow::request& req) {
+    const auto userId = authenticatedUserId(req);
+    if (!userId) return unauthorized();
+    const auto input = crow::json::load(req.body);
+    if (!input || !input.has("orderId") || !input.has("amount") || !input.has("paymentMethod"))
+        return crow::response(400, "Missing orderId, amount, or paymentMethod");
+    crow::json::wvalue body;
+    body["userId"] = *userId;
+    body["orderId"] = input["orderId"].i();
+    body["amount"] = input["amount"].d();
+    body["paymentMethod"] = input["paymentMethod"].s();
+    if (input.has("idempotencyKey")) body["idempotencyKey"] = input["idempotencyKey"].s();
+    return crow::response(paymentClient.createPayment(body.dump(), req.get_header_value("Idempotency-Key")));
+});
 CROW_ROUTE(app, "/payments/<int>").methods(crow::HTTPMethod::GET)
 ([&paymentClient](int id) { return crow::response(paymentClient.getPayment(id)); });
 CROW_ROUTE(app, "/payments/order/<int>").methods(crow::HTTPMethod::GET)
