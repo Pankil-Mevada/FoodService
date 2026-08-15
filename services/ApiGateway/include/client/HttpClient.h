@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 class HttpClient
 {
@@ -13,7 +14,8 @@ public:
 std::string post(
     const std::string& url,
     const std::string& body,
-    const std::string& authHeader = "");
+    const std::string& authHeader = "",
+    const std::vector<std::string>& extraHeaders = {});
 
 std::string put(
     const std::string& url,

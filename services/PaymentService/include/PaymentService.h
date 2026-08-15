@@ -14,15 +14,19 @@ public:
 
     explicit PaymentService(PaymentRepository& repository);
 
-    bool createPayment(
+    std::optional<Payment> createPayment(
     int orderId,
     int userId,
     double amount,
-    const std::string& paymentMethod);
+    const std::string& paymentMethod,
+    const std::string& idempotencyKey);
 
     std::vector<Payment> getAllPayments();
 
     std::optional<Payment> getPaymentById(int id);
+    std::optional<Payment> getPaymentForOrder(int orderId);
+    std::optional<Payment> applyProviderEvent(const std::string& transactionId,
+        const std::string& status, const std::string& providerPaymentId);
 
     bool updatePayment(const Payment& payment);
 

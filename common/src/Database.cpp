@@ -123,8 +123,12 @@ void Database::createPaymentTable()
             order_id INTEGER NOT NULL,
             amount REAL NOT NULL,
             payment_method TEXT NOT NULL,
-            transaction_id TEXT NOT NULL,
-            status TEXT NOT NULL
+            transaction_id TEXT NOT NULL UNIQUE,
+            status TEXT NOT NULL,
+            idempotency_key TEXT UNIQUE,
+            provider TEXT NOT NULL DEFAULT 'test',
+            provider_payment_id TEXT,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
     )";
 
@@ -144,6 +148,15 @@ void Database::createPaymentTable()
 
         sqlite3_free(errMsg);
     }
+
+    // Backwards-compatible migrations for databases created by older builds.
+    // SQLite reports duplicate-column errors on subsequent starts; those are safe.
+    sqlite3_exec(connection(), "ALTER TABLE payments ADD COLUMN idempotency_key TEXT;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE payments ADD COLUMN provider TEXT NOT NULL DEFAULT 'test';", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE payments ADD COLUMN provider_payment_id TEXT;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE payments ADD COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_idempotency_key ON payments(idempotency_key) WHERE idempotency_key IS NOT NULL;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_transaction_id ON payments(transaction_id);", nullptr, nullptr, nullptr);
 }
 void Database::createNotificationTable()
 {

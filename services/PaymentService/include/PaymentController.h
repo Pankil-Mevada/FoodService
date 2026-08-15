@@ -17,6 +17,9 @@ public:
     crow::response getAllPayments();
 
     crow::response getPaymentById(int id);
+    crow::response getPaymentForOrder(int orderId);
+    crow::response paymentStream(const crow::request& req);
+    crow::response providerWebhook(const crow::request& req);
 
     crow::response updatePayment(
         int id,

@@ -35,7 +35,7 @@ bool OrderService::createOrder(const Order& order)
     {
         m_repository.updateOrderStatus(
             *orderId,
-            "PAID");
+            "PAYMENT_PENDING");
     }
 else
 {

@@ -206,7 +206,8 @@ std::string HttpClient::remove(
 std::string HttpClient::post(
     const std::string& url,
     const std::string& body,
-    const std::string& authHeader)
+    const std::string& authHeader,
+    const std::vector<std::string>& extraHeaders)
 {
     CURL* curl = curl_easy_init();
 
@@ -229,6 +230,7 @@ std::string HttpClient::post(
                 headers,
                 header.c_str());
         }
+        for (const auto& header : extraHeaders) headers = curl_slist_append(headers, header.c_str());
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
