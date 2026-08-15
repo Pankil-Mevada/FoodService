@@ -4,12 +4,14 @@
 #include "PaymentController.h"
 #include "PaymentRepository.h"
 #include "PaymentService.h"
+#include <cstdlib>
 
 int main()
 {
     crow::SimpleApp app;
 
-    Database database("payment.db");
+    const char* databasePath = std::getenv("PAYMENT_DATABASE_PATH");
+    Database database(databasePath ? databasePath : "payment.db");
 
     database.createPaymentTable();
 
@@ -48,23 +50,21 @@ int main()
         return controller.getPaymentById(id);
     });
 
-    // Update Payment
-    CROW_ROUTE(app, "/payments/<int>")
-    .methods(crow::HTTPMethod::PUT)
-    ([&controller](const crow::request& req, int id)
-    {
-        return controller.updatePayment(id, req);
-    });
+    CROW_ROUTE(app, "/payments/order/<int>")
+    .methods(crow::HTTPMethod::GET)
+    ([&controller](int orderId) { return controller.getPaymentForOrder(orderId); });
 
-    // Delete Payment
-    CROW_ROUTE(app, "/payments/<int>")
-    .methods(crow::HTTPMethod::DELETE)
-    ([&controller](int id)
-    {
-        return controller.deletePayment(id);
-    });
+    CROW_ROUTE(app, "/payments/stream")
+    .methods(crow::HTTPMethod::GET)
+    ([&controller](const crow::request& req) { return controller.paymentStream(req); });
 
-    app.port(8083)
+    CROW_ROUTE(app, "/payments/webhooks/provider")
+    .methods(crow::HTTPMethod::POST)
+    ([&controller](const crow::request& req) { return controller.providerWebhook(req); });
+
+    const char* portValue = std::getenv("PAYMENT_SERVICE_PORT");
+    const unsigned short port = portValue ? static_cast<unsigned short>(std::stoi(portValue)) : 8083;
+    app.port(port)
        .multithreaded()
        .run();
 

@@ -8,6 +8,7 @@ add_executable(ApiGateway
     src/client/HttpClient.cpp   
     src/client/RestaurantClient.cpp
     src/client/UserClient.cpp
+    src/client/PaymentClient.cpp
     
 )
 

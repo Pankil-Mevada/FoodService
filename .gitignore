@@ -1,0 +1,11 @@
+build/
+build-wsl/
+out/
+.vs/
+vcpkg_installed/
+*.db
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example

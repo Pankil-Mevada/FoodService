@@ -1,5 +1,6 @@
 #include "client/PaymentClient.h"
 #include <iostream>
+#include <cstdlib>
 #include <curl/curl.h>
 #include <iostream>
 
@@ -34,11 +35,15 @@ bool PaymentClient::createPayment(
     headers = curl_slist_append(
         headers,
         "Content-Type: application/json");
+    const std::string idempotencyHeader = "Idempotency-Key: order-" + std::to_string(orderId);
+    headers = curl_slist_append(headers, idempotencyHeader.c_str());
 
+    const char* configuredUrl = std::getenv("PAYMENT_SERVICE_URL");
+    const std::string url = std::string(configuredUrl ? configuredUrl : "http://localhost:8083") + "/payments";
     curl_easy_setopt(
         curl,
         CURLOPT_URL,
-        "http://localhost:8083/payments");
+        url.c_str());
 
     curl_easy_setopt(
         curl,

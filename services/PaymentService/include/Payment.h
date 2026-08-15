@@ -14,7 +14,11 @@ public:
         double amount,
         const std::string& paymentMethod,
         const std::string& transactionId,
-        const std::string& status);
+        const std::string& status,
+        const std::string& idempotencyKey = "",
+        const std::string& provider = "test",
+        const std::string& providerPaymentId = "",
+        const std::string& updatedAt = "");
 
     int getId() const;
 
@@ -27,6 +31,10 @@ public:
     const std::string& getTransactionId() const;
 
     const std::string& getStatus() const;
+    const std::string& getIdempotencyKey() const;
+    const std::string& getProvider() const;
+    const std::string& getProviderPaymentId() const;
+    const std::string& getUpdatedAt() const;
 
 private:
 
@@ -41,4 +49,8 @@ private:
     std::string m_transactionId;
 
     std::string m_status;
+    std::string m_idempotencyKey;
+    std::string m_provider;
+    std::string m_providerPaymentId;
+    std::string m_updatedAt;
 };
