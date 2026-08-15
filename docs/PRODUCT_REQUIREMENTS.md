@@ -1,5 +1,8 @@
 # FoodService product requirements
 
+Updated 2026-08-15. Checked items describe the exact locally implemented and
+tested slice; they do not imply production restaurant or courier integration.
+
 ## 1. Product vision
 
 Build FoodService into a production-ready local food marketplace inspired by
@@ -27,18 +30,26 @@ The first commercial milestone is a complete single-city ordering journey:
 - notification persistence
 - responsive Plated customer frontend
 - automated end-to-end test harness and dummy-payment script
+- authenticated `/me`; order/payment customer identity derived from JWT
+- browser GPS or Bengaluru demo, OpenStreetMap nearby discovery/import, distance display, and radius enforcement
+- delivery address/coordinates persisted on orders
+- three-minute simulated driver assignment, profile, coordinates, ETA, timeline, and persisted `DELIVERED` state
+- latest local E2E evidence: 21 passed, 0 failed, 0 skipped
 
 ### Gaps that block a real marketplace
 
 - no menu, category, item, variation, or add-on data model
 - no cart or itemized order lines
-- frontend asks for a numeric user ID instead of using the logged-in identity
+- passwords are stored/compared/logged as plaintext; hashing utility is incomplete
 - no roles or authorization rules for customer, restaurant, delivery, or admin
 - public restaurant/order mutation routes are insufficiently protected
 - payment completion does not update the corresponding order status
 - API Gateway does not consistently preserve downstream HTTP status codes
 - SSE is reconnect-based status sampling rather than a durable event stream
-- no delivery address, serviceability, tax, fee, coupon, or pricing engine
+- no reusable address book with recipient/phone/notes; current order has one freeform address and coordinates
+- nearby discovery relies on a public development endpoint; no production geocoder/maps/routing contract
+- driver assignment, identity, movement, vehicle, contact, and three-minute ETA are simulated
+- no tax, fee, coupon, or authoritative pricing engine
 - no restaurant, delivery-partner, or administrator web portal
 - no production payment-provider integration
 - no production database, deployment, monitoring, backup, or disaster recovery
@@ -88,6 +99,14 @@ token. Clients must not be trusted to submit arbitrary `userId` values.
 ### 5.2 Location and serviceability
 
 #### P0
+
+Current local MVP coverage:
+
+- [x] capture a freeform delivery address plus browser coordinates on each order
+- [x] determine radius serviceability and reject checkout outside the zone
+- [x] display straight-line distance and a simulated three-minute ETA
+
+Production requirements still open:
 
 - customer can add and select a delivery address
 - address contains label, recipient, phone, coordinates, and delivery notes
@@ -262,6 +281,14 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 
 #### P0 for delivery launch; optional for restaurant-pickup MVP
 
+Current local MVP coverage:
+
+- [x] deterministic test-driver assignment and test profile/vehicle details
+- [x] simulated five-second coordinates and three-minute delivery state timeline
+- [x] persist final `DELIVERED` state in `order.db`
+
+Production requirements still open:
+
 - delivery-partner onboarding and approval
 - online/offline availability
 - assign a delivery task manually or using a simple dispatch rule
@@ -405,7 +432,7 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 ### Security — P0
 
 - OWASP-aligned input validation and output encoding
-- password hashing with Argon2 using reviewed parameters
+- password hashing with Argon2 using reviewed parameters (required; not yet implemented)
 - short-lived access tokens and rotated refresh tokens
 - secrets from a managed secret store; none in source or frontend code
 - least-privilege service and database credentials
@@ -477,7 +504,8 @@ No test may charge real money or use production customer data.
 
 ### Phase 1 — Ordering MVP
 
-- [x] addresses and serviceability (MVP: browser coordinates, persisted order destination, radius validation)
+- [x] local address/serviceability slice: browser coordinates, persisted destination, radius validation
+- production address book, geocoding, privacy retention, and routing provider
 - menu/category/item/add-on model
 - cart, server-side pricing, taxes, fees, and itemized orders
 - customer restaurant/menu/cart/checkout/order-history screens
@@ -495,7 +523,8 @@ No test may charge real money or use production customer data.
 
 ### Phase 3 — Growth
 
-- [x] delivery-partner workflow and tracking (three-minute local simulator MVP; production dispatch remains required)
+- [x] three-minute local delivery simulator and persisted final state
+- production delivery-partner onboarding, dispatch, tracking ingestion, verification, and retention
 - ratings/reviews, favourites, coupons, recommendations, and scheduled orders
 - restaurant analytics and settlements
 - stronger search and personalized discovery
