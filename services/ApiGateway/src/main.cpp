@@ -5,6 +5,10 @@
 #include "client/UserClient.h"
 #include "client/PaymentClient.h"
 #include "JwtManager.h"
+#include <chrono>
+#include <cmath>
+#include <mutex>
+#include <unordered_map>
 
 namespace
 {
@@ -26,6 +30,27 @@ crow::response unauthorized()
     body["success"] = false;
     body["message"] = "A valid bearer token is required";
     return crow::response(401, body);
+}
+
+double distanceKm(double lat1, double lon1, double lat2, double lon2)
+{
+    constexpr double earthKm = 6371.0;
+    constexpr double pi = 3.14159265358979323846;
+    const auto radians = [pi](double value) { return value * pi / 180.0; };
+    const double dLat = radians(lat2 - lat1);
+    const double dLon = radians(lon2 - lon1);
+    const double a = std::sin(dLat / 2) * std::sin(dLat / 2) +
+        std::cos(radians(lat1)) * std::cos(radians(lat2)) *
+        std::sin(dLon / 2) * std::sin(dLon / 2);
+    return earthKm * 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+}
+
+crow::response jsonError(int status, const std::string& message)
+{
+    crow::json::wvalue body;
+    body["success"] = false;
+    body["message"] = message;
+    return crow::response(status, body);
 }
 }
 
@@ -172,17 +197,33 @@ CROW_ROUTE(app, "/restaurants/<int>")
 
     CROW_ROUTE(app, "/orders")
         .methods(crow::HTTPMethod::POST)
-    ([&client](const crow::request& req)
+    ([&client, &restaurantClient](const crow::request& req)
     {
         const auto userId = authenticatedUserId(req);
         if (!userId) return unauthorized();
         const auto input = crow::json::load(req.body);
-        if (!input || !input.has("restaurantId") || !input.has("totalAmount"))
-            return crow::response(400, "Missing restaurantId or totalAmount");
+        if (!input || !input.has("restaurantId") || !input.has("totalAmount") ||
+            !input.has("deliveryLatitude") || !input.has("deliveryLongitude") || !input.has("deliveryAddress"))
+            return jsonError(400, "Restaurant, amount, and delivery location are required");
+        const double deliveryLat = input["deliveryLatitude"].d();
+        const double deliveryLon = input["deliveryLongitude"].d();
+        if (deliveryLat < -90 || deliveryLat > 90 || deliveryLon < -180 || deliveryLon > 180)
+            return jsonError(422, "Delivery coordinates are invalid");
+        const auto restaurant = crow::json::load(restaurantClient.getRestaurantById(input["restaurantId"].i()));
+        if (!restaurant || !restaurant.has("latitude") || !restaurant.has("longitude"))
+            return jsonError(404, "Restaurant location is unavailable");
+        const double distance = distanceKm(deliveryLat, deliveryLon,
+            restaurant["latitude"].d(), restaurant["longitude"].d());
+        const double radius = restaurant.has("deliveryRadiusKm") ? restaurant["deliveryRadiusKm"].d() : 8.0;
+        if (distance > radius)
+            return jsonError(422, "This address is outside the restaurant delivery area");
         crow::json::wvalue body;
         body["userId"] = *userId;
         body["restaurantId"] = input["restaurantId"].i();
         body["totalAmount"] = input["totalAmount"].d();
+        body["deliveryLatitude"] = deliveryLat;
+        body["deliveryLongitude"] = deliveryLon;
+        body["deliveryAddress"] = input["deliveryAddress"].s();
         return crow::response(client.createOrder(body.dump()));
     });
 
@@ -200,6 +241,51 @@ CROW_ROUTE(app, "/orders/<int>")
 {
     return crow::response(
         client.getOrderById(id));
+});
+
+CROW_ROUTE(app, "/orders/<int>/tracking")
+.methods(crow::HTTPMethod::GET)
+([&client, &restaurantClient](const crow::request& req, int id)
+{
+    const auto userId = authenticatedUserId(req);
+    if (!userId) return unauthorized();
+    const auto order = crow::json::load(client.getOrderById(id));
+    if (!order || !order.has("id")) return jsonError(404, "Order not found");
+    if (order["userId"].i() != *userId) return jsonError(403, "This order belongs to another customer");
+    const auto restaurant = crow::json::load(restaurantClient.getRestaurantById(order["restaurantId"].i()));
+    if (!restaurant || !restaurant.has("latitude")) return jsonError(404, "Restaurant location unavailable");
+
+    const double startLat = restaurant["latitude"].d();
+    const double startLon = restaurant["longitude"].d();
+    const double endLat = order["deliveryLatitude"].d();
+    const double endLon = order["deliveryLongitude"].d();
+    static std::mutex trackingMutex;
+    static std::unordered_map<int, std::chrono::steady_clock::time_point> trackingStarted;
+    const auto now = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point started;
+    {
+        std::lock_guard<std::mutex> lock(trackingMutex);
+        auto [entry, inserted] = trackingStarted.emplace(id, now);
+        started = entry->second;
+    }
+    const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - started).count();
+    const double progress = std::min(0.95, 0.15 + (elapsed / 5) * 0.05);
+    const double remainingKm = distanceKm(startLat, startLon, endLat, endLon) * (1.0 - progress);
+    crow::json::wvalue response;
+    response["orderId"] = id;
+    response["driverId"] = 1000 + (id % 7);
+    response["driverName"] = std::string("Delivery Partner ") + char('A' + (id % 7));
+    response["driverLatitude"] = startLat + (endLat - startLat) * progress;
+    response["driverLongitude"] = startLon + (endLon - startLon) * progress;
+    response["restaurantLatitude"] = startLat;
+    response["restaurantLongitude"] = startLon;
+    response["customerLatitude"] = endLat;
+    response["customerLongitude"] = endLon;
+    response["progressPercent"] = static_cast<int>(progress * 100);
+    response["etaMinutes"] = std::max(1, static_cast<int>(std::ceil(remainingKm / 0.35)));
+    response["status"] = progress > 0.8 ? "ARRIVING" : "ON_THE_WAY";
+    response["simulated"] = true;
+    return crow::response(response);
 });
 
 CROW_ROUTE(app, "/payments").methods(crow::HTTPMethod::POST)

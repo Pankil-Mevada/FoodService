@@ -11,8 +11,8 @@ RestaurantRepository::RestaurantRepository(Database& database)
 bool RestaurantRepository::saveRestaurant(const Restaurant& restaurant)
 {
     const char* sql =
-        "INSERT INTO restaurants(name,address,phone,rating) "
-        "VALUES(?,?,?,?);";
+        "INSERT INTO restaurants(name,address,phone,rating,latitude,longitude,delivery_radius_km) "
+        "VALUES(?,?,?,?,?,?,?);";
 
     sqlite3_stmt* stmt = nullptr;
 
@@ -33,6 +33,9 @@ bool RestaurantRepository::saveRestaurant(const Restaurant& restaurant)
     sqlite3_bind_text(stmt, 2, restaurant.getAddress().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 3, restaurant.getPhone().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_double(stmt, 4, restaurant.getRating());
+    sqlite3_bind_double(stmt, 5, restaurant.getLatitude());
+    sqlite3_bind_double(stmt, 6, restaurant.getLongitude());
+    sqlite3_bind_double(stmt, 7, restaurant.getDeliveryRadiusKm());
 
     rc = sqlite3_step(stmt);
 
@@ -46,7 +49,7 @@ std::vector<Restaurant> RestaurantRepository::getAllRestaurants()
     std::vector<Restaurant> restaurants;
 
     const char* sql =
-        "SELECT id,name,address,phone,rating FROM restaurants;";
+        "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km FROM restaurants;";
 
     sqlite3_stmt* stmt = nullptr;
 
@@ -74,7 +77,10 @@ std::vector<Restaurant> RestaurantRepository::getAllRestaurants()
             reinterpret_cast<const char*>(
                 sqlite3_column_text(stmt, 3)),
 
-            sqlite3_column_double(stmt, 4));
+            sqlite3_column_double(stmt, 4),
+            sqlite3_column_double(stmt, 5),
+            sqlite3_column_double(stmt, 6),
+            sqlite3_column_double(stmt, 7));
     }
 
     sqlite3_finalize(stmt);
@@ -85,7 +91,7 @@ std::vector<Restaurant> RestaurantRepository::getAllRestaurants()
 std::optional<Restaurant> RestaurantRepository::getRestaurantById(int id)
 {
     const char* sql =
-        "SELECT id,name,address,phone,rating "
+        "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km "
         "FROM restaurants "
         "WHERE id=?;";
 
@@ -117,7 +123,10 @@ std::optional<Restaurant> RestaurantRepository::getRestaurantById(int id)
             reinterpret_cast<const char*>(
                 sqlite3_column_text(stmt, 3)),
 
-            sqlite3_column_double(stmt, 4));
+            sqlite3_column_double(stmt, 4),
+            sqlite3_column_double(stmt, 5),
+            sqlite3_column_double(stmt, 6),
+            sqlite3_column_double(stmt, 7));
 
         sqlite3_finalize(stmt);
 
@@ -133,7 +142,7 @@ bool RestaurantRepository::updateRestaurant(const Restaurant& restaurant)
 {
     const char* sql =
         "UPDATE restaurants "
-        "SET name=?,address=?,phone=?,rating=? "
+        "SET name=?,address=?,phone=?,rating=?,latitude=?,longitude=?,delivery_radius_km=? "
         "WHERE id=?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -152,7 +161,10 @@ bool RestaurantRepository::updateRestaurant(const Restaurant& restaurant)
     sqlite3_bind_text(stmt, 2, restaurant.getAddress().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 3, restaurant.getPhone().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_double(stmt, 4, restaurant.getRating());
-    sqlite3_bind_int(stmt, 5, restaurant.getId());
+    sqlite3_bind_double(stmt, 5, restaurant.getLatitude());
+    sqlite3_bind_double(stmt, 6, restaurant.getLongitude());
+    sqlite3_bind_double(stmt, 7, restaurant.getDeliveryRadiusKm());
+    sqlite3_bind_int(stmt, 8, restaurant.getId());
 
     int rc = sqlite3_step(stmt);
 

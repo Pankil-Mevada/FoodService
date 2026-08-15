@@ -61,7 +61,10 @@ void Database::createRestaurantTable()
             name TEXT NOT NULL,
             address TEXT NOT NULL,
             phone TEXT NOT NULL,
-            rating REAL DEFAULT 0.0
+            rating REAL DEFAULT 0.0,
+            latitude REAL NOT NULL DEFAULT 23.0225,
+            longitude REAL NOT NULL DEFAULT 72.5714,
+            delivery_radius_km REAL NOT NULL DEFAULT 8.0
         );
     )";
 
@@ -81,6 +84,9 @@ void Database::createRestaurantTable()
 
         sqlite3_free(errMsg);
     }
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN latitude REAL NOT NULL DEFAULT 23.0225;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN longitude REAL NOT NULL DEFAULT 72.5714;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN delivery_radius_km REAL NOT NULL DEFAULT 8.0;", nullptr, nullptr, nullptr);
 }
 
 void Database::createOrderTable()
@@ -92,7 +98,10 @@ void Database::createOrderTable()
             user_id INTEGER NOT NULL,
             restaurant_id INTEGER NOT NULL,
             total_amount REAL NOT NULL,
-            status TEXT NOT NULL
+            status TEXT NOT NULL,
+            delivery_latitude REAL NOT NULL DEFAULT 0,
+            delivery_longitude REAL NOT NULL DEFAULT 0,
+            delivery_address TEXT NOT NULL DEFAULT ''
         );
     )";
 
@@ -112,6 +121,9 @@ void Database::createOrderTable()
 
         sqlite3_free(errMsg);
     }
+    sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN delivery_latitude REAL NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN delivery_longitude REAL NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN delivery_address TEXT NOT NULL DEFAULT '';", nullptr, nullptr, nullptr);
 }
 
 void Database::createPaymentTable()

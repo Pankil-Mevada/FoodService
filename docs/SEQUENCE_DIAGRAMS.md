@@ -248,6 +248,40 @@ Service would update `order.db` to `PAID`, `PAYMENT_FAILED`, or
 
 ## Source-code map
 
+## 6. Location, serviceability, and simulated delivery
+
+```mermaid
+sequenceDiagram
+    participant Customer
+    participant UI as Web UI
+    participant GW as API Gateway
+    participant RS as Restaurant Service
+    participant OS as Order Service
+    participant ODB as order.db
+
+    Customer->>UI: Allow browser location or choose Ahmedabad demo
+    UI->>UI: Save coordinates locally and calculate restaurant distances
+    Customer->>UI: Enter address and place order
+    UI->>GW: POST /orders + JWT + destination
+    GW->>RS: GET /restaurants/{id}
+    RS-->>GW: Coordinates and delivery radius
+    GW->>GW: Haversine serviceability check
+    GW->>OS: Create order with JWT user and destination
+    OS->>ODB: Persist address and coordinates
+    Customer->>UI: Track driver
+    loop Every five seconds
+        UI->>GW: GET /orders/{id}/tracking + JWT
+        GW->>GW: Verify ownership and calculate simulated position/ETA
+        GW-->>UI: Driver coordinates, progress, ETA, simulated=true
+        UI->>UI: Move driver marker on local schematic map
+    end
+```
+
+The current driver feed is an explicit local simulator for functional testing.
+It does not dispatch a real courier or call an external maps/geocoding service.
+Production work still requires driver authentication, consent, coordinate
+ingestion, retention limits, and a selected maps/routing provider.
+
 - Browser orchestration: `frontend/app.js`
 - API Gateway routes: `services/ApiGateway/src/main.cpp`
 - Gateway HTTP clients: `services/ApiGateway/src/client/`

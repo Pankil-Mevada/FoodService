@@ -477,7 +477,7 @@ No test may charge real money or use production customer data.
 
 ### Phase 1 — Ordering MVP
 
-- addresses and serviceability
+- [x] addresses and serviceability (MVP: browser coordinates, persisted order destination, radius validation)
 - menu/category/item/add-on model
 - cart, server-side pricing, taxes, fees, and itemized orders
 - customer restaurant/menu/cart/checkout/order-history screens

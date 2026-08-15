@@ -15,11 +15,12 @@ JSON requests require `Content-Type: application/json`.
 | Users | `PUT /users/{id}` | `name`, `email`, `password` | JWT required |
 | Users | `DELETE /users/{id}` | — | JWT required |
 | Restaurants | `GET /restaurants` | — | Lists restaurants |
-| Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating` | Creates restaurant |
+| Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating`, optional `latitude`, `longitude`, `deliveryRadiusKm` | Creates restaurant and delivery zone |
 | Restaurants | `GET/PUT/DELETE /restaurants/{id}` | same fields for PUT | CRUD |
 | Orders | `GET /orders` | — | Lists orders |
-| Orders | `POST /orders` | `restaurantId`, `totalAmount` | JWT required; derives customer ID from the token |
+| Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress` | JWT required; validates delivery zone and derives customer ID |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
+| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership required; returns simulated driver coordinates, progress and ETA |
 | Payments | `GET /payments` | — | Direct service; lists payment state |
 | Payments | `POST /payments` | `orderId`, `amount`, `paymentMethod` | Gateway requires JWT and derives customer ID; test mode |
 | Payments | `GET /payments/order/{orderId}` | — | Latest payment for an order |

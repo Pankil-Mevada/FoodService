@@ -11,7 +11,10 @@ public:
         const std::string& name,
         const std::string& address,
         const std::string& phone,
-        double rating);
+        double rating,
+        double latitude = 23.0225,
+        double longitude = 72.5714,
+        double deliveryRadiusKm = 8.0);
 
     int getId() const;
 
@@ -22,6 +25,9 @@ public:
     const std::string& getPhone() const;
 
     double getRating() const;
+    double getLatitude() const;
+    double getLongitude() const;
+    double getDeliveryRadiusKm() const;
 
 private:
 
@@ -34,4 +40,7 @@ private:
     std::string m_phone;
 
     double m_rating{0.0};
+    double m_latitude{23.0225};
+    double m_longitude{72.5714};
+    double m_deliveryRadiusKm{8.0};
 };

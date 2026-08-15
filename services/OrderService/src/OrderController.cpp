@@ -23,9 +23,12 @@ crow::response OrderController::createOrder(
     Order order(
         0,
         json["userId"].i(),
-        json["restaurantId"].i(),
-        json["totalAmount"].d(),
-         "PENDING");
+         json["restaurantId"].i(),
+         json["totalAmount"].d(),
+         "PENDING",
+         json.has("deliveryLatitude") ? json["deliveryLatitude"].d() : 0.0,
+         json.has("deliveryLongitude") ? json["deliveryLongitude"].d() : 0.0,
+         json.has("deliveryAddress") ? std::string(json["deliveryAddress"].s()) : std::string());
 
     bool status = m_service.createOrder(order);
 
@@ -60,6 +63,9 @@ crow::response OrderController::getAllOrders()
         response[index]["restaurantId"] = order.getRestaurantId();
         response[index]["totalAmount"] = order.getTotalAmount();
         response[index]["status"] = order.getStatus();
+        response[index]["deliveryLatitude"] = order.getDeliveryLatitude();
+        response[index]["deliveryLongitude"] = order.getDeliveryLongitude();
+        response[index]["deliveryAddress"] = order.getDeliveryAddress();
 
         ++index;
     }
@@ -88,6 +94,9 @@ crow::response OrderController::getOrderById(int id)
     response["restaurantId"] = order->getRestaurantId();
     response["totalAmount"] = order->getTotalAmount();
     response["status"] = order->getStatus();
+    response["deliveryLatitude"] = order->getDeliveryLatitude();
+    response["deliveryLongitude"] = order->getDeliveryLongitude();
+    response["deliveryAddress"] = order->getDeliveryAddress();
 
     return crow::response(response);
 }
@@ -108,7 +117,10 @@ crow::response OrderController::updateOrder(
         json["userId"].i(),
         json["restaurantId"].i(),
         json["totalAmount"].d(),
-     "PENDING");
+     "PENDING",
+     json.has("deliveryLatitude") ? json["deliveryLatitude"].d() : 0.0,
+     json.has("deliveryLongitude") ? json["deliveryLongitude"].d() : 0.0,
+     json.has("deliveryAddress") ? std::string(json["deliveryAddress"].s()) : std::string());
 
     bool status = m_service.updateOrder(order);
 

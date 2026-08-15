@@ -5,13 +5,19 @@ Order::Order(
     int userId,
     int restaurantId,
     double totalAmount,
-    const std::string& status)
+    const std::string& status,
+    double deliveryLatitude,
+    double deliveryLongitude,
+    const std::string& deliveryAddress)
     :
     m_id(id),
     m_userId(userId),
     m_restaurantId(restaurantId),
     m_totalAmount(totalAmount),
-    m_status(status)
+    m_status(status),
+    m_deliveryLatitude(deliveryLatitude),
+    m_deliveryLongitude(deliveryLongitude),
+    m_deliveryAddress(deliveryAddress)
 {
 }
 
@@ -39,3 +45,7 @@ const std::string& Order::getStatus() const
 {
     return m_status;
 }
+
+double Order::getDeliveryLatitude() const { return m_deliveryLatitude; }
+double Order::getDeliveryLongitude() const { return m_deliveryLongitude; }
+const std::string& Order::getDeliveryAddress() const { return m_deliveryAddress; }
