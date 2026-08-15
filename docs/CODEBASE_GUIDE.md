@@ -1,5 +1,8 @@
 # Codebase guide
 
+Product scope, priorities, acceptance criteria, and the delivery roadmap are in
+[`PRODUCT_REQUIREMENTS.md`](PRODUCT_REQUIREMENTS.md).
+
 - `common/include`, `common/src`: shared infrastructure and security helpers.
 - `services/ApiGateway`: public façade and HTTP clients for domain services.
 - `services/UserService`: registration, login, JWT issuance, and user CRUD.
