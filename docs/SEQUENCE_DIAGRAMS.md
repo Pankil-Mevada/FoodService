@@ -11,12 +11,12 @@ sequenceDiagram
     participant GW as API Gateway
     participant JWT as JWT verifier
     participant Order as Order Service
-    UI->>GW: POST /orders + Bearer JWT<br/>{restaurantId, totalAmount}
+    UI->>GW: POST /orders + Bearer JWT<br/>{restaurantId, totalAmount, delivery destination}
     GW->>JWT: Verify token and read userId claim
     alt missing or invalid token
         GW-->>UI: 401 valid bearer token required
     else valid token
-        GW->>Order: POST /orders<br/>{userId from JWT, restaurantId, totalAmount}
+        GW->>Order: POST /orders<br/>{userId from JWT, restaurantId, totalAmount, destination}
         Order-->>GW: Order result
         GW-->>UI: Order result
     end
@@ -29,7 +29,7 @@ The gateway is the public identity trust boundary. It ignores any client-sent
 
 | Component | Port | Storage |
 |---|---:|---|
-| Plated frontend | 5173 | Browser local storage for API URL and JWT |
+| Plated frontend | 5173 | Browser local storage for API URL, JWT, selected location, and address |
 | API Gateway | 8085 | None |
 | User Service | 8080 | `foodservice.db` |
 | Restaurant Service | 8081 | `restaurant.db` |
@@ -53,8 +53,8 @@ sequenceDiagram
     UI->>GW: POST /register<br/>{name, email, password}
     GW->>UC: registerUser(body)
     UC->>US: POST /register
-    US->>US: Validate input and hash password
-    US->>UDB: INSERT user
+    US->>US: Validate input
+    US->>UDB: INSERT user with plaintext password (known security defect)
     UDB-->>US: User stored
     US-->>UC: {success, message}
     UC-->>GW: Response body
@@ -66,8 +66,8 @@ sequenceDiagram
     GW->>UC: login(body)
     UC->>US: POST /login
     US->>UDB: Find user by email
-    UDB-->>US: User and password hash
-    US->>US: Verify password and create JWT
+    UDB-->>US: User and plaintext password
+    US->>US: Compare password and create JWT
     US-->>GW: {success, token}
     GW-->>UI: JWT
     UI->>UI: Store token in localStorage
@@ -77,6 +77,10 @@ sequenceDiagram
 Protected user requests include `Authorization: Bearer <JWT>`. The API Gateway
 forwards this header to User Service, where authentication middleware validates
 it.
+
+Passwords are not currently hashed despite the intended production design.
+Only dummy local credentials may be used until the documented security debt is
+fixed.
 
 ## 2. Load restaurants
 
@@ -125,8 +129,9 @@ sequenceDiagram
     participant NDB as notification.db
 
     Customer->>UI: Click Order here
-    Customer->>UI: Enter user ID and total amount
-    UI->>GW: POST /orders<br/>{userId, restaurantId, totalAmount}
+    Customer->>UI: Select saved location and enter address/amount
+    UI->>GW: POST /orders + JWT<br/>{restaurantId, totalAmount, destination}
+    GW->>GW: Verify JWT; inject userId; validate delivery radius
     GW->>OC: createOrder(body)
     OC->>OS: POST /orders
     OS->>RS: GET /restaurants/{restaurantId}
@@ -246,8 +251,6 @@ event or call a dedicated authenticated Order Service status endpoint. Order
 Service would update `order.db` to `PAID`, `PAYMENT_FAILED`, or
 `PAYMENT_CANCELLED` using the payment's `orderId`.
 
-## Source-code map
-
 ## 6. Location, serviceability, and simulated delivery
 
 ```mermaid
@@ -255,6 +258,7 @@ sequenceDiagram
     participant Customer
     participant UI as Web UI
     participant GW as API Gateway
+    participant OSM as OpenStreetMap Overpass
     participant RS as Restaurant Service
     participant OS as Order Service
     participant ODB as order.db
@@ -278,24 +282,26 @@ sequenceDiagram
     loop Every five seconds
         UI->>GW: GET /orders/{id}/tracking + JWT
         GW->>GW: Verify ownership and calculate simulated position/ETA
+        GW->>OS: POST /orders/{id}/status {current delivery stage}
+        OS->>ODB: Persist stage when it changes
         GW-->>UI: Driver coordinates, progress, ETA, simulated=true
         UI->>UI: Move driver marker on local schematic map
     end
     Note over GW,UI: ASSIGNED 0-15s → PICKED_UP 15-45s →<br/>ON_THE_WAY 45-135s → ARRIVING 135-180s
-    GW->>OS: POST /orders/{id}/status {DELIVERED}
-    OS->>ODB: Persist DELIVERED
     GW-->>UI: 100% progress, ETA 0, completed timeline
     UI->>UI: Mark order Delivered and stop polling
 ```
 
 The current driver feed is an explicit local simulator for functional testing.
-It does not dispatch a real courier or call an external maps/geocoding service.
+It does not dispatch a real courier or call an external routing/maps service.
 Production work still requires driver authentication, consent, coordinate
 ingestion, retention limits, and a selected maps/routing provider.
 
 Nearby discovery is user-triggered and displays OpenStreetMap attribution. The
 public endpoint is a development dependency only; production must use a
 contracted or self-hosted provider with caching, monitoring, and privacy review.
+
+## Source-code map
 
 - Browser orchestration: `frontend/app.js`
 - API Gateway routes: `services/ApiGateway/src/main.cpp`
