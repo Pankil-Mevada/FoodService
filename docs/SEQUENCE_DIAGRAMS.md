@@ -251,7 +251,7 @@ event or call a dedicated authenticated Order Service status endpoint. Order
 Service would update `order.db` to `PAID`, `PAYMENT_FAILED`, or
 `PAYMENT_CANCELLED` using the payment's `orderId`.
 
-## 6. Location, serviceability, and simulated delivery
+## 6. Fetch nearby restaurants from the customer's location
 
 ```mermaid
 sequenceDiagram
@@ -260,31 +260,67 @@ sequenceDiagram
     participant GW as API Gateway
     participant OSM as OpenStreetMap Overpass
     participant RS as Restaurant Service
-    participant OS as Order Service
-    participant ODB as order.db
+    participant RDB as restaurant.db
 
-    Customer->>UI: Allow browser location or choose Bengaluru demo
+    Customer->>UI: Click Use GPS & find nearby
+    UI->>Customer: Request browser location permission
+    Customer-->>UI: Allow GPS coordinates
+    alt GPS unavailable or demo requested
+        Customer->>UI: Click Bengaluru demo
+        UI->>UI: Use configured Bengaluru test coordinates
+    end
     UI->>GW: GET /restaurants/discover?lat&lon
     GW->>GW: Identify Bengaluru/Ahmedabad coordinate region
     GW->>OSM: One capped nearby restaurant query
     OSM-->>GW: Public restaurant POIs
     GW->>RS: Import up to 20 restaurants with coordinates
+    RS->>RDB: Deduplicate and persist restaurants/radius
+    RDB-->>RS: Saved restaurant rows
     GW-->>UI: City, provider, discovered count
-    UI->>UI: Save coordinates locally and calculate restaurant distances
+    UI->>GW: GET /restaurants
+    GW->>RS: Load saved and newly imported restaurants
+    RS-->>UI: Restaurants with coordinates and delivery radius
+    UI->>UI: Save customer coordinates and calculate Haversine distance
+    UI-->>Customer: Show nearby/orderable and outside-area cards
     Customer->>UI: Enter address and place order
     UI->>GW: POST /orders + JWT + destination
     GW->>RS: GET /restaurants/{id}
     RS-->>GW: Coordinates and delivery radius
     GW->>GW: Haversine serviceability check
-    GW->>OS: Create order with JWT user and destination
-    OS->>ODB: Persist address and coordinates
+    alt outside restaurant delivery radius
+        GW-->>UI: 400 restaurant does not deliver to this location
+    else serviceable
+        GW-->>UI: Continue authenticated order workflow
+    end
+```
+
+Nearby discovery is user-triggered and displays OpenStreetMap attribution. The
+public endpoint is a development dependency only; production must use a
+contracted or self-hosted provider with caching, monitoring, and privacy review.
+
+## 7. Live delivery tracking simulator
+
+```mermaid
+sequenceDiagram
+    participant Customer
+    participant UI as Web UI
+    participant GW as API Gateway
+    participant JWT as JWT verifier
+    participant OS as Order Service
+    participant ODB as order.db
+
     Customer->>UI: Track driver
     loop Every five seconds
         UI->>GW: GET /orders/{id}/tracking + JWT
-        GW->>GW: Verify ownership and calculate simulated position/ETA
+        GW->>JWT: Verify token and derive customer ID
+        GW->>OS: GET /orders/{id}
+        OS->>ODB: Load order, restaurant, and destination coordinates
+        ODB-->>OS: Order record
+        OS-->>GW: Order details
+        GW->>GW: Verify ownership; calculate simulated position/ETA
         GW->>OS: POST /orders/{id}/status {current delivery stage}
         OS->>ODB: Persist stage when it changes
-        GW-->>UI: Driver coordinates, progress, ETA, simulated=true
+        GW-->>UI: Driver profile, vehicle, coordinates,<br/>progress, ETA, timeline, simulated=true
         UI->>UI: Move driver marker on local schematic map
     end
     Note over GW,UI: ASSIGNED 0-15s → PICKED_UP 15-45s →<br/>ON_THE_WAY 45-135s → ARRIVING 135-180s
@@ -296,10 +332,6 @@ The current driver feed is an explicit local simulator for functional testing.
 It does not dispatch a real courier or call an external routing/maps service.
 Production work still requires driver authentication, consent, coordinate
 ingestion, retention limits, and a selected maps/routing provider.
-
-Nearby discovery is user-triggered and displays OpenStreetMap attribution. The
-public endpoint is a development dependency only; production must use a
-contracted or self-hosted provider with caching, monitoring, and privacy review.
 
 ## Source-code map
 
