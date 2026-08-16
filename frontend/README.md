@@ -35,6 +35,11 @@ display name, phone, and test UPI ID. Restaurant hearts are browser-local
 favourites. The image is resized before storage. The app never requests a UPI
 PIN, and none of these fields are bank-verified or synchronized to the backend.
 
+The discovery experience uses common food-marketplace patterns—photo-led search,
+craving shortcuts, offer cards, ratings, ETA, distance, and filters—while keeping
+the original Plated brand. It is not a copy of Zomato branding or proprietary UI.
+Choosing a craving preselects that test-menu item when the customer opens a restaurant.
+
 ## Files
 
 - `index.html` — semantic application structure and dialogs

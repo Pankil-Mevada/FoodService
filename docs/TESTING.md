@@ -59,6 +59,7 @@ The WSL C++ build, JavaScript syntax check, Python compilation, and
 - Restaurant `imageUrl` persists through create/list; invalid or missing UI images show a neutral fallback.
 - Test-menu checkout persists item summary, subtotal, discount, delivery fee, and matching final total.
 - Profile photo is resized to 256×256, favourites survive refresh, and invalid test UPI IDs are rejected; no UPI PIN is requested.
+- Craving shortcuts preselect the matching menu item; rating and favourite filters update the restaurant grid.
 - Tracking starts assigned at three minutes and persists delivered at zero ETA.
 - Dummy credentials only: plaintext password storage/logging is open security debt.
 
