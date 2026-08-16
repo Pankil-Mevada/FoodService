@@ -11,8 +11,8 @@ OrderRepository::OrderRepository(Database& database)
 std::optional<int> OrderRepository::saveOrder(const Order& order)
 {
     const char* sql =
-        "INSERT INTO orders(user_id,restaurant_id,total_amount,status,delivery_latitude,delivery_longitude,delivery_address)"
-        "VALUES(?,?,?,?,?,?,?);";
+        "INSERT INTO orders(user_id,restaurant_id,total_amount,status,delivery_latitude,delivery_longitude,delivery_address,item_summary,subtotal,discount_amount,delivery_fee)"
+        "VALUES(?,?,?,?,?,?,?,?,?,?,?);";
 
     sqlite3_stmt* stmt = nullptr;
 
@@ -40,6 +40,10 @@ std::optional<int> OrderRepository::saveOrder(const Order& order)
     sqlite3_bind_double(stmt, 5, order.getDeliveryLatitude());
     sqlite3_bind_double(stmt, 6, order.getDeliveryLongitude());
     sqlite3_bind_text(stmt, 7, order.getDeliveryAddress().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 8, order.getItemSummary().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(stmt, 9, order.getSubtotal());
+    sqlite3_bind_double(stmt, 10, order.getDiscountAmount());
+    sqlite3_bind_double(stmt, 11, order.getDeliveryFee());
 
     rc = sqlite3_step(stmt);
 
@@ -62,7 +66,7 @@ std::vector<Order> OrderRepository::getAllOrders()
     std::vector<Order> orders;
 
     const char* sql =
-        "SELECT id,user_id,restaurant_id,total_amount,status,delivery_latitude,delivery_longitude,delivery_address "
+        "SELECT id,user_id,restaurant_id,total_amount,status,delivery_latitude,delivery_longitude,delivery_address,item_summary,subtotal,discount_amount,delivery_fee "
         "FROM orders;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -90,7 +94,9 @@ std::vector<Order> OrderRepository::getAllOrders()
                 sqlite3_column_text(stmt,4)),
             sqlite3_column_double(stmt,5),
             sqlite3_column_double(stmt,6),
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt,7)));
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt,7)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt,8)),
+            sqlite3_column_double(stmt,9), sqlite3_column_double(stmt,10), sqlite3_column_double(stmt,11));
     }
 
     sqlite3_finalize(stmt);
@@ -101,7 +107,7 @@ std::vector<Order> OrderRepository::getAllOrders()
 std::optional<Order> OrderRepository::getOrderById(int id)
 {
     const char* sql =
-        "SELECT id,user_id,restaurant_id,total_amount,status,delivery_latitude,delivery_longitude,delivery_address "
+        "SELECT id,user_id,restaurant_id,total_amount,status,delivery_latitude,delivery_longitude,delivery_address,item_summary,subtotal,discount_amount,delivery_fee "
         "FROM orders WHERE id=?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -131,7 +137,9 @@ std::optional<Order> OrderRepository::getOrderById(int id)
                 sqlite3_column_text(stmt,4)),
             sqlite3_column_double(stmt,5),
             sqlite3_column_double(stmt,6),
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt,7)));
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt,7)),
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt,8)),
+            sqlite3_column_double(stmt,9), sqlite3_column_double(stmt,10), sqlite3_column_double(stmt,11));
 
         sqlite3_finalize(stmt);
 
@@ -147,7 +155,7 @@ bool OrderRepository::updateOrder(const Order& order)
 {
     const char* sql =
         "UPDATE orders "
-        "SET user_id=?,restaurant_id=?,total_amount=?,status=?,delivery_latitude=?,delivery_longitude=?,delivery_address=? "
+        "SET user_id=?,restaurant_id=?,total_amount=?,status=?,delivery_latitude=?,delivery_longitude=?,delivery_address=?,item_summary=?,subtotal=?,discount_amount=?,delivery_fee=? "
         "WHERE id=?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -175,7 +183,11 @@ bool OrderRepository::updateOrder(const Order& order)
     sqlite3_bind_double(stmt,5,order.getDeliveryLatitude());
     sqlite3_bind_double(stmt,6,order.getDeliveryLongitude());
     sqlite3_bind_text(stmt,7,order.getDeliveryAddress().c_str(),-1,SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt,8,order.getId());
+    sqlite3_bind_text(stmt,8,order.getItemSummary().c_str(),-1,SQLITE_TRANSIENT);
+    sqlite3_bind_double(stmt,9,order.getSubtotal());
+    sqlite3_bind_double(stmt,10,order.getDiscountAmount());
+    sqlite3_bind_double(stmt,11,order.getDeliveryFee());
+    sqlite3_bind_int(stmt,12,order.getId());
 
     rc = sqlite3_step(stmt);
 

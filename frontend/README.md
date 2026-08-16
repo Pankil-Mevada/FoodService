@@ -25,6 +25,11 @@ Open `http://localhost:5173`. Use **API settings** in the footer if the gateway 
 
 Order creation may create its pending payment automatically. Checkout first looks up the order payment and only creates one when none exists, preventing duplicate charges. The live watcher handles the named `payment-status` SSE event and automatically switches to 2.5-second polling if SSE is unavailable. The API URL and stream path are stored only in browser local storage. JWTs are sent as bearer tokens for normal API calls; the SSE endpoint must not require an Authorization header because native `EventSource` cannot set one.
 
+The order dialog includes a three-item sample menu using generated project assets
+in `assets/menu/`. Quantities, the `WELCOME10` test coupon, delivery fee, and
+final total can be tested without entering an arbitrary amount. These photographs
+illustrate menu items and are not claimed to come from the listed restaurant.
+
 ## Files
 
 - `index.html` — semantic application structure and dialogs

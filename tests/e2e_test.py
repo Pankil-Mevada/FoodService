@@ -165,7 +165,9 @@ class Suite:
         status, payload = self.api.request("POST", f"{self.args.gateway}/orders", {
             "userId": self.created["user"] + 999999, "restaurantId": self.created["restaurant"],
             "totalAmount": 12.34, "deliveryLatitude": 23.0240,
-            "deliveryLongitude": 72.5730, "deliveryAddress": "E2E Test Address"
+            "deliveryLongitude": 72.5730, "deliveryAddress": "E2E Test Address",
+            "itemSummary": "Test Biryani × 1", "subtotal": 12.0,
+            "discountAmount": 1.0, "deliveryFee": 1.34
         }, token=self.token)
         self.expect(status, (200, 201), payload)
         if not isinstance(payload, dict) or payload.get("success") is not True:
@@ -176,6 +178,10 @@ class Suite:
         if not candidates:
             raise AssertionError("created order absent from list")
         order = max(candidates, key=lambda item: item["id"])
+        if order.get("itemSummary") != "Test Biryani × 1":
+            raise AssertionError(f"order items were not persisted: {order}")
+        if abs(float(order.get("subtotal", 0)) - 12.0) > 0.001 or abs(float(order.get("discountAmount", 0)) - 1.0) > 0.001:
+            raise AssertionError(f"order pricing breakdown was not persisted: {order}")
         self.created["order"] = int(order["id"])
 
         deadline = time.monotonic() + self.args.eventual_timeout

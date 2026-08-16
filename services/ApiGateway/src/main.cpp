@@ -225,6 +225,10 @@ CROW_ROUTE(app, "/restaurants/<int>")
         body["deliveryLatitude"] = deliveryLat;
         body["deliveryLongitude"] = deliveryLon;
         body["deliveryAddress"] = input["deliveryAddress"].s();
+        body["itemSummary"] = input.has("itemSummary") ? std::string(input["itemSummary"].s()) : "";
+        body["subtotal"] = input.has("subtotal") ? input["subtotal"].d() : input["totalAmount"].d();
+        body["discountAmount"] = input.has("discountAmount") ? input["discountAmount"].d() : 0.0;
+        body["deliveryFee"] = input.has("deliveryFee") ? input["deliveryFee"].d() : 0.0;
         return crow::response(client.createOrder(body.dump()));
     });
 

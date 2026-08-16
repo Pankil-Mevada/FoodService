@@ -57,6 +57,7 @@ The WSL C++ build, JavaScript syntax check, Python compilation, and
 - Provider timeout leaves existing database restaurants available and shows a recoverable error.
 - Repeated nearby discovery does not create duplicate restaurant rows.
 - Restaurant `imageUrl` persists through create/list; invalid or missing UI images show a neutral fallback.
+- Test-menu checkout persists item summary, subtotal, discount, delivery fee, and matching final total.
 - Tracking starts assigned at three minutes and persists delivered at zero ETA.
 - Dummy credentials only: plaintext password storage/logging is open security debt.
 

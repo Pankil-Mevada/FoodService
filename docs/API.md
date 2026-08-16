@@ -19,7 +19,7 @@ JSON requests require `Content-Type: application/json`.
 | Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating`, optional `latitude`, `longitude`, `deliveryRadiusKm`, `imageUrl` | Creates restaurant, delivery zone, and optional HTTP(S) photo reference |
 | Restaurants | `GET/PUT/DELETE /restaurants/{id}` | same fields for PUT | CRUD |
 | Orders | `GET /orders` | — | Lists orders |
-| Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress` | JWT required; validates delivery zone and derives customer ID |
+| Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress`; optional `itemSummary`, `subtotal`, `discountAmount`, `deliveryFee` | JWT required; validates delivery zone and price arithmetic, derives customer ID |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
 | Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership required; returns simulated driver/vehicle details, coordinates, timeline, three-minute progress and ETA; persists `DELIVERED` |
 

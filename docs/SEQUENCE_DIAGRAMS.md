@@ -129,8 +129,9 @@ sequenceDiagram
     participant NDB as notification.db
 
     Customer->>UI: Click Order here
-    Customer->>UI: Select saved location and enter address/amount
-    UI->>GW: POST /orders + JWT<br/>{restaurantId, totalAmount, destination}
+    Customer->>UI: Select menu items/quantities and optional WELCOME10
+    UI->>UI: Calculate subtotal, discount, delivery fee, and total
+    UI->>GW: POST /orders + JWT<br/>{restaurantId, item summary, price breakdown, destination}
     GW->>GW: Verify JWT; inject userId; validate delivery radius
     GW->>OC: createOrder(body)
     OC->>OS: POST /orders

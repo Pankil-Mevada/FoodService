@@ -103,7 +103,11 @@ void Database::createOrderTable()
             status TEXT NOT NULL,
             delivery_latitude REAL NOT NULL DEFAULT 0,
             delivery_longitude REAL NOT NULL DEFAULT 0,
-            delivery_address TEXT NOT NULL DEFAULT ''
+            delivery_address TEXT NOT NULL DEFAULT '',
+            item_summary TEXT NOT NULL DEFAULT '',
+            subtotal REAL NOT NULL DEFAULT 0,
+            discount_amount REAL NOT NULL DEFAULT 0,
+            delivery_fee REAL NOT NULL DEFAULT 0
         );
     )";
 
@@ -126,6 +130,10 @@ void Database::createOrderTable()
     sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN delivery_latitude REAL NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
     sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN delivery_longitude REAL NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
     sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN delivery_address TEXT NOT NULL DEFAULT '';", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN item_summary TEXT NOT NULL DEFAULT '';", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN subtotal REAL NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN discount_amount REAL NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE orders ADD COLUMN delivery_fee REAL NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
 }
 
 void Database::createPaymentTable()

@@ -79,6 +79,13 @@ from `wikimedia_commons`. The frontend displays the sourced photograph with lazy
 loading and shows “Photo unavailable” when no attributable image exists; it does
 not present stock artwork as a photograph of that restaurant.
 
+For local checkout testing, the frontend ships three generated illustrative food
+photos and a fixed menu. It labels those images as sample menu photos. The chosen
+item summary and price breakdown are persisted with the order, while Order
+Service verifies the arithmetic. This is not an authoritative menu/pricing
+architecture: production requires restaurant-owned menu records and server-side
+price, promotion, tax, and availability calculation.
+
 The public endpoint is for low-volume development. Production requires a
 contracted or self-hosted provider, caching, rate-limit handling, privacy
 review, and proper geocoding/routing.

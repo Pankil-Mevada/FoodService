@@ -8,7 +8,11 @@ Order::Order(
     const std::string& status,
     double deliveryLatitude,
     double deliveryLongitude,
-    const std::string& deliveryAddress)
+    const std::string& deliveryAddress,
+    const std::string& itemSummary,
+    double subtotal,
+    double discountAmount,
+    double deliveryFee)
     :
     m_id(id),
     m_userId(userId),
@@ -17,7 +21,11 @@ Order::Order(
     m_status(status),
     m_deliveryLatitude(deliveryLatitude),
     m_deliveryLongitude(deliveryLongitude),
-    m_deliveryAddress(deliveryAddress)
+    m_deliveryAddress(deliveryAddress),
+    m_itemSummary(itemSummary),
+    m_subtotal(subtotal),
+    m_discountAmount(discountAmount),
+    m_deliveryFee(deliveryFee)
 {
 }
 
@@ -49,3 +57,7 @@ const std::string& Order::getStatus() const
 double Order::getDeliveryLatitude() const { return m_deliveryLatitude; }
 double Order::getDeliveryLongitude() const { return m_deliveryLongitude; }
 const std::string& Order::getDeliveryAddress() const { return m_deliveryAddress; }
+const std::string& Order::getItemSummary() const { return m_itemSummary; }
+double Order::getSubtotal() const { return m_subtotal; }
+double Order::getDiscountAmount() const { return m_discountAmount; }
+double Order::getDeliveryFee() const { return m_deliveryFee; }

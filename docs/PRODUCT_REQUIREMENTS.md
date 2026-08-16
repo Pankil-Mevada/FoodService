@@ -35,11 +35,13 @@ The first commercial milestone is a complete single-city ordering journey:
 - optional provider-sourced restaurant photos with honest unavailable fallback
 - delivery address/coordinates persisted on orders
 - three-minute simulated driver assignment, profile, coordinates, ETA, timeline, and persisted `DELIVERED` state
+- local three-item test menu with generated photos, quantities, `WELCOME10`, delivery fee, and persisted price breakdown
 - latest local E2E evidence: 21 passed, 0 failed, 0 skipped
 
 ### Gaps that block a real marketplace
 
 - no menu, category, item, variation, or add-on data model
+- current menu is a frontend test fixture; prices are not yet sourced from an authoritative server-side catalogue
 - no cart or itemized order lines
 - passwords are stored/compared/logged as plaintext; hashing utility is incomplete
 - no roles or authorization rules for customer, restaurant, delivery, or admin

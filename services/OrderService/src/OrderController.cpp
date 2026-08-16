@@ -1,4 +1,5 @@
 #include "OrderController.h"
+#include <cmath>
 
 OrderController::OrderController(OrderService& service)
     : m_service(service)
@@ -28,7 +29,16 @@ crow::response OrderController::createOrder(
          "PENDING",
          json.has("deliveryLatitude") ? json["deliveryLatitude"].d() : 0.0,
          json.has("deliveryLongitude") ? json["deliveryLongitude"].d() : 0.0,
-         json.has("deliveryAddress") ? std::string(json["deliveryAddress"].s()) : std::string());
+         json.has("deliveryAddress") ? std::string(json["deliveryAddress"].s()) : std::string(),
+         json.has("itemSummary") ? std::string(json["itemSummary"].s()) : std::string(),
+         json.has("subtotal") ? json["subtotal"].d() : json["totalAmount"].d(),
+         json.has("discountAmount") ? json["discountAmount"].d() : 0.0,
+         json.has("deliveryFee") ? json["deliveryFee"].d() : 0.0);
+
+    if (order.getSubtotal() < 0 || order.getDiscountAmount() < 0 ||
+        order.getDiscountAmount() > order.getSubtotal() || order.getDeliveryFee() < 0 ||
+        std::abs(order.getTotalAmount() - (order.getSubtotal() - order.getDiscountAmount() + order.getDeliveryFee())) > 0.01)
+        return crow::response(422, "Order price breakdown is invalid");
 
     bool status = m_service.createOrder(order);
 
@@ -66,6 +76,10 @@ crow::response OrderController::getAllOrders()
         response[index]["deliveryLatitude"] = order.getDeliveryLatitude();
         response[index]["deliveryLongitude"] = order.getDeliveryLongitude();
         response[index]["deliveryAddress"] = order.getDeliveryAddress();
+        response[index]["itemSummary"] = order.getItemSummary();
+        response[index]["subtotal"] = order.getSubtotal();
+        response[index]["discountAmount"] = order.getDiscountAmount();
+        response[index]["deliveryFee"] = order.getDeliveryFee();
 
         ++index;
     }
@@ -97,6 +111,10 @@ crow::response OrderController::getOrderById(int id)
     response["deliveryLatitude"] = order->getDeliveryLatitude();
     response["deliveryLongitude"] = order->getDeliveryLongitude();
     response["deliveryAddress"] = order->getDeliveryAddress();
+    response["itemSummary"] = order->getItemSummary();
+    response["subtotal"] = order->getSubtotal();
+    response["discountAmount"] = order->getDiscountAmount();
+    response["deliveryFee"] = order->getDeliveryFee();
 
     return crow::response(response);
 }
@@ -120,7 +138,11 @@ crow::response OrderController::updateOrder(
      "PENDING",
      json.has("deliveryLatitude") ? json["deliveryLatitude"].d() : 0.0,
      json.has("deliveryLongitude") ? json["deliveryLongitude"].d() : 0.0,
-     json.has("deliveryAddress") ? std::string(json["deliveryAddress"].s()) : std::string());
+     json.has("deliveryAddress") ? std::string(json["deliveryAddress"].s()) : std::string(),
+     json.has("itemSummary") ? std::string(json["itemSummary"].s()) : std::string(),
+     json.has("subtotal") ? json["subtotal"].d() : json["totalAmount"].d(),
+     json.has("discountAmount") ? json["discountAmount"].d() : 0.0,
+     json.has("deliveryFee") ? json["deliveryFee"].d() : 0.0);
 
     bool status = m_service.updateOrder(order);
 
