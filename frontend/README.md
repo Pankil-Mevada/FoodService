@@ -30,6 +30,11 @@ in `assets/menu/`. Quantities, the `WELCOME10` test coupon, delivery fee, and
 final total can be tested without entering an arbitrary amount. These photographs
 illustrate menu items and are not claimed to come from the listed restaurant.
 
+Signed-in users can open **Profile** to upload a browser-local avatar, save a
+display name, phone, and test UPI ID. Restaurant hearts are browser-local
+favourites. The image is resized before storage. The app never requests a UPI
+PIN, and none of these fields are bank-verified or synchronized to the backend.
+
 ## Files
 
 - `index.html` — semantic application structure and dialogs

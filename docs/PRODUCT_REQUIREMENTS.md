@@ -36,6 +36,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - delivery address/coordinates persisted on orders
 - three-minute simulated driver assignment, profile, coordinates, ETA, timeline, and persisted `DELIVERED` state
 - local three-item test menu with generated photos, quantities, `WELCOME10`, delivery fee, and persisted price breakdown
+- browser-local customer profile photo, display name, phone, test UPI ID, and favourite restaurants
 - latest local E2E evidence: 21 passed, 0 failed, 0 skipped
 
 ### Gaps that block a real marketplace
@@ -56,6 +57,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - no tax, fee, coupon, or authoritative pricing engine
 - no restaurant, delivery-partner, or administrator web portal
 - no production payment-provider integration
+- profile photo, phone, favourites, and UPI ID are browser-local test data rather than synchronized account records
 - no production database, deployment, monitoring, backup, or disaster recovery
 
 ## 3. Users and roles

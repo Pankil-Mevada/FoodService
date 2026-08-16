@@ -26,6 +26,12 @@ radius. Order Service persists the destination and final delivery state. API
 Gateway handles JWT identity injection, serviceability, provider orchestration,
 and the local delivery simulation.
 
+The current profile enhancement also stores a resized avatar, display name,
+phone, test UPI ID, and favourites in browser local storage. It never captures a
+UPI PIN. These fields are presentation/test conveniences, not synchronized or
+bank-verified account data; production requires authenticated profile storage,
+object storage for photos, consent/retention controls, and payment-provider tokenization.
+
 ## Request layers
 
 1. Crow route parses the request and calls a controller.
