@@ -272,8 +272,8 @@ sequenceDiagram
     UI->>GW: GET /restaurants/discover?lat&lon
     GW->>GW: Identify Bengaluru/Ahmedabad coordinate region
     GW->>OSM: One capped nearby restaurant query
-    OSM-->>GW: Public restaurant POIs
-    GW->>RS: Import up to 20 restaurants with coordinates
+    OSM-->>GW: Public restaurant POIs + optional image/Wikimedia tag
+    GW->>RS: Import up to 20 restaurants with coordinates + imageUrl
     RS->>RDB: Deduplicate and persist restaurants/radius
     RDB-->>RS: Saved restaurant rows
     GW-->>UI: City, provider, discovered count

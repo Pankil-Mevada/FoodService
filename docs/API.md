@@ -16,7 +16,7 @@ JSON requests require `Content-Type: application/json`.
 | Users | `DELETE /users/{id}` | — | JWT required |
 | Restaurants | `GET /restaurants` | — | Lists restaurants |
 | Restaurants | `GET /restaurants/discover?lat={lat}&lon={lon}` | — | User-triggered OpenStreetMap lookup; deduplicates/imports up to 20 nearby restaurants and returns city/provider metadata |
-| Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating`, optional `latitude`, `longitude`, `deliveryRadiusKm` | Creates restaurant and delivery zone |
+| Restaurants | `POST /restaurants` | `name`, `address`, `phone`, `rating`, optional `latitude`, `longitude`, `deliveryRadiusKm`, `imageUrl` | Creates restaurant, delivery zone, and optional HTTP(S) photo reference |
 | Restaurants | `GET/PUT/DELETE /restaurants/{id}` | same fields for PUT | CRUD |
 | Orders | `GET /orders` | — | Lists orders |
 | Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress` | JWT required; validates delivery zone and derives customer ID |

@@ -73,6 +73,12 @@ returns city/provider metadata. The UI calculates display distance; API Gateway
 independently enforces delivery radius at checkout. Saved restaurants remain
 visible when the provider is unavailable.
 
+Restaurant records also persist an optional `imageUrl`. Discovery accepts only
+HTTP(S) `image` values from OpenStreetMap or builds a Wikimedia Commons redirect
+from `wikimedia_commons`. The frontend displays the sourced photograph with lazy
+loading and shows “Photo unavailable” when no attributable image exists; it does
+not present stock artwork as a photograph of that restaurant.
+
 The public endpoint is for low-volume development. Production requires a
 contracted or self-hosted provider, caching, rate-limit handling, privacy
 review, and proper geocoding/routing.

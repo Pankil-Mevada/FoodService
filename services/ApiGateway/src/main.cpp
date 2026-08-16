@@ -284,6 +284,19 @@ CROW_ROUTE(app, "/restaurants/discover")
         std::string address = tags.has("addr:full") ? std::string(tags["addr:full"].s()) :
             (tags.has("addr:street") ? std::string(tags["addr:street"].s()) : "OpenStreetMap nearby listing");
         std::string phone = tags.has("phone") ? std::string(tags["phone"].s()) : "Not listed";
+        std::string imageUrl;
+        if (tags.has("image"))
+        {
+            const std::string candidate = std::string(tags["image"].s());
+            if (candidate.rfind("https://", 0) == 0 || candidate.rfind("http://", 0) == 0)
+                imageUrl = candidate;
+        }
+        else if (tags.has("wikimedia_commons"))
+        {
+            std::string file = std::string(tags["wikimedia_commons"].s());
+            if (file.rfind("File:", 0) == 0) file = file.substr(5);
+            if (!file.empty()) imageUrl = "https://commons.wikimedia.org/wiki/Special:Redirect/file/" + file;
+        }
         crow::json::wvalue body;
         body["name"] = name;
         body["address"] = address;
@@ -292,6 +305,7 @@ CROW_ROUTE(app, "/restaurants/discover")
         body["latitude"] = restaurantLat;
         body["longitude"] = restaurantLon;
         body["deliveryRadiusKm"] = 8.0;
+        body["imageUrl"] = imageUrl;
         restaurantClient.registerRestaurant(body.dump());
         existingNames.insert(name);
         ++imported;

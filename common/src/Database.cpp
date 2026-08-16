@@ -64,7 +64,8 @@ void Database::createRestaurantTable()
             rating REAL DEFAULT 0.0,
             latitude REAL NOT NULL DEFAULT 23.0225,
             longitude REAL NOT NULL DEFAULT 72.5714,
-            delivery_radius_km REAL NOT NULL DEFAULT 8.0
+            delivery_radius_km REAL NOT NULL DEFAULT 8.0,
+            image_url TEXT NOT NULL DEFAULT ''
         );
     )";
 
@@ -87,6 +88,7 @@ void Database::createRestaurantTable()
     sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN latitude REAL NOT NULL DEFAULT 23.0225;", nullptr, nullptr, nullptr);
     sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN longitude REAL NOT NULL DEFAULT 72.5714;", nullptr, nullptr, nullptr);
     sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN delivery_radius_km REAL NOT NULL DEFAULT 8.0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN image_url TEXT NOT NULL DEFAULT '';", nullptr, nullptr, nullptr);
 }
 
 void Database::createOrderTable()

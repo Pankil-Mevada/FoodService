@@ -141,7 +141,8 @@ class Suite:
         name = f"E2E Kitchen {uuid.uuid4().hex[:8]}"
         status, payload = self.api.request("POST", f"{self.args.gateway}/restaurants", {
             "name": name, "address": "Test Mode Street", "phone": "+10000000000", "rating": 4.5,
-            "latitude": 23.0225, "longitude": 72.5714, "deliveryRadiusKm": 8.0
+            "latitude": 23.0225, "longitude": 72.5714, "deliveryRadiusKm": 8.0,
+            "imageUrl": "https://example.test/restaurant-photo.jpg"
         })
         self.expect(status, (200, 201), payload)
         if not isinstance(payload, dict) or payload.get("success") is not True:
@@ -151,6 +152,8 @@ class Suite:
         match = next((item for item in payload if item.get("name") == name), None)
         if not match:
             raise AssertionError("created restaurant absent from list")
+        if match.get("imageUrl") != "https://example.test/restaurant-photo.jpg":
+            raise AssertionError(f"restaurant image URL was not persisted: {match}")
         self.created["restaurant"] = int(match["id"])
         return f"restaurant id {match['id']}"
 

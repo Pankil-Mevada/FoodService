@@ -30,7 +30,8 @@ crow::response RestaurantController::registerRestaurant(const crow::request& req
 			json["rating"].d(),
 			json.has("latitude") ? json["latitude"].d() : 23.0225,
 			json.has("longitude") ? json["longitude"].d() : 72.5714,
-			json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0
+			json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0,
+			json.has("imageUrl") ? std::string(json["imageUrl"].s()) : ""
 			);
 	if (!UserValidator::validateName(restaurant.getName()))
 	{
@@ -76,6 +77,7 @@ crow::response RestaurantController::getAllRestaurants()
 	    response[index]["latitude"] = restaurant.getLatitude();
 	    response[index]["longitude"] = restaurant.getLongitude();
 	    response[index]["deliveryRadiusKm"] = restaurant.getDeliveryRadiusKm();
+	    response[index]["imageUrl"] = restaurant.getImageUrl();
 
 	    ++index;
     }
@@ -105,6 +107,7 @@ crow::response RestaurantController::getRestaurantById(int id)
     response["latitude"] = restaurant->getLatitude();
     response["longitude"] = restaurant->getLongitude();
     response["deliveryRadiusKm"] = restaurant->getDeliveryRadiusKm();
+    response["imageUrl"] = restaurant->getImageUrl();
     
     return crow::response(response);
 }
@@ -128,7 +131,8 @@ crow::response RestaurantController::updateRestaurant(
         json["rating"].d(),
         json.has("latitude") ? json["latitude"].d() : 23.0225,
         json.has("longitude") ? json["longitude"].d() : 72.5714,
-        json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0);
+        json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0,
+        json.has("imageUrl") ? std::string(json["imageUrl"].s()) : "");
 	
     if (!UserValidator::validateName(restaurant.getName()))
     {

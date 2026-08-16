@@ -14,7 +14,8 @@ public:
         double rating,
         double latitude = 23.0225,
         double longitude = 72.5714,
-        double deliveryRadiusKm = 8.0);
+        double deliveryRadiusKm = 8.0,
+        const std::string& imageUrl = "");
 
     int getId() const;
 
@@ -28,6 +29,7 @@ public:
     double getLatitude() const;
     double getLongitude() const;
     double getDeliveryRadiusKm() const;
+    const std::string& getImageUrl() const;
 
 private:
 
@@ -43,4 +45,5 @@ private:
     double m_latitude{23.0225};
     double m_longitude{72.5714};
     double m_deliveryRadiusKm{8.0};
+    std::string m_imageUrl;
 };

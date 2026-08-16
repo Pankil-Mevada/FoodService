@@ -8,7 +8,8 @@ Restaurant::Restaurant(
     double rating,
     double latitude,
     double longitude,
-    double deliveryRadiusKm)
+    double deliveryRadiusKm,
+    const std::string& imageUrl)
     :
     m_id(id),
     m_name(name),
@@ -17,7 +18,8 @@ Restaurant::Restaurant(
     m_rating(rating),
     m_latitude(latitude),
     m_longitude(longitude),
-    m_deliveryRadiusKm(deliveryRadiusKm)
+    m_deliveryRadiusKm(deliveryRadiusKm),
+    m_imageUrl(imageUrl)
 {
 }
 
@@ -49,3 +51,4 @@ double Restaurant::getRating() const
 double Restaurant::getLatitude() const { return m_latitude; }
 double Restaurant::getLongitude() const { return m_longitude; }
 double Restaurant::getDeliveryRadiusKm() const { return m_deliveryRadiusKm; }
+const std::string& Restaurant::getImageUrl() const { return m_imageUrl; }

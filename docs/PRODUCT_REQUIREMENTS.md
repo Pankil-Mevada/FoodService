@@ -32,6 +32,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - automated end-to-end test harness and dummy-payment script
 - authenticated `/me`; order/payment customer identity derived from JWT
 - browser GPS or Bengaluru demo, OpenStreetMap nearby discovery/import, distance display, and radius enforcement
+- optional provider-sourced restaurant photos with honest unavailable fallback
 - delivery address/coordinates persisted on orders
 - three-minute simulated driver assignment, profile, coordinates, ETA, timeline, and persisted `DELIVERED` state
 - latest local E2E evidence: 21 passed, 0 failed, 0 skipped
@@ -48,6 +49,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - SSE is reconnect-based status sampling rather than a durable event stream
 - no reusable address book with recipient/phone/notes; current order has one freeform address and coordinates
 - nearby discovery relies on a public development endpoint; no production geocoder/maps/routing contract
+- OpenStreetMap photo coverage is sparse; production needs licensed photo ingestion and owner moderation
 - driver assignment, identity, movement, vehicle, contact, and three-minute ETA are simulated
 - no tax, fee, coupon, or authoritative pricing engine
 - no restaurant, delivery-partner, or administrator web portal

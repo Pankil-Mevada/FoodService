@@ -56,6 +56,7 @@ The WSL C++ build, JavaScript syntax check, Python compilation, and
 - Restarting services preserves SQLite state.
 - Provider timeout leaves existing database restaurants available and shows a recoverable error.
 - Repeated nearby discovery does not create duplicate restaurant rows.
+- Restaurant `imageUrl` persists through create/list; invalid or missing UI images show a neutral fallback.
 - Tracking starts assigned at three minutes and persists delivered at zero ETA.
 - Dummy credentials only: plaintext password storage/logging is open security debt.
 
@@ -70,3 +71,8 @@ PCI compliance.
 The automated suite does not call OpenStreetMap, wait three wall-clock minutes,
 grant GPS permission, or validate real restaurant/driver dispatch. It advances
 delivery through the internal localhost-only test route.
+
+The restaurant acceptance scenario now verifies `imageUrl` persistence. Browser
+photo rendering still requires a rebuilt Restaurant Service and API Gateway;
+the legacy `build/` cache is machine-specific and must be regenerated when its
+recorded source or vcpkg paths do not exist.
