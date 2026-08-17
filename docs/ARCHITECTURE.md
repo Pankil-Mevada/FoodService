@@ -10,7 +10,7 @@ require that state before starting delivery or accepting `ASSIGNED` and later
 transitions. No driver identity, coordinates, or timer is created for an unpaid
 order.
 
-Updated 2026-08-15 for the current local MVP and three-minute delivery simulator.
+Updated 2026-08-17 for real delivery-partner browser GPS ingestion.
 
 For request-by-request frontend and backend interactions, see
 [End-to-end sequence diagrams](SEQUENCE_DIAGRAMS.md).
@@ -36,7 +36,7 @@ The browser stores its JWT, API settings, selected coordinates, and address in
 local storage. Restaurant Service persists discovered coordinates and delivery
 radius. Order Service persists the destination and final delivery state. API
 Gateway handles JWT identity injection, serviceability, provider orchestration,
-and the local delivery simulation.
+and durable real driver GPS ingestion.
 
 The public Gateway order-list route requires a valid JWT and filters the Order
 Service response to the JWT customer ID. The browser also resolves payment
@@ -76,17 +76,21 @@ development, and never store raw card data.
 
 ## Known boundaries
 
-### Local delivery simulation
+### Real driver browser GPS
 
-API Gateway owns the in-memory three-minute simulation clock. It verifies JWT
-order ownership, selects a stable test driver profile from the order ID,
-interpolates coordinates between restaurant and destination, and calls Order
-Service's internal status endpoint. Order Service persists lifecycle state in
-`order.db`; once `DELIVERED` is stored, gateway restarts cannot revert it.
+The driver opens `frontend/driver.html`, enters the assigned order and driver
+token, grants precise browser location permission, and starts `watchPosition`.
+Each real device fix is posted to API Gateway and persisted in `delivery.db`.
+The customer tracking route verifies JWT ownership and successful payment,
+returns the stored coordinates, reports fixes older than 30 seconds as stale,
+and calculates progress/ETA from geographic distance and reported speed. It
+never invents a position when no driver fix exists.
 
-Before production, a Delivery Service must own driver authentication,
-assignment, consented location ingestion, durable events, dispatch rules, and
-retention. Current driver/contact/vehicle values and the map are simulated.
+The local driver token is a limited MVP trust boundary, not production driver
+identity. Production still requires a Delivery Service with driver accounts,
+per-assignment authorization, dispatch, encrypted transport, consent and
+retention controls, background mobile location support, routing, audit events,
+and automatic token revocation.
 
 ### Nearby restaurant discovery
 

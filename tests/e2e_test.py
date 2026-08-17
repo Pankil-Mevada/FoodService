@@ -256,6 +256,23 @@ class Suite:
         status, payload = self.api.request(
             "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
             token=self.token)
+        if status != 409 or "GPS" not in str(payload):
+            raise AssertionError(f"tracking invented a location before driver GPS: HTTP {status}, {payload}")
+        driver_payload = {"latitude": 23.0230, "longitude": 72.5720, "accuracy": 8.0,
+                          "speed": 4.5, "heading": 90.0, "status": "ON_THE_WAY",
+                          "driverName": "E2E Driver", "driverContact": "TEST-DRIVER",
+                          "vehicleType": "Test scooter", "vehiclePlate": "TEST-GPS-1"}
+        rejected_status, rejected = self.api.request(
+            "POST", f"{self.args.gateway}/driver/orders/{self.created['order']}/location",
+            driver_payload, extra_headers={"X-Driver-Token": "wrong-token"})
+        if rejected_status != 401:
+            raise AssertionError(f"invalid driver token accepted: HTTP {rejected_status}, {rejected}")
+        status, accepted = self.api.request(
+            "POST", f"{self.args.gateway}/driver/orders/{self.created['order']}/location",
+            driver_payload, extra_headers={"X-Driver-Token": self.args.driver_token})
+        self.expect(status, (202,), accepted)
+        status, payload = self.api.request(
+            "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking", token=self.token)
         self.expect(status, (200,), payload)
         required = ("driverId", "driverName", "driverContact", "driverRating",
                     "vehicleType", "vehiclePlate", "driverLatitude", "driverLongitude",
@@ -263,21 +280,22 @@ class Suite:
                     "customerLatitude", "customerLongitude")
         if not isinstance(payload, dict) or any(key not in payload for key in required):
             raise AssertionError(f"incomplete tracking response: {payload}")
-        if payload.get("simulated") is not True:
-            raise AssertionError(f"test tracking must be explicitly marked simulated: {payload}")
-        if payload.get("status") != "ASSIGNED" or payload.get("etaMinutes") != 3:
-            raise AssertionError(f"tracking did not start assigned with three-minute ETA: {payload}")
+        if payload.get("simulated") is not False or payload.get("live") is not True:
+            raise AssertionError(f"tracking was not backed by a fresh real GPS record: {payload}")
+        if payload.get("driverLatitude") != driver_payload["latitude"] or payload.get("driverName") != "E2E Driver":
+            raise AssertionError(f"stored driver GPS/profile was not returned: {payload}")
+        driver_payload.update({"latitude": 23.0240, "longitude": 72.5730, "status": "DELIVERED"})
         status, advanced = self.api.request(
-            "POST", f"{self.args.orders}/orders/{self.created['order']}/status",
-            {"status": "DELIVERED"})
-        self.expect(status, (200,), advanced)
+            "POST", f"{self.args.gateway}/driver/orders/{self.created['order']}/location",
+            driver_payload, extra_headers={"X-Driver-Token": self.args.driver_token})
+        self.expect(status, (202,), advanced)
         status, delivered = self.api.request(
             "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
             token=self.token)
         self.expect(status, (200,), delivered)
         if delivered.get("status") != "DELIVERED" or delivered.get("progressPercent") != 100:
             raise AssertionError(f"delivered status was not persisted: {delivered}")
-        return f"driver {payload['driverId']} assigned -> delivered, ETA 3 -> 0 min"
+        return "no fabricated fix -> authenticated real GPS -> delivered at customer coordinates"
 
     def notifications(self) -> str:
         status, payload = self.api.request("GET", f"{self.args.notifications}/notifications")
@@ -433,6 +451,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--keep-data", action="store_true", help="do not delete test records")
     parser.add_argument("--webhook-secret", default="test-webhook-secret",
                         help="local test webhook secret; pass an empty value to skip transition test")
+    parser.add_argument("--driver-token", default="local-driver-test-token",
+                        help="local driver GPS ingestion token")
     return parser.parse_args()
 
 

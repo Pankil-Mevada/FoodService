@@ -71,7 +71,8 @@ The suite also reads the resulting order list with that JWT; anonymous order
 listing is rejected and the Gateway returns only that customer's rows.
 The location scenario creates a geocoded restaurant, places an order at a
 serviceable delivery point, persists its address/coordinates, and verifies the
-explicitly simulated driver-location and ETA response.
+real GPS ingestion response, rejects an invalid driver token, verifies that no
+position is invented before a fix, and completes delivery at customer coordinates.
 It verifies driver/contact/vehicle details, then uses the internal local test
 endpoint to advance the order without waiting three minutes and proves that
 `DELIVERED`, 100% progress, and zero ETA are persisted and returned.

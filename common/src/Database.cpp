@@ -221,3 +221,24 @@ void Database::createNotificationTable()
         sqlite3_free(errMsg);
     }
 }
+
+void Database::createDriverLocationTable()
+{
+    execute(R"(
+        CREATE TABLE IF NOT EXISTS driver_locations
+        (
+            order_id INTEGER PRIMARY KEY,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
+            accuracy_m REAL NOT NULL DEFAULT 0,
+            speed_mps REAL NOT NULL DEFAULT 0,
+            heading REAL NOT NULL DEFAULT 0,
+            delivery_status TEXT NOT NULL,
+            driver_name TEXT NOT NULL,
+            driver_contact TEXT NOT NULL,
+            vehicle_type TEXT NOT NULL,
+            vehicle_plate TEXT NOT NULL,
+            updated_epoch INTEGER NOT NULL
+        );
+    )");
+}

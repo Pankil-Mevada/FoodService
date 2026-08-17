@@ -21,7 +21,8 @@ JSON requests require `Content-Type: application/json`.
 | Orders | `GET /orders` | — | JWT required; returns only orders owned by the signed-in customer |
 | Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress`; optional `itemSummary`, `subtotal`, `discountAmount`, `deliveryFee` | JWT required; validates delivery zone and price arithmetic, derives customer ID |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
-| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership required; returns simulated driver/vehicle details, coordinates, timeline, three-minute progress and ETA; persists `DELIVERED` |
+| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership and successful payment required; returns the latest real driver GPS fix, freshness, distance-based progress/ETA, and timeline |
+| Driver GPS | `POST /driver/orders/{id}/location` | `latitude`, `longitude`; optional accuracy, speed, heading, delivery status and driver/vehicle profile | `X-Driver-Token` required; verified payment required; stores the real browser GPS fix in `delivery.db` |
 
 Tracking returns HTTP `409` until the latest payment has durable status
 `succeeded`. Order Service also validates payment before accepting internal

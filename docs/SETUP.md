@@ -84,3 +84,21 @@ webhook secret outside local development. Store all secrets in environment
 variables, never source files, frontend JavaScript, logs, or Git.
 
 After all health endpoints respond, run `python tests/e2e_test.py`.
+
+## Real driver GPS testing
+
+Set a driver ingestion token before starting the stack. The hard-coded local
+fallback is only for automated tests and must not be used outside localhost:
+
+```powershell
+$env:DRIVER_LOCATION_TOKEN = "choose-a-long-random-local-token"
+$env:WSLENV = "$env:WSLENV`:DRIVER_LOCATION_TOKEN/u"
+.\scripts\start-all.ps1
+```
+
+On the delivery partner's device open `http://<computer-lan-ip>:5173/driver.html`,
+enter the paid order ID and the token, then allow precise GPS and select **Start
+sharing real GPS**. The customer opens Track driver on the main UI. Browser
+geolocation normally requires HTTPS; `localhost` is allowed for same-device
+testing, while a phone using a LAN IP may require a trusted HTTPS development
+certificate. Stop sharing after delivery.

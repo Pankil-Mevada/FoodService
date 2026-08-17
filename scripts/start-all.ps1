@@ -14,6 +14,7 @@ if (-not $env:RAZORPAY_KEY_ID.StartsWith('rzp_test_')) {
     throw 'RAZORPAY_KEY_ID is not a Test Mode key (expected rzp_test_ prefix).'
 }
 $requiredBridge = @('RAZORPAY_KEY_ID/u', 'RAZORPAY_KEY_SECRET/u', 'RAZORPAY_WEBHOOK_SECRET/u')
+if ($env:DRIVER_LOCATION_TOKEN) { $requiredBridge += 'DRIVER_LOCATION_TOKEN/u' }
 $existingBridge = @($env:WSLENV -split ':' | Where-Object { $_ })
 $env:WSLENV = (@($existingBridge + $requiredBridge) | Select-Object -Unique) -join ':'
 wsl bash /mnt/c/Users/Pankil/Documents/ChatGPT/FoodService/scripts/start-all.sh

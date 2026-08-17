@@ -21,7 +21,7 @@ Run on 2026-08-15 against the locally running WSL services.
 [PASS] orders:reject-tracking-before-payment - HTTP 409; no driver assigned before verified payment
 [PASS] payments:reject-forged-razorpay-signature - forged provider confirmation rejected
 [PASS] payments:complete-order-payment - verified payment succeeded; delivery may start
-[PASS] orders:live-delivery-tracking - driver details returned; assigned -> delivered persisted, ETA 3 -> 0
+[PASS] orders:live-delivery-tracking - no fabricated fix -> authenticated real GPS -> delivered at customer coordinates
 [PASS] payments:idempotency - repeated key returned the same payment
 [PASS] payments:realtime-snapshot - order lookup and SSE returned pending
 [PASS] payments:reject-unsigned-webhook - unsigned mutation rejected

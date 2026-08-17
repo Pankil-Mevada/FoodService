@@ -25,6 +25,12 @@ Open `http://localhost:5173`. Use **API settings** in the footer if the gateway 
 
 Order creation may create its pending payment automatically. Checkout first looks up the order payment and only creates one when none exists, preventing duplicate charges. The live watcher handles the named `payment-status` SSE event and automatically switches to 2.5-second polling if SSE is unavailable. The API URL and stream path are stored only in browser local storage. JWTs are sent as bearer tokens for normal API calls; the SSE endpoint must not require an Authorization header because native `EventSource` cannot set one.
 
+`driver.html` is the delivery-partner test portal. It uses browser
+`watchPosition` and sends actual device fixes to the payment-gated driver
+location endpoint with `X-Driver-Token`. Customer tracking never generates a
+fallback position; it waits for a driver fix and flags updates older than 30
+seconds as stale.
+
 The order dialog includes a three-item sample menu using generated project assets
 in `assets/menu/`. Quantities, the `WELCOME10` test coupon, delivery fee, and
 final total can be tested without entering an arbitrary amount. These photographs

@@ -34,7 +34,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - browser GPS or Bengaluru demo, OpenStreetMap nearby discovery/import, distance display, and radius enforcement
 - optional provider-sourced restaurant photos with honest unavailable fallback
 - delivery address/coordinates persisted on orders
-- three-minute simulated driver assignment, profile, coordinates, ETA, timeline, and persisted `DELIVERED` state
+- real driver browser GPS ingestion, freshness, distance ETA/timeline, and persisted `DELIVERED` state
 - local three-item test menu with generated photos, quantities, `WELCOME10`, delivery fee, and persisted price breakdown
 - browser-local customer profile photo, display name, phone, test UPI ID, and favourite restaurants
 - location-first discovery UI with craving shortcuts, offer presentation, rating/favourite filters, and richer delivery cards
@@ -54,7 +54,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - no reusable address book with recipient/phone/notes; current order has one freeform address and coordinates
 - nearby discovery relies on a public development endpoint; no production geocoder/maps/routing contract
 - OpenStreetMap photo coverage is sparse; production needs licensed photo ingestion and owner moderation
-- driver assignment, identity, movement, vehicle, contact, and three-minute ETA are simulated
+- driver assignment remains manual and the shared local driver token is not production driver identity
 - no tax, fee, coupon, or authoritative pricing engine
 - no restaurant, delivery-partner, or administrator web portal
 - no production payment-provider integration
@@ -111,7 +111,7 @@ Current local MVP coverage:
 
 - [x] capture a freeform delivery address plus browser coordinates on each order
 - [x] determine radius serviceability and reject checkout outside the zone
-- [x] display straight-line distance and a simulated three-minute ETA
+- [x] display straight-line progress and distance/speed-based ETA from real driver GPS
 
 Production requirements still open:
 
@@ -295,8 +295,8 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 
 Current local MVP coverage:
 
-- [x] deterministic test-driver assignment and test profile/vehicle details
-- [x] simulated five-second coordinates and three-minute delivery state timeline
+- [x] authenticated local driver portal using real browser `watchPosition` GPS
+- [x] durable latest driver fix, accuracy/speed/heading, 30-second stale detection, and distance-based ETA
 - [x] persist final `DELIVERED` state in `order.db`
 
 Production requirements still open:
@@ -310,7 +310,7 @@ Production requirements still open:
 
 #### P1
 
-- location updates with consent and retention limits
+- production location consent, retention/deletion jobs, and per-driver authorization
 - route/ETA integration
 - automatic dispatch and reassignment
 - earnings and payout ledger
@@ -535,7 +535,7 @@ No test may charge real money or use production customer data.
 
 ### Phase 3 — Growth
 
-- [x] three-minute local delivery simulator and persisted final state
+- [x] real browser GPS delivery tracking and persisted final state
 - production delivery-partner onboarding, dispatch, tracking ingestion, verification, and retention
 - ratings/reviews, favourites, coupons, recommendations, and scheduled orders
 - restaurant analytics and settlements

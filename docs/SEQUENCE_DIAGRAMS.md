@@ -351,40 +351,58 @@ Nearby discovery is user-triggered and displays OpenStreetMap attribution. The
 public endpoint is a development dependency only; production must use a
 contracted or self-hosted provider with caching, monitoring, and privacy review.
 
-## 7. Live delivery tracking simulator
+## 7. Real driver GPS tracking
 
 ```mermaid
 sequenceDiagram
+    participant Driver
+    participant DriverUI as Driver browser portal
     participant Customer
     participant UI as Web UI
     participant GW as API Gateway
     participant JWT as JWT verifier
+    participant PS as Payment Service
     participant OS as Order Service
+    participant DDB as delivery.db
     participant ODB as order.db
 
-    Customer->>UI: Track driver
+    Driver->>DriverUI: Enter paid order and driver token; allow GPS
+    DriverUI->>DriverUI: navigator.geolocation.watchPosition
     loop Every five seconds
+        DriverUI->>GW: POST driver location + token + actual GPS fix
+        GW->>PS: Verify payment succeeded
+        PS-->>GW: succeeded
+        GW->>DDB: UPSERT coordinates, accuracy, speed, status, timestamp
+        GW->>OS: Persist submitted delivery status
+        GW-->>DriverUI: HTTP 202 GPS accepted
+    end
+    Customer->>UI: Track driver
+    loop Every five seconds while tracking is open
         UI->>GW: GET /orders/{id}/tracking + JWT
         GW->>JWT: Verify token and derive customer ID
         GW->>OS: GET /orders/{id}
-        OS->>ODB: Load order, restaurant, and destination coordinates
+        OS->>ODB: Load order and destination coordinates
         ODB-->>OS: Order record
         OS-->>GW: Order details
-        GW->>GW: Verify ownership; calculate simulated position/ETA
-        GW->>OS: POST /orders/{id}/status {current delivery stage}
-        OS->>ODB: Persist stage when it changes
-        GW-->>UI: Driver profile, vehicle, coordinates,<br/>progress, ETA, timeline, simulated=true
-        UI->>UI: Move driver marker on local schematic map
+        GW->>DDB: Read latest actual driver fix
+        alt no driver fix exists
+            GW-->>UI: 409 waiting for driver GPS
+        else stored fix exists
+            GW->>GW: Calculate age, distance progress and ETA
+            GW-->>UI: Actual coordinates, accuracy, freshness, ETA, timeline
+            UI->>UI: Move marker using measured progress
+        end
     end
-    Note over GW,UI: ASSIGNED 0-15s → PICKED_UP 15-45s →<br/>ON_THE_WAY 45-135s → ARRIVING 135-180s
-    GW-->>UI: 100% progress, ETA 0, completed timeline
-    UI->>UI: Mark order Delivered and stop polling
+    DriverUI->>GW: Final customer coordinates + DELIVERED
+    GW->>ODB: Persist DELIVERED
+    GW-->>UI: 100% progress, ETA 0
 ```
 
-The current driver feed is an explicit local simulator for functional testing.
-It does not dispatch a real courier or call an external routing/maps service.
-Production work still requires driver authentication, consent, coordinate
-ingestion, retention limits, and a selected maps/routing provider.
+Coordinates now come from real browser GPS movement and remain durable across
+Gateway restarts. The local shared driver token is not production identity or
+dispatch. Production still requires driver accounts, assignment-scoped tokens,
+background mobile tracking, HTTPS, retention/deletion enforcement, and a
+selected maps/routing provider for road-aware ETA.
 
 ## Source-code map
 
