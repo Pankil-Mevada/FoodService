@@ -24,11 +24,19 @@ Database::Database(const std::string& databaseName)
 
     m_database.reset(db);
 
+    // Wait for short write bursts rather than failing immediately with
+    // SQLITE_BUSY. WAL permits readers while the single SQLite writer drains.
+    sqlite3_busy_timeout(db, 30000);
+    execute("PRAGMA journal_mode=WAL;");
+    execute("PRAGMA synchronous=NORMAL;");
+    execute("PRAGMA foreign_keys=ON;");
+
     std::cout << "Database opened successfully\n";
 }
 
 bool Database::execute(const std::string& sql)
 {
+    std::lock_guard<std::recursive_mutex> lock(m_mutex);
     char* errorMessage = nullptr;
 
     int rc = sqlite3_exec(

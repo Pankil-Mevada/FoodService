@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include <sqlite3.h>
@@ -41,6 +42,11 @@ public:
         return m_database.get();
     }
 
+    // A service owns one SQLite connection shared by Crow worker threads.
+    // Callers use this lock for multi-call sequences such as INSERT + row id.
+    std::recursive_mutex& mutex() const { return m_mutex; }
+
 private:
     std::unique_ptr<sqlite3, SQLiteCloser> m_database;
+    mutable std::recursive_mutex m_mutex;
 };

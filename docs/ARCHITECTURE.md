@@ -14,6 +14,8 @@ Updated 2026-08-15 for the current local MVP and three-minute delivery simulator
 
 For request-by-request frontend and backend interactions, see
 [End-to-end sequence diagrams](SEQUENCE_DIAGRAMS.md).
+For the worker pools, SQLite serialization, 1,000-client sequence, and load-test
+verification flow, see [High-concurrency order processing](CONCURRENCY_DIAGRAMS.md).
 
 FoodService is a C++20/Crow microservice application. Each domain service owns
 its HTTP controller, business service, repository, and SQLite persistence. The

@@ -466,8 +466,9 @@ CROW_ROUTE(app, "/orders/<int>")
         client.deleteOrder(id));
 });
 
-    app.port(8085)
-       .multithreaded()
+    app.loglevel(crow::LogLevel::Warning)
+       .port(8085)
+       .concurrency(128)
        .run();
 
     return 0;

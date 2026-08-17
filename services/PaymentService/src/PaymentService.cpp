@@ -56,10 +56,10 @@ std::optional<Payment> PaymentService::createPayment(
         std::cout << "Notification failed" << std::endl;
     }
 
-    auto payments = m_repository.getAllPayments();
-    for (auto it = payments.rbegin(); it != payments.rend(); ++it)
-        if (it->getTransactionId() == transactionId) return *it;
-    return payment;
+    // Indexed point lookup avoids copying/scanning the complete payment table
+    // for every order (the former implementation became O(n^2) under load).
+    auto persisted = m_repository.getPaymentByTransactionId(transactionId);
+    return persisted ? persisted : std::optional<Payment>(payment);
 }
 std::vector<Payment> PaymentService::getAllPayments()
 {

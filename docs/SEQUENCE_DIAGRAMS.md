@@ -3,6 +3,9 @@
 These diagrams describe how the browser frontend, API Gateway, C++
 microservices, and SQLite databases communicate in the current implementation.
 
+The multi-client worker, code-path, 1,000-order, and test-verification diagrams
+are maintained in [High-concurrency order processing](CONCURRENCY_DIAGRAMS.md).
+
 ## Authenticated customer identity
 
 ```mermaid
@@ -390,4 +393,5 @@ ingestion, retention limits, and a selected maps/routing provider.
 - Payment persistence: `services/PaymentService/src/PaymentRepository.cpp`
 - Database schema creation: `common/src/Database.cpp`
 - Automated end-to-end flow: `tests/e2e_test.py`
+- Parallel load and persistence verification: `tests/load_test.py`
 - Manual payment simulator: `scripts/test-dummy-payment.ps1`

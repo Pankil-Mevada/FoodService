@@ -51,6 +51,8 @@ bool NotificationClient::createNotification(
         curl,
         CURLOPT_POSTFIELDS,
         json.c_str());
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 1000L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 3000L);
 
     CURLcode res = curl_easy_perform(curl);
 

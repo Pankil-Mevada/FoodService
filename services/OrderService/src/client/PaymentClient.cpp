@@ -69,6 +69,8 @@ bool PaymentClient::createPayment(
         curl,
         CURLOPT_POSTFIELDS,
         json.c_str());
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 10000L);
 
     CURLcode res = curl_easy_perform(curl);
 

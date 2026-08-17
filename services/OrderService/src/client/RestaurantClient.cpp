@@ -19,6 +19,8 @@ bool RestaurantClient::restaurantExists(int restaurantId)
         curl,
         CURLOPT_URL,
         url.c_str());
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, 2000L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, 5000L);
 
     CURLcode result =
         curl_easy_perform(curl);

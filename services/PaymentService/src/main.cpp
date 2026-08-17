@@ -75,7 +75,7 @@ int main()
     const char* portValue = std::getenv("PAYMENT_SERVICE_PORT");
     const unsigned short port = portValue ? static_cast<unsigned short>(std::stoi(portValue)) : 8083;
     app.port(port)
-       .multithreaded()
+       .concurrency(128)
        .run();
 
     return 0;

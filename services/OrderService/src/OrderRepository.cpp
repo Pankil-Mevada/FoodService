@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sqlite3.h>
+#include <mutex>
 
 OrderRepository::OrderRepository(Database& database)
     : m_database(database)
@@ -10,6 +11,8 @@ OrderRepository::OrderRepository(Database& database)
 
 std::optional<int> OrderRepository::saveOrder(const Order& order)
 {
+    // Keep INSERT and sqlite3_last_insert_rowid atomic on the shared connection.
+    std::lock_guard<std::recursive_mutex> lock(m_database.mutex());
     const char* sql =
         "INSERT INTO orders(user_id,restaurant_id,total_amount,status,delivery_latitude,delivery_longitude,delivery_address,item_summary,subtotal,discount_amount,delivery_fee)"
         "VALUES(?,?,?,?,?,?,?,?,?,?,?);";

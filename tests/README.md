@@ -1,5 +1,9 @@
 # FoodService test harness
 
+For the verified 1,000-client burst test, see
+[`docs/LOAD_TESTING.md`](../docs/LOAD_TESTING.md) and run
+`python3 tests/load_test.py --orders 1000` from WSL.
+
 `e2e_test.py` is a dependency-free, black-box test application for the local
 microservices. It checks health, registration/login/JWT protection, users,
 restaurants, order creation, the resulting payment, and the resulting

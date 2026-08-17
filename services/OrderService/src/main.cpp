@@ -86,7 +86,7 @@ int main()
     });
 
     app.port(8082)
-       .multithreaded()
+       .concurrency(128)
        .run();
 
     return 0;

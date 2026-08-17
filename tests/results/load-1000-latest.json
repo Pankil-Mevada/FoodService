@@ -1,0 +1,23 @@
+{
+  "testMode": true,
+  "marker": "LOAD-7bbd97a0b24f",
+  "requested": 1000,
+  "concurrency": 1000,
+  "httpSuccess": 1000,
+  "persistedOrders": 1000,
+  "paymentRecords": 1000,
+  "uniquePaymentOrders": 1000,
+  "duplicatePaymentRecords": 0,
+  "wallSeconds": 16.99,
+  "throughputOrdersPerSecond": 58.86,
+  "latencyMs": {
+    "min": 594.3,
+    "mean": 9074.09,
+    "p50": 9410.71,
+    "p95": 16137.25,
+    "p99": 16769.29,
+    "max": 16915.71
+  },
+  "errors": {},
+  "passed": true
+}
