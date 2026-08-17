@@ -1,5 +1,46 @@
 # Testing strategy
 
+## Razorpay sandbox checkout
+
+Configure `rzp_test_...` credentials using `docs/SETUP.md`, restart Payment
+Service and Gateway, and hard-refresh the frontend. Create an order, click
+**Pay now**, then **Pay securely**. Complete Razorpay's mock success flow and
+confirm the UI shows `succeeded` only after server-side signature verification.
+Exercise the mock failure flow and confirm it is not marked successful. No real
+money moves in Test Mode. Automated E2E tests retain the deterministic dummy
+provider, so hosted Razorpay Checkout is intentionally a manual test.
+
+The complete positive and negative matrix is in
+`docs/PAYMENT_DELIVERY_TEST_CASES.md`. Safe runtime logs are written to
+`.run/gateway.log` and `.run/payments.log`; keys, signatures, card data, UPI
+PINs, and banking credentials must never be logged.
+
+## Reading structured C++ flow logs
+
+Application messages use stable prefixes:
+
+- `[order-flow]`: order validation, persistence, and pending-payment creation.
+- `[payment-flow]`: idempotent creation and allowed/rejected status changes.
+- `[razorpay]`: provider order creation and signature-verification outcome.
+- `[delivery-gate]`: Order Service's paid-before-delivery decision.
+- Crow `Tracking ...`: Gateway tracking rejection, acceptance, and progress.
+
+A successful test payment and first driver assignment includes lines similar to:
+
+```text
+[payment-flow] create accepted ... status=pending provider=test
+[razorpay] create-order accepted providerOrderId=order_...
+[razorpay] signature-verification passed orderId=order_...
+[payment-flow] transition accepted ... to=succeeded
+[delivery-gate] ... paymentStatus=succeeded decision=allow
+Tracking snapshot ... status=ASSIGNED progress=5
+```
+
+Expected failure examples include `credentials missing`, `provider order
+mismatch`, `signature-verification failed`, `payment-not-succeeded`, and
+`transition rejected`. These messages intentionally omit request secrets,
+signatures, card/UPI details, OTPs, JWTs, and passwords.
+
 Updated 2026-08-15. All provider, payment, restaurant, and courier behavior in
 this test plan is local/dummy behavior unless a section explicitly says otherwise.
 

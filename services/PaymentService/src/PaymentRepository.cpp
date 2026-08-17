@@ -191,6 +191,20 @@ bool PaymentRepository::updateStatus(const std::string& id, const std::string& s
     return rc == SQLITE_DONE && sqlite3_changes(m_database.connection()) > 0;
 }
 
+bool PaymentRepository::updateProviderOrder(const std::string& id, const std::string& provider,
+                                            const std::string& providerOrderId)
+{
+    const char* sql = "UPDATE payments SET provider=?,provider_payment_id=?,updated_at=CURRENT_TIMESTAMP WHERE transaction_id=?;";
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(m_database.connection(), sql, -1, &stmt, nullptr) != SQLITE_OK) return false;
+    sqlite3_bind_text(stmt, 1, provider.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 2, providerOrderId.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 3, id.c_str(), -1, SQLITE_TRANSIENT);
+    const int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return rc == SQLITE_DONE && sqlite3_changes(m_database.connection()) > 0;
+}
+
 bool PaymentRepository::updatePayment(const Payment& payment)
 {
     const char* sql =

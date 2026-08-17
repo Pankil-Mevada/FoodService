@@ -67,6 +67,7 @@ class Suite:
         self.token: str | None = None
         self.idempotent_payment_id: int | None = None
         self.test_transaction_id: str | None = None
+        self.order_transaction_id: str | None = None
         suffix = uuid.uuid4().hex[:10]
         self.email = f"foodservice-e2e-{suffix}@example.test"
 
@@ -196,7 +197,46 @@ class Suite:
         if not payment:
             raise AssertionError("no payment record created for order")
         self.created["payment"] = int(payment["id"])
+        self.order_transaction_id = str(payment["transactionId"])
         return f"order {order['id']} -> payment {payment['id']} ({payment.get('status')})"
+
+    def reject_tracking_before_payment(self) -> str:
+        if "order" not in self.created:
+            raise SkipTest("requires successful order setup")
+        status, payload = self.api.request(
+            "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
+            token=self.token)
+        if status != 409 or "payment" not in str(payload).lower():
+            raise AssertionError(f"unpaid order received driver tracking: HTTP {status}, {payload}")
+        return "HTTP 409; no driver assigned before verified payment"
+
+    def complete_order_payment(self) -> str:
+        if not self.order_transaction_id:
+            raise SkipTest("requires the order-created payment")
+        if not self.args.webhook_secret:
+            raise SkipTest("set --webhook-secret to unlock delivery tracking")
+        status, payload = self.api.request(
+            "POST", f"{self.args.payments}/payments/webhooks/provider",
+            {"transactionId": self.order_transaction_id, "status": "succeeded",
+             "providerPaymentId": f"test_order_{uuid.uuid4().hex[:12]}"},
+            extra_headers={"X-Webhook-Secret": self.args.webhook_secret})
+        self.expect(status, (200,), payload)
+        if payload.get("status") != "succeeded":
+            raise AssertionError(f"order payment did not succeed: {payload}")
+        return "verified test payment succeeded; delivery may start"
+
+    def reject_invalid_razorpay_signature(self) -> str:
+        if not self.order_transaction_id:
+            raise SkipTest("requires an order payment")
+        status, payload = self.api.request(
+            "POST", f"{self.args.payments}/payments/razorpay/verify",
+            {"transactionId": self.order_transaction_id,
+             "razorpay_order_id": "order_forged",
+             "razorpay_payment_id": "pay_forged",
+             "razorpay_signature": "not-a-valid-signature"})
+        if status not in (401, 409):
+            raise AssertionError(f"forged provider callback was accepted: HTTP {status}, {payload}")
+        return f"HTTP {status}; forged Razorpay confirmation rejected"
 
     def reject_outside_delivery_zone(self) -> str:
         if "restaurant" not in self.created:
@@ -355,6 +395,9 @@ class Suite:
         self.run("restaurants:create-and-list", self.restaurant)
         self.run("orders:reject-outside-delivery-zone", self.reject_outside_delivery_zone)
         self.run("orders:payment-eventual-consistency", self.order_and_payment)
+        self.run("orders:reject-tracking-before-payment", self.reject_tracking_before_payment)
+        self.run("payments:reject-forged-razorpay-signature", self.reject_invalid_razorpay_signature)
+        self.run("payments:complete-order-payment", self.complete_order_payment)
         self.run("orders:live-delivery-tracking", self.delivery_tracking)
         self.run("payments:idempotency", self.payment_idempotency)
         self.run("payments:realtime-snapshot", self.realtime_payment_snapshot)

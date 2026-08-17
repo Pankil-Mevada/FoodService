@@ -50,6 +50,10 @@ int main()
         return controller.getPaymentById(id);
     });
 
+    CROW_ROUTE(app, "/payments/<int>")
+    .methods(crow::HTTPMethod::DELETE)
+    ([&controller](int id) { return controller.deletePayment(id); });
+
     CROW_ROUTE(app, "/payments/order/<int>")
     .methods(crow::HTTPMethod::GET)
     ([&controller](int orderId) { return controller.getPaymentForOrder(orderId); });
@@ -61,6 +65,12 @@ int main()
     CROW_ROUTE(app, "/payments/webhooks/provider")
     .methods(crow::HTTPMethod::POST)
     ([&controller](const crow::request& req) { return controller.providerWebhook(req); });
+
+    CROW_ROUTE(app, "/payments/razorpay/order").methods(crow::HTTPMethod::POST)
+    ([&controller](const crow::request& req) { return controller.createRazorpayOrder(req); });
+
+    CROW_ROUTE(app, "/payments/razorpay/verify").methods(crow::HTTPMethod::POST)
+    ([&controller](const crow::request& req) { return controller.verifyRazorpayPayment(req); });
 
     const char* portValue = std::getenv("PAYMENT_SERVICE_PORT");
     const unsigned short port = portValue ? static_cast<unsigned short>(std::stoi(portValue)) : 8083;

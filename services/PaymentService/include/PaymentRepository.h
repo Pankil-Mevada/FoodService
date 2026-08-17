@@ -21,6 +21,8 @@ public:
     std::optional<Payment> getPaymentByIdempotencyKey(const std::string& key);
     bool updateStatus(const std::string& transactionId, const std::string& status,
                       const std::string& providerPaymentId);
+    bool updateProviderOrder(const std::string& transactionId, const std::string& provider,
+                             const std::string& providerOrderId);
 
     bool updatePayment(const Payment& payment);
 

@@ -1,5 +1,15 @@
 # Architecture and design
 
+## Payment-gated delivery invariant
+
+The browser opens `frontend/payment.html` as a separate checkout surface. It
+shares non-sensitive progress through same-origin local storage, while
+`payment.db` remains authoritative. Payment Service validates Razorpay's HMAC
+signature before storing `succeeded`. API Gateway and Order Service both
+require that state before starting delivery or accepting `ASSIGNED` and later
+transitions. No driver identity, coordinates, or timer is created for an unpaid
+order.
+
 Updated 2026-08-15 for the current local MVP and three-minute delivery simulator.
 
 For request-by-request frontend and backend interactions, see

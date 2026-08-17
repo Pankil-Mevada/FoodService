@@ -244,12 +244,17 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 
 ### 5.8 Payments and refunds
 
+- [x] dedicated responsive payment page
+- [x] main-board in-progress, failure/retry, and verified states
+- [x] backend-verified payment required before driver assignment/tracking
+- [x] safe recovery from refresh, provider dismissal, popup blocking, and network errors
+
 #### P0
 
-- integrate one provider in sandbox mode first, such as Razorpay or Stripe
-- create provider payment intents only on the backend
+- [x] integrate Razorpay Standard Checkout in sandbox mode with dummy fallback
+- [x] create Razorpay orders only on the backend
 - never store raw card or UPI credentials
-- provider-signature verification using the official SDK
+- [x] verify Razorpay checkout signatures server-side with HMAC-SHA256/OpenSSL
 - idempotent payment creation and webhook handling
 - webhook event deduplication and durable event log
 - successful/failed payment updates both `payment` and `order` consistently

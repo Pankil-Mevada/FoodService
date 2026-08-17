@@ -331,13 +331,19 @@ CROW_ROUTE(app, "/restaurants/discover")
 
 CROW_ROUTE(app, "/orders/<int>/tracking")
 .methods(crow::HTTPMethod::GET)
-([&client, &restaurantClient](const crow::request& req, int id)
+([&client, &restaurantClient, &paymentClient](const crow::request& req, int id)
 {
     const auto userId = authenticatedUserId(req);
     if (!userId) return unauthorized();
     const auto order = crow::json::load(client.getOrderById(id));
     if (!order || !order.has("id")) return jsonError(404, "Order not found");
     if (order["userId"].i() != *userId) return jsonError(403, "This order belongs to another customer");
+    const auto payment = crow::json::load(paymentClient.getPaymentForOrder(id));
+    if (!payment || !payment.has("status") || std::string(payment["status"].s()) != "succeeded") {
+        CROW_LOG_WARNING << "Tracking rejected order=" << id << " reason=payment-not-succeeded";
+        return jsonError(409, "Driver assignment starts only after verified payment");
+    }
+    CROW_LOG_INFO << "Tracking allowed order=" << id << " payment=succeeded";
     const auto restaurant = crow::json::load(restaurantClient.getRestaurantById(order["restaurantId"].i()));
     if (!restaurant || !restaurant.has("latitude")) return jsonError(404, "Restaurant location unavailable");
 
@@ -364,6 +370,8 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
     else if (elapsed >= 15) { progress = 0.15 + ((elapsed - 15) / 30.0) * 0.10; deliveryStatus = "PICKED_UP"; }
     if (std::string(order["status"].s()) != deliveryStatus)
         client.updateOrderStatus(id, deliveryStatus);
+    CROW_LOG_INFO << "Tracking snapshot order=" << id << " status=" << deliveryStatus
+                  << " progress=" << static_cast<int>(progress * 100);
     const int remainingSeconds = std::max(0, 180 - static_cast<int>(elapsed));
     crow::json::wvalue response;
     response["orderId"] = id;
@@ -426,6 +434,18 @@ CROW_ROUTE(app, "/payments/stream").methods(crow::HTTPMethod::GET)
 });
 CROW_ROUTE(app, "/payments/webhooks/provider").methods(crow::HTTPMethod::POST)
 ([&paymentClient](const crow::request& req) { return crow::response(paymentClient.providerWebhook(req.body, req.get_header_value("X-Webhook-Secret"))); });
+CROW_ROUTE(app, "/payments/razorpay/order").methods(crow::HTTPMethod::POST)
+([&paymentClient](const crow::request& req) {
+    if (!authenticatedUserId(req)) return unauthorized();
+    CROW_LOG_INFO << "Gateway forwarding Razorpay order creation";
+    return crow::response(paymentClient.createRazorpayOrder(req.body));
+});
+CROW_ROUTE(app, "/payments/razorpay/verify").methods(crow::HTTPMethod::POST)
+([&paymentClient](const crow::request& req) {
+    if (!authenticatedUserId(req)) return unauthorized();
+    CROW_LOG_INFO << "Gateway forwarding Razorpay signature verification";
+    return crow::response(paymentClient.verifyRazorpayPayment(req.body));
+});
 
 CROW_ROUTE(app, "/orders/<int>")
 .methods(crow::HTTPMethod::PUT)

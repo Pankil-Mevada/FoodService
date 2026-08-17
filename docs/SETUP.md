@@ -32,10 +32,51 @@ Database files are opened relative to each process working directory. For
 predictable local data placement, launch all executables with the repository
 root as the working directory.
 
-## Configuration and secrets
+### `.run` PID and log files
 
-The current backend is a safe provider simulator: it persists a `pending`
-payment but makes no external processor call. Configuration variables are
+`scripts/start-all.ps1` creates `.run/` as local runtime state. A `.pid` file
+contains one Linux process ID, not application output or customer data. For
+example, `.run/payments.pid` identifies the Payment Service process so the
+launcher can stop that exact instance on restart. The matching `.log` file
+contains stdout/stderr:
+
+| Process | PID file | Log file |
+|---|---|---|
+| API Gateway | `.run/gateway.pid` | `.run/gateway.log` |
+| Payment Service | `.run/payments.pid` | `.run/payments.log` |
+| Order Service | `.run/orders.pid` | `.run/orders.log` |
+| Other services/frontend | same base name | same base name |
+
+Watch a flow from separate PowerShell windows:
+
+```powershell
+Get-Content .run\gateway.log -Wait
+Get-Content .run\payments.log -Wait
+Get-Content .run\orders.log -Wait
+```
+
+The directory is ignored by Git. PID files can become stale after a crash;
+the launcher also finds exact FoodService executable names before restart.
+
+## Razorpay Test Mode and secrets
+
+The dummy provider remains the fallback when Razorpay variables are absent.
+For Razorpay's real sandbox, set Test Mode keys only in the terminal that
+launches Payment Service:
+
+```powershell
+$env:RAZORPAY_KEY_ID = "rzp_test_..."
+$env:RAZORPAY_KEY_SECRET = "..."
+$env:RAZORPAY_WEBHOOK_SECRET = "a-separate-random-test-secret"
+$env:WSLENV = "RAZORPAY_KEY_ID/u:RAZORPAY_KEY_SECRET/u:RAZORPAY_WEBHOOK_SECRET/u"
+```
+
+`WSLENV` passes those named variables to a subsequently launched WSL process.
+Restart Payment Service and API Gateway, then hard-refresh the frontend. The
+public Test Key ID may reach the browser; the Key Secret must stay exclusively
+in Payment Service and must never be committed, logged, or pasted into chat.
+
+Other payment configuration variables are
 `PAYMENT_SERVICE_PORT` (default 8083), `PAYMENT_DATABASE_PATH` (default
 `payment.db`), `PAYMENT_WEBHOOK_SECRET` (local default `test-webhook-secret`),
 and `PAYMENT_SERVICE_URL` for Order Service/API Gateway discovery. Set a strong

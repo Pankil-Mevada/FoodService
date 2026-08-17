@@ -3,6 +3,7 @@
 #include <crow.h>
 
 #include "PaymentService.h"
+#include "RazorpayClient.h"
 
 class PaymentController
 {
@@ -20,6 +21,8 @@ public:
     crow::response getPaymentForOrder(int orderId);
     crow::response paymentStream(const crow::request& req);
     crow::response providerWebhook(const crow::request& req);
+    crow::response createRazorpayOrder(const crow::request& req);
+    crow::response verifyRazorpayPayment(const crow::request& req);
 
     crow::response updatePayment(
         int id,
@@ -30,4 +33,5 @@ public:
 private:
 
     PaymentService& m_service;
+    RazorpayClient m_razorpay;
 };

@@ -1,5 +1,21 @@
 # Codebase guide
 
+## Runtime flow observability
+
+The primary diagnostic path is `.run/gateway.log` -> `.run/payments.log` ->
+`.run/orders.log`. Structured messages originate in:
+
+- `services/ApiGateway/src/main.cpp` for routing and tracking gates.
+- `services/PaymentService/src/PaymentController.cpp` for provider endpoints.
+- `services/PaymentService/src/PaymentService.cpp` for durable transitions.
+- `services/PaymentService/src/RazorpayClient.cpp` for safe provider outcomes.
+- `services/OrderService/src/OrderService.cpp` and
+  `src/client/PaymentClient.cpp` for paid-before-driver enforcement.
+
+Use the transaction ID and order ID to correlate messages. Never add logging of
+credentials, Authorization headers, provider signatures, payment instrument
+details, OTPs, UPI PINs, passwords, or full third-party response bodies.
+
 Product scope, priorities, acceptance criteria, and the delivery roadmap are in
 [`PRODUCT_REQUIREMENTS.md`](PRODUCT_REQUIREMENTS.md).
 

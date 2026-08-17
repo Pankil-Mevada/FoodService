@@ -18,6 +18,9 @@ Run on 2026-08-15 against the locally running WSL services.
 [PASS] restaurants:create-and-list - persisted restaurant found
 [PASS] orders:reject-outside-delivery-zone - out-of-zone address returned 422
 [PASS] orders:payment-eventual-consistency - order created a pending payment
+[PASS] orders:reject-tracking-before-payment - HTTP 409; no driver assigned before verified payment
+[PASS] payments:reject-forged-razorpay-signature - forged provider confirmation rejected
+[PASS] payments:complete-order-payment - verified payment succeeded; delivery may start
 [PASS] orders:live-delivery-tracking - driver details returned; assigned -> delivered persisted, ETA 3 -> 0
 [PASS] payments:idempotency - repeated key returned the same payment
 [PASS] payments:realtime-snapshot - order lookup and SSE returned pending
@@ -25,7 +28,7 @@ Run on 2026-08-15 against the locally running WSL services.
 [PASS] payments:test-webhook-transition - pending -> processing -> succeeded
 [PASS] notifications:payment-event - payment notifications observed
 
-21 passed, 0 failed, 0 skipped
+24 passed, 0 failed, 0 skipped
 ```
 
 The suite uses temporary randomized records and performs best-effort cleanup. Payments are test-mode records; no live card transaction is performed.

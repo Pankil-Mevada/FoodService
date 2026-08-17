@@ -1,4 +1,5 @@
 #include "OrderService.h"
+#include <iostream>
 
 OrderService::OrderService(OrderRepository& repository)
     : m_repository(repository)
@@ -8,12 +9,15 @@ OrderService::OrderService(OrderRepository& repository)
 
 bool OrderService::createOrder(const Order& order)
 {
+    std::clog << "[order-flow] create start user=" << order.getUserId()
+              << " restaurant=" << order.getRestaurantId() << " amount=" << order.getTotalAmount() << std::endl;
     bool restaurantFound =
         m_restaurantClient.restaurantExists(
             order.getRestaurantId());
 
     if (!restaurantFound)
     {
+        std::clog << "[order-flow] create rejected reason=restaurant-not-found" << std::endl;
         return false;
     }
 
@@ -22,6 +26,7 @@ bool OrderService::createOrder(const Order& order)
 
     if (!orderId.has_value())
     {
+        std::clog << "[order-flow] create failed stage=database-save" << std::endl;
         return false;
     }
 
@@ -36,12 +41,14 @@ bool OrderService::createOrder(const Order& order)
         m_repository.updateOrderStatus(
             *orderId,
             "PAYMENT_PENDING");
+        std::clog << "[order-flow] create accepted order=" << *orderId << " status=PAYMENT_PENDING" << std::endl;
     }
 else
 {
     m_repository.updateOrderStatus(
     *orderId,
     "PAYMENT_FAILED");
+    std::clog << "[order-flow] create failed order=" << *orderId << " stage=payment-record" << std::endl;
 }
 
 return paymentStatus;
@@ -70,6 +77,16 @@ bool OrderService::updateOrderStatus(
     int orderId,
     const std::string& status)
 {
+    const bool deliveryStatus = status == "ASSIGNED" || status == "PICKED_UP" ||
+        status == "ON_THE_WAY" || status == "ARRIVING" || status == "DELIVERED";
+    if (deliveryStatus && !m_paymentClient.isPaymentSucceeded(orderId)) {
+        std::clog << "[delivery-flow] transition rejected order=" << orderId
+                  << " nextStatus=" << status << " reason=payment-not-succeeded" << std::endl;
+        return false;
+    }
+    if (deliveryStatus)
+        std::clog << "[delivery-flow] transition allowed order=" << orderId
+                  << " nextStatus=" << status << std::endl;
     return m_repository.updateOrderStatus(
         orderId,
         status);

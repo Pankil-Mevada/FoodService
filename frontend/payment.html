@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Secure Razorpay Test Mode checkout for Plated FoodService.">
+  <title>Secure checkout — Plated</title>
+  <link rel="stylesheet" href="payment.css?v=20260817a">
+</head>
+<body>
+  <header><a class="brand" href="/">P <span>plated.</span></a><span class="secure">Razorpay Test Mode · no real money</span></header>
+  <main>
+    <section class="checkout-card">
+      <div class="intro"><p class="eyebrow">Separate secure checkout</p><h1>Complete your payment</h1><p>Your driver will be assigned only after FoodService verifies Razorpay's signature.</p></div>
+      <div id="loading" class="state"><span class="spinner"></span><b>Loading your order…</b></div>
+      <div id="checkout" hidden>
+        <div class="order-line"><div><small>ORDER</small><b id="order-number"></b></div><div class="amount"><small>TOTAL</small><b id="amount"></b></div></div>
+        <p id="items" class="items"></p>
+        <div class="steps"><span class="complete">1 Order placed</span><span class="active">2 Secure payment</span><span>3 Driver assignment</span></div>
+        <fieldset><legend>Continue with</legend><label><input checked type="radio" name="method" value="upi"><span><b>UPI</b><small>Use Razorpay's Test Mode UPI flow</small></span></label><label><input type="radio" name="method" value="card"><span><b>Card</b><small>Use an official Razorpay test card</small></span></label></fieldset>
+        <div class="safety"><b>Test payments only</b><span>Never enter a real card, real UPI PIN, OTP, or banking password.</span></div>
+        <p id="error" class="error" role="alert"></p>
+        <button id="pay" class="pay">Open Razorpay Test Checkout</button>
+        <a class="return" href="/">Return to orders</a>
+      </div>
+      <div id="result" class="result" hidden><span id="result-icon"></span><h2 id="result-title"></h2><p id="result-copy"></p><a class="pay link" href="/">Return to order tracking</a><button id="retry" class="return" hidden>Try payment again</button></div>
+    </section>
+    <aside><p class="eyebrow">What happens next</p><h2>Payment first.<br>Driver second.</h2><ol><li>Razorpay creates a sandbox transaction.</li><li>FoodService verifies the returned signature on the backend.</li><li>Only a verified payment unlocks driver assignment and tracking.</li></ol><div class="shield">✓ Key Secret stays on the server</div></aside>
+  </main>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="payment.js?v=20260817" defer></script>
+</body>
+</html>

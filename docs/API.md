@@ -23,6 +23,10 @@ JSON requests require `Content-Type: application/json`.
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
 | Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership required; returns simulated driver/vehicle details, coordinates, timeline, three-minute progress and ETA; persists `DELIVERED` |
 
+Tracking returns HTTP `409` until the latest payment has durable status
+`succeeded`. Order Service also validates payment before accepting internal
+delivery-status transitions, preventing a direct assignment bypass.
+
 The local lifecycle is `ASSIGNED -> PICKED_UP -> ON_THE_WAY -> ARRIVING -> DELIVERED`.
 Tracking begins on the first tracking request, refreshes every five seconds, and
 reaches `DELIVERED` after 180 seconds. Driver contacts and vehicle plates are
@@ -33,6 +37,8 @@ test values and do not identify real people or vehicles.
 | Payments | `GET/PUT/DELETE /payments/{id}` | payment fields for PUT | Operational CRUD |
 | Payments | `GET /payments/stream?orderId={id}` | — | SSE-compatible current-state event with retry hint |
 | Payments | `POST /payments/webhooks/provider` | `transactionId`, `status`, optional `providerPaymentId` | Requires `X-Webhook-Secret` |
+| Razorpay | `POST /payments/razorpay/order` | `transactionId` | JWT required; creates/reuses a Test Mode order server-side |
+| Razorpay | `POST /payments/razorpay/verify` | `transactionId`, `razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature` | JWT required; HMAC verification required before success |
 | Notifications | `GET /notifications` | — | Direct service; lists notifications |
 | Notifications | `POST /notifications` | `userId`, `type`, `message` | Normally called by payment service |
 | Notifications | `GET/PUT/DELETE /notifications/{id}` | notification fields for PUT | Operational CRUD |

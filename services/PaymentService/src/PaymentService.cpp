@@ -3,8 +3,9 @@
 #include <iomanip>
 #include <sstream>
 #include <ctime>
+#include <chrono>
 
-int PaymentService::m_transactionCounter = 1;
+std::atomic<unsigned long long> PaymentService::m_transactionCounter{1};
 
 PaymentService::PaymentService(PaymentRepository& repository)
     : m_repository(repository)
@@ -21,7 +22,11 @@ std::optional<Payment> PaymentService::createPayment(
     if (!idempotencyKey.empty())
     {
         auto existing = m_repository.getPaymentByIdempotencyKey(idempotencyKey);
-        if (existing) return existing;
+        if (existing) {
+            std::clog << "[payment-flow] create reused order=" << orderId
+                      << " payment=" << existing->getId() << " idempotent=true" << std::endl;
+            return existing;
+        }
     }
     const std::string transactionId = generateTransactionId();
     Payment payment(
@@ -34,7 +39,12 @@ std::optional<Payment> PaymentService::createPayment(
 
     bool status = m_repository.savePayment(payment);
 
-    if (!status) return std::nullopt;
+    if (!status) {
+        std::clog << "[payment-flow] create failed order=" << orderId << " stage=database-save" << std::endl;
+        return std::nullopt;
+    }
+    std::clog << "[payment-flow] create accepted order=" << orderId
+              << " transaction=" << transactionId << " status=pending provider=test" << std::endl;
 
     bool notificationStatus =
        m_notificationClient.createNotification(
@@ -78,9 +88,35 @@ std::optional<Payment> PaymentService::applyProviderEvent(const std::string& tra
     const bool allowed = old == status ||
         (old == "pending" && (status == "processing" || status == "succeeded" || status == "failed" || status == "cancelled")) ||
         (old == "processing" && (status == "succeeded" || status == "failed" || status == "cancelled"));
-    if (!allowed) return std::nullopt;
-    if (old != status && !m_repository.updateStatus(transactionId, status, providerPaymentId)) return std::nullopt;
+    if (!allowed) {
+        std::clog << "[payment-flow] transition rejected transaction=" << transactionId
+                  << " from=" << old << " to=" << status << std::endl;
+        return std::nullopt;
+    }
+    if (old != status && !m_repository.updateStatus(transactionId, status, providerPaymentId)) {
+        std::clog << "[payment-flow] transition failed transaction=" << transactionId
+                  << " stage=database-update" << std::endl;
+        return std::nullopt;
+    }
+    std::clog << "[payment-flow] transition accepted transaction=" << transactionId
+              << " from=" << old << " to=" << status << std::endl;
     return m_repository.getPaymentByTransactionId(transactionId);
+}
+
+std::optional<Payment> PaymentService::getPaymentByTransactionId(const std::string& transactionId)
+{
+    return m_repository.getPaymentByTransactionId(transactionId);
+}
+
+std::optional<Payment> PaymentService::getPaymentByIdempotencyKey(const std::string& idempotencyKey)
+{
+    return m_repository.getPaymentByIdempotencyKey(idempotencyKey);
+}
+
+bool PaymentService::attachProviderOrder(const std::string& transactionId, const std::string& provider,
+                                         const std::string& providerOrderId)
+{
+    return m_repository.updateProviderOrder(transactionId, provider, providerOrderId);
 }
 
 bool PaymentService::updatePayment(const Payment& payment)
@@ -95,29 +131,9 @@ bool PaymentService::deletePayment(int id)
 
 std::string PaymentService::generateTransactionId()
 {
-    std::time_t now = std::time(nullptr);
-
-    std::tm* timeInfo = std::localtime(&now);
-
+    const auto epochMicros = std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
     std::ostringstream oss;
-
-    oss << "TXN-";
-
-    oss << (timeInfo->tm_year + 1900);
-
-    oss << std::setw(2)
-        << std::setfill('0')
-        << (timeInfo->tm_mon + 1);
-
-    oss << std::setw(2)
-        << std::setfill('0')
-        << timeInfo->tm_mday;
-
-    oss << "-";
-
-    oss << std::setw(6)
-        << std::setfill('0')
-        << m_transactionCounter++;
-
+    oss << "TXN-" << epochMicros << "-" << m_transactionCounter.fetch_add(1);
     return oss.str();
 }

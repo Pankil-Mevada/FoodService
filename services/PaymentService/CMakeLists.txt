@@ -4,6 +4,7 @@ add_executable(PaymentService
     src/PaymentController.cpp
     src/PaymentService.cpp
     src/PaymentRepository.cpp
+    src/RazorpayClient.cpp
     src/client/NotificationClient.cpp
 )
 
@@ -16,5 +17,7 @@ target_include_directories(PaymentService PRIVATE
 target_link_libraries(PaymentService PRIVATE
     Common
     CURL::libcurl
+    OpenSSL::Crypto
 )
 find_package(CURL CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)

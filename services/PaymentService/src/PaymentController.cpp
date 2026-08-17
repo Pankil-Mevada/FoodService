@@ -101,14 +101,68 @@ crow::response PaymentController::providerWebhook(const crow::request& req)
     const std::string expected = configured ? configured : "test-webhook-secret";
     if (!safeEqual(req.get_header_value("X-Webhook-Secret"), expected)) return crow::response(401, "Invalid webhook secret");
     auto json = crow::json::load(req.body);
-    if (!json || !json.has("transactionId") || !json.has("status")) return crow::response(400, "Invalid provider event");
+    if (!json || !json.has("transactionId") || !json.has("status")) {
+        CROW_LOG_WARNING << "Provider webhook rejected: invalid payload";
+        return crow::response(400, "Invalid provider event");
+    }
     const std::string status = json["status"].s();
     if (status != "processing" && status != "succeeded" && status != "failed" && status != "cancelled")
         return crow::response(422, "Unsupported payment status");
     std::string providerId = json.has("providerPaymentId") ? std::string(json["providerPaymentId"].s()) : "";
     auto payment = m_service.applyProviderEvent(json["transactionId"].s(), status, providerId);
-    if (!payment) return crow::response(409, "Payment not found or transition rejected");
+    if (!payment) { CROW_LOG_WARNING << "Provider webhook transition rejected"; return crow::response(409, "Payment not found or transition rejected"); }
+    CROW_LOG_INFO << "Provider webhook applied transaction " << json["transactionId"].s() << " status " << status;
     return crow::response(paymentJson(*payment));
+}
+
+crow::response PaymentController::createRazorpayOrder(const crow::request& req)
+{
+    const auto json = crow::json::load(req.body);
+    if (!json || !json.has("transactionId")) return crow::response(422, "transactionId is required");
+    const std::string transactionId = json["transactionId"].s();
+    CROW_LOG_INFO << "Razorpay order requested for transaction " << transactionId;
+    auto existing = m_service.getPaymentByTransactionId(transactionId);
+    if (!existing) { CROW_LOG_WARNING << "Razorpay order rejected: payment not found"; return crow::response(404, "Payment not found"); }
+    if (existing->getStatus() != "pending") { CROW_LOG_WARNING << "Razorpay order rejected: payment not pending"; return crow::response(409, "Payment is not pending"); }
+    if (existing->getProvider() == "razorpay" && existing->getProviderPaymentId().rfind("order_", 0) == 0)
+    {
+        crow::json::wvalue out; out["keyId"] = m_razorpay.keyId(); out["providerOrderId"] = existing->getProviderPaymentId();
+        out["amount"] = static_cast<long long>(std::llround(existing->getAmount() * 100.0)); out["currency"] = "INR";
+        return crow::response(out);
+    }
+    std::string error;
+    const long long amountPaise = static_cast<long long>(std::llround(existing->getAmount() * 100.0));
+    auto order = m_razorpay.createOrder(amountPaise, transactionId, error);
+    if (!order) { CROW_LOG_ERROR << "Razorpay order creation failed for transaction " << transactionId; return crow::response(502, error); }
+    if (!m_service.attachProviderOrder(transactionId, "razorpay", order->id)) return crow::response(500, "Could not save Razorpay order");
+    crow::json::wvalue out; out["keyId"] = m_razorpay.keyId(); out["providerOrderId"] = order->id;
+    out["amount"] = order->amount; out["currency"] = order->currency;
+    return crow::response(201, out);
+}
+
+crow::response PaymentController::verifyRazorpayPayment(const crow::request& req)
+{
+    const auto json = crow::json::load(req.body);
+    if (!json || !json.has("transactionId") || !json.has("razorpay_order_id") ||
+        !json.has("razorpay_payment_id") || !json.has("razorpay_signature"))
+        return crow::response(422, "Incomplete Razorpay verification payload");
+    const std::string transactionId = json["transactionId"].s();
+    CROW_LOG_INFO << "Razorpay verification requested for transaction " << transactionId;
+    const std::string orderId = json["razorpay_order_id"].s();
+    const std::string paymentId = json["razorpay_payment_id"].s();
+    auto payment = m_service.getPaymentByTransactionId(transactionId);
+    if (!payment || payment->getProvider() != "razorpay" || payment->getProviderPaymentId() != orderId) {
+        CROW_LOG_WARNING << "Razorpay verification rejected: provider order mismatch transaction " << transactionId;
+        return crow::response(409, "Razorpay order does not match this payment");
+    }
+    if (!m_razorpay.verifyPaymentSignature(orderId, paymentId, json["razorpay_signature"].s())) {
+        CROW_LOG_WARNING << "Razorpay verification rejected: invalid signature transaction " << transactionId;
+        return crow::response(401, "Invalid Razorpay payment signature");
+    }
+    auto updated = m_service.applyProviderEvent(transactionId, "succeeded", paymentId);
+    if (!updated) return crow::response(409, "Payment transition rejected");
+    CROW_LOG_INFO << "Razorpay payment verified transaction " << transactionId << " status succeeded";
+    return crow::response(paymentJson(*updated));
 }
 
 crow::response PaymentController::getAllPayments()

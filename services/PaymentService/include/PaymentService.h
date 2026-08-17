@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <atomic>
 #include <string>
 #include <vector>
 
@@ -24,9 +25,13 @@ public:
     std::vector<Payment> getAllPayments();
 
     std::optional<Payment> getPaymentById(int id);
+    std::optional<Payment> getPaymentByTransactionId(const std::string& transactionId);
+    std::optional<Payment> getPaymentByIdempotencyKey(const std::string& idempotencyKey);
     std::optional<Payment> getPaymentForOrder(int orderId);
     std::optional<Payment> applyProviderEvent(const std::string& transactionId,
         const std::string& status, const std::string& providerPaymentId);
+    bool attachProviderOrder(const std::string& transactionId, const std::string& provider,
+                             const std::string& providerOrderId);
 
     bool updatePayment(const Payment& payment);
 
@@ -38,7 +43,7 @@ private:
 
     PaymentRepository& m_repository;
 
-    static int m_transactionCounter;
+    static std::atomic<unsigned long long> m_transactionCounter;
 
 
     NotificationClient m_notificationClient;

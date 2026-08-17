@@ -1,8 +1,18 @@
 #include "client/PaymentClient.h"
+#include <crow.h>
 #include <iostream>
 #include <cstdlib>
 #include <curl/curl.h>
 #include <iostream>
+
+namespace
+{
+size_t paymentResponseCallback(void* data, size_t size, size_t count, void* target)
+{
+    static_cast<std::string*>(target)->append(static_cast<char*>(data), size * count);
+    return size * count;
+}
+}
 
 bool PaymentClient::createPayment(
     int orderId,
@@ -87,4 +97,32 @@ bool PaymentClient::createPayment(
     curl_easy_cleanup(curl);
 
     return (res == CURLE_OK && responseCode == 201);
+}
+
+bool PaymentClient::isPaymentSucceeded(int orderId)
+{
+    CURL* curl = curl_easy_init();
+    if (!curl) return false;
+    std::string response;
+    const char* configuredUrl = std::getenv("PAYMENT_SERVICE_URL");
+    const std::string url = std::string(configuredUrl ? configuredUrl : "http://localhost:8083") +
+        "/payments/order/" + std::to_string(orderId);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, paymentResponseCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+    const CURLcode result = curl_easy_perform(curl);
+    long status = 0; curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+    curl_easy_cleanup(curl);
+    if (result != CURLE_OK || status != 200) {
+        std::clog << "[delivery-gate] payment lookup failed order=" << orderId
+                  << " http=" << status << " curl=" << static_cast<int>(result) << std::endl;
+        return false;
+    }
+    const auto json = crow::json::load(response);
+    const std::string paymentStatus = json && json.has("status") ? std::string(json["status"].s()) : "invalid-response";
+    const bool paid = paymentStatus == "succeeded";
+    std::clog << "[delivery-gate] order=" << orderId << " paymentStatus=" << paymentStatus
+              << " decision=" << (paid ? "allow" : "deny") << std::endl;
+    return paid;
 }

@@ -13,3 +13,7 @@ std::string PaymentClient::getPaymentForOrder(int id) { return m_http.get(m_base
 std::string PaymentClient::getPaymentStream(const std::string& id) { return m_http.get(m_baseUrl + "/payments/stream?orderId=" + id); }
 std::string PaymentClient::providerWebhook(const std::string& body, const std::string& secret)
 { return m_http.post(m_baseUrl + "/payments/webhooks/provider", body, "", {"X-Webhook-Secret: " + secret}); }
+std::string PaymentClient::createRazorpayOrder(const std::string& body)
+{ return m_http.post(m_baseUrl + "/payments/razorpay/order", body); }
+std::string PaymentClient::verifyRazorpayPayment(const std::string& body)
+{ return m_http.post(m_baseUrl + "/payments/razorpay/verify", body); }
