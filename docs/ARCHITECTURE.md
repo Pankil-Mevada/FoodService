@@ -38,6 +38,12 @@ radius. Order Service persists the destination and final delivery state. API
 Gateway handles JWT identity injection, serviceability, provider orchestration,
 and the local delivery simulation.
 
+The public Gateway order-list route requires a valid JWT and filters the Order
+Service response to the JWT customer ID. The browser also resolves payment
+status with at most eight concurrent lookups. This prevents another customer's
+orders from appearing and prevents a large history from exhausting the browser
+connection queue while checkout is waiting for its response.
+
 The current profile enhancement also stores a resized avatar, display name,
 phone, test UPI ID, and favourites in browser local storage. It never captures a
 UPI PIN. These fields are presentation/test conveniences, not synchronized or

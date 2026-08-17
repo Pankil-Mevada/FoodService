@@ -234,10 +234,20 @@ CROW_ROUTE(app, "/restaurants/<int>")
 
 CROW_ROUTE(app, "/orders")
 .methods(crow::HTTPMethod::GET)
-([&client]()
+([&client](const crow::request& req)
 {
-    return crow::response(
-        client.getAllOrders());
+    const auto userId = authenticatedUserId(req);
+    if (!userId) return unauthorized();
+    const auto orders = crow::json::load(client.getAllOrders());
+    if (!orders) return jsonError(502, "Order Service returned an invalid response");
+    crow::json::wvalue filtered;
+    std::size_t index = 0;
+    for (const auto& order : orders)
+    {
+        if (order.has("userId") && order["userId"].i() == *userId)
+            filtered[index++] = order;
+    }
+    return crow::response(filtered);
 });
 
 CROW_ROUTE(app, "/orders/<int>")

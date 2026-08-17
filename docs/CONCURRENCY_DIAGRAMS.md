@@ -180,3 +180,8 @@ flowchart LR
 The measured result is evidence for this machine and test payload, not a claim
 that the application can sustain 1,000 new orders every second or meet a
 production availability target.
+
+For interactive browsing, `GET /orders` is JWT-scoped at the Gateway and the
+frontend limits payment-status enrichment to eight requests at a time. Load
+verification intentionally reads the internal Order and Payment services
+directly after the burst so it can validate all marker-tagged persistence rows.

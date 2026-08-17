@@ -156,12 +156,17 @@ sequenceDiagram
     OS-->>OC: Order created response
     OC-->>GW: Response body
     GW-->>UI: {success, message}
-    UI->>GW: GET /orders
-    GW-->>UI: Order array
+    UI->>GW: GET /orders + JWT
+    GW->>GW: Filter rows to JWT customer ID
+    GW-->>UI: Signed-in customer's order array
     UI->>GW: GET /payments/order/{orderId}
     GW-->>UI: Pending payment
     UI-->>Customer: Render order with pending status
 ```
+
+The frontend performs payment lookups with a bounded pool of eight requests,
+so even a large customer history cannot monopolize the browser connection queue
+and block a new order submission.
 
 If the restaurant does not exist, the order is rejected. If payment creation
 fails—for example, an amount above `1000000`—Order Service records

@@ -173,7 +173,7 @@ class Suite:
         self.expect(status, (200, 201), payload)
         if not isinstance(payload, dict) or payload.get("success") is not True:
             raise AssertionError(f"order creation was not accepted: {payload}")
-        status, orders = self.api.request("GET", f"{self.args.gateway}/orders")
+        status, orders = self.api.request("GET", f"{self.args.gateway}/orders", token=self.token)
         self.expect(status, (200,), orders)
         candidates = [item for item in orders if item.get("userId") == self.created["user"]]
         if not candidates:

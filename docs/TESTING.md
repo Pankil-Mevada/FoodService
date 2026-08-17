@@ -67,6 +67,8 @@ checks order-based payment lookup, reads the finite SSE-compatible snapshot, and
 submits an unsigned/unknown webhook that must be rejected without mutation.
 It resolves `GET /me`, rejects anonymous order creation, and submits a forged
 `userId` to prove the gateway ignores client identity and uses the JWT claim.
+The suite also reads the resulting order list with that JWT; anonymous order
+listing is rejected and the Gateway returns only that customer's rows.
 The location scenario creates a geocoded restaurant, places an order at a
 serviceable delivery point, persists its address/coordinates, and verifies the
 explicitly simulated driver-location and ETA response.
