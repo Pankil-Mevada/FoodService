@@ -205,93 +205,93 @@ or SSE.
 
 ## Meta/Google-style questions and answers
 
-**1. Why microservices?**  
+**1. Why microservices?**
 The domains have different security, ownership, and scale profiles. The cost is
 network failure and operational complexity. For a small team, a modular monolith
 would be a reasonable starting point and could preserve the same boundaries.
 
-**2. Why an API Gateway?**  
+**2. Why an API Gateway?**
 It creates one public endpoint, hides topology, and centralizes routing, CORS,
 rate limits, request IDs, and policy. Business logic should remain in services.
 
-**3. Why database-per-service?**  
+**3. Why database-per-service?**
 It prevents schema coupling and permits independent evolution. Cross-service
 joins become API composition, events, or materialized read models.
 
-**4. How is POST made safe to retry?**  
+**4. How is POST made safe to retry?**
 Store a caller-scoped idempotency key under a uniqueness constraint together with
 the result. A repeat returns the original result.
 
-**5. PUT versus PATCH?**  
+**5. PUT versus PATCH?**
 PUT generally replaces a representation and is idempotent; PATCH changes selected
 fields. Both need validation, authorization, and concurrency policy.
 
-**6. How do you prevent cross-user order access?**  
+**6. How do you prevent cross-user order access?**
 Derive identity from a verified JWT and include it in every query/mutation
 predicate. Never trust a customer ID supplied by the browser.
 
-**7. Why not delete payment records?**  
+**7. Why not delete payment records?**
 Payments require audit, reconciliation, dispute, and compliance history. Prefer
 state transitions and retention policies over hard deletion.
 
-**8. Mutex versus transaction?**  
+**8. Mutex versus transaction?**
 A mutex coordinates application threads and shared memory/connection use. A
 database transaction provides atomicity, isolation, and durability for data.
 
-**9. Why not create thousands of threads?**  
+**9. Why not create thousands of threads?**
 Threads consume memory and scheduling time, while blocking dependencies remain
 bottlenecks. Use bounded pools, async I/O where valuable, and backpressure.
 
-**10. What does WAL solve?**  
+**10. What does WAL solve?**
 It allows readers to continue during an appended write. SQLite still has a
 single-writer constraint and is not a distributed production database.
 
-**11. Payment succeeded but order update failed—what now?**  
+**11. Payment succeeded but order update failed—what now?**
 Persist payment plus an outbox event atomically, retry publishing, apply an
 idempotent order transition, and use reconciliation against the provider.
 
-**12. How do you verify webhooks?**  
+**12. How do you verify webhooks?**
 Verify the signature over raw bytes with the secret, reject replay/stale events,
 store provider event IDs uniquely, and enforce valid state transitions.
 
-**13. How do you prevent two driver assignments?**  
+**13. How do you prevent two driver assignments?**
 Use a conditional atomic update where the driver is null and payment succeeded,
 then check affected rows and enforce a unique active assignment constraint.
 
-**14. Which consistency model suits GPS?**  
+**14. Which consistency model suits GPS?**
 Eventual consistency is acceptable. Include timestamps/sequence numbers and
 ignore older updates so the displayed position does not move backward.
 
-**15. Can this handle 1,000 simultaneous orders?**  
+**15. Can this handle 1,000 simultaneous orders?**
 Only a measured test on a named configuration supports that statement. Quote
 throughput, tail latency, errors, and resource saturation—not worker count alone.
 
-**16. How do you find the bottleneck?**  
+**16. How do you find the bottleneck?**
 Trace requests and split queue, application, SQL, lock, and downstream time;
 correlate them with CPU, memory, threads, sockets, and errors.
 
-**17. What should be cached?**  
+**17. What should be cached?**
 Restaurant catalogue and nearby results tolerate bounded staleness. Payment and
 mutable order truth should not be served from an unsafe stale cache.
 
-**18. How do you prevent retry storms?**  
+**18. How do you prevent retry storms?**
 Use deadlines, exponential backoff with jitter, retry budgets, circuit breakers,
 and `Retry-After`. Retry only idempotent/protected operations.
 
-**19. What SLOs matter?**  
+**19. What SLOs matter?**
 Order-creation availability and tail latency, payment reconciliation delay, and
 driver-location freshness—user journeys rather than only process uptime.
 
-**20. How are passwords stored?**  
+**20. How are passwords stored?**
 Use Argon2id or bcrypt with unique salts. Never store plaintext or reversible
 passwords. Secrets belong in a secrets manager, not source or frontend code.
 
-**21. How do you test negative scenarios?**  
+**21. How do you test negative scenarios?**
 Test expired JWTs, wrong owners, invalid input, duplicate keys, DB locks, provider
 timeouts, bad/replayed/out-of-order webhooks, downstream outage, stale GPS, and
 cancelled/delivered state violations.
 
-**22. What is the testing pyramid?**  
+**22. What is the testing pyramid?**
 Unit-test validation/transitions/pricing, integration-test repositories and APIs,
 contract-test service compatibility, E2E-test the customer journey, then run load
 and fault-injection tests.
