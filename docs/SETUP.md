@@ -91,10 +91,12 @@ Set a driver ingestion token before starting the stack. The hard-coded local
 fallback is only for automated tests and must not be used outside localhost:
 
 ```powershell
-$env:DRIVER_LOCATION_TOKEN = "choose-a-long-random-local-token"
-$env:WSLENV = "$env:WSLENV`:DRIVER_LOCATION_TOKEN/u"
-.\scripts\start-all.ps1
+.\scripts\start-all.ps1 -DriverToken "choose-a-long-random-local-token"
 ```
+
+If `-DriverToken` is omitted, the local launcher deterministically uses
+`local-driver-test-token`. It does not silently inherit an old token from the
+PowerShell environment. Enter the same value in `driver.html`.
 
 On the delivery partner's device open `http://<computer-lan-ip>:5173/driver.html`,
 enter the paid order ID and the token, then allow precise GPS and select **Start

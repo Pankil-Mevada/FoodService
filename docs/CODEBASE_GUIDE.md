@@ -1,5 +1,8 @@
 # Codebase guide
 
+For repository-grounded microservice, CRUD, multithreading, scaling, and interview
+question material, see the [FoodService Interview Guide](INTERVIEW_GUIDE.md).
+
 ## Runtime flow observability
 
 The primary diagnostic path is `.run/gateway.log` -> `.run/payments.log` ->
