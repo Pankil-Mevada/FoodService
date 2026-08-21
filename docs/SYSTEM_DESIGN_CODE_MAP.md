@@ -513,3 +513,4 @@ Use this concise answer:
 - [Testing](TESTING.md)
 - [Load testing](LOAD_TESTING.md)
 - [Ports and networking](PORTS_AND_NETWORKING.md)
+- [JWT authentication](JWT_AUTHENTICATION.md)
