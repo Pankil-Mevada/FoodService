@@ -1,0 +1,722 @@
+LEA
+Crow::App Library - Complete Explanation
+PART 1: What is Crow?
+CROW LIBRARY:
+════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  Crow is a C++ Web Framework                          │
+│                                                         │
+│  Similar to:                                          │
+│  → Python's Flask/FastAPI                            │
+│  → Node.js Express                                   │
+│  → Java Spring Boot                                  │
+│  BUT written in C++!                                  │
+│                                                         │
+│  PURPOSE:                                             │
+│  Build HTTP/REST API servers                         │
+│  quickly and easily in C++!                          │
+│                                                         │
+│  CREATED BY:                                          │
+│  Ipkiss (open source)                                │
+│  GitHub: CrowCpp/Crow                                │
+│                                                         │
+│  FEATURES:                                            │
+│  → Very FAST (C++ speed!)                            │
+│  → Lightweight                                       │
+│  → Easy to use                                       │
+│  → Header only library                               │
+│  → Supports REST API                                 │
+│  → Supports WebSocket                                │
+│  → Supports Middleware                               │
+│  → Multi-threaded                                    │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+PART 2: Installation & Setup
+HOW TO INSTALL CROW:
+════════════════════════════════════════════════════════════
+
+METHOD 1: Using vcpkg
+──────────────────────
+# Install vcpkg first
+git clone https://github.com/microsoft/vcpkg
+./vcpkg install crow
+
+content_copy
+
+METHOD 2: Using CMake FetchContent
+───────────────────────────────────
+# CMakeLists.txt
+cmake_minimum_required(VERSION 3.14)
+project(MyCrowApp)
+
+include(FetchContent)
+FetchContent_Declare(
+    Crow
+    GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
+    GIT_TAG        v1.0+5
+)
+FetchContent_MakeAvailable(Crow)
+
+add_executable(myapp main.cpp)
+target_link_libraries(myapp Crow::Crow)
+
+content_copy
+
+METHOD 3: Direct Download
+──────────────────────────
+# Download single header file
+wget https://github.com/CrowCpp/Crow/releases/download/v1.0+5/crow_all.h
+
+# Include in your project
+#include "crow_all.h"
+
+content_copy
+
+PART 3: Basic Usage - Hello World
+// ─────────────────────────────────────────────────────
+// SIMPLEST CROW APP
+// ─────────────────────────────────────────────────────
+
+#include "crow.h"
+
+int main()
+{
+    // STEP 1: Create Crow application
+    crow::SimpleApp app;
+
+    // STEP 2: Define a ROUTE
+    CROW_ROUTE(app, "/")
+    ([]()
+    {
+        return "Hello World!";
+    });
+
+    // STEP 3: Run the server on port 8080
+    app.port(8080).run();
+
+    return 0;
+}
+
+// TEST IT:
+// curl http://localhost:8080/
+// Output: Hello World!
+
+content_copy
+
+PART 4: HTTP Methods (GET, POST, PUT, DELETE)
+#include "crow.h"
+
+int main()
+{
+    crow::SimpleApp app;
+
+    // ─────────────────────────────────────────────────
+    // GET REQUEST - Retrieve data
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/vehicle/speed")
+    .methods(crow::HTTPMethod::GET)
+    ([](const crow::request& req)
+    {
+        crow::json::wvalue response;
+        response["speed"]  = 60;
+        response["unit"]   = "km/h";
+        response["status"] = "moving";
+
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // POST REQUEST - Send data
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/vehicle/config")
+    .methods(crow::HTTPMethod::POST)
+    ([](const crow::request& req)
+    {
+        // Parse incoming JSON
+        auto body = crow::json::load(req.body);
+
+        if (!body)
+        {
+            return crow::response(400, "Invalid JSON!");
+        }
+
+        // Read values from JSON
+        std::string mode = body["mode"].s();
+        int speed_limit  = body["speed_limit"].i();
+
+        crow::json::wvalue response;
+        response["message"]     = "Config updated!";
+        response["mode"]        = mode;
+        response["speed_limit"] = speed_limit;
+
+        return crow::response(201, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // PUT REQUEST - Update data
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/vehicle/status")
+    .methods(crow::HTTPMethod::PUT)
+    ([](const crow::request& req)
+    {
+        auto body = crow::json::load(req.body);
+
+        crow::json::wvalue response;
+        response["message"] = "Status updated!";
+        response["updated"] = true;
+
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // DELETE REQUEST - Remove data
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/vehicle/log")
+    .methods(crow::HTTPMethod::DELETE)
+    ([](const crow::request& req)
+    {
+        crow::json::wvalue response;
+        response["message"] = "Log deleted!";
+
+        return crow::response(200, response);
+    });
+
+    app.port(8080).multithreaded().run();
+    return 0;
+}
+
+content_copy
+
+PART 5: URL Parameters & Query Strings
+#include "crow.h"
+
+int main()
+{
+    crow::SimpleApp app;
+
+    // ─────────────────────────────────────────────────
+    // URL PARAMETER  →  /vehicle/123
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/vehicle/<int>")
+    ([](int vehicle_id)
+    {
+        crow::json::wvalue response;
+        response["vehicle_id"] = vehicle_id;
+        response["name"]       = "Toyota Camry";
+        response["status"]     = "active";
+
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // STRING PARAMETER  →  /driver/john
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/driver/<string>")
+    ([](std::string driver_name)
+    {
+        crow::json::wvalue response;
+        response["driver"]  = driver_name;
+        response["license"] = "ABC-1234";
+
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // MULTIPLE PARAMETERS  →  /fleet/5/vehicle/99
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/fleet/<int>/vehicle/<int>")
+    ([](int fleet_id, int vehicle_id)
+    {
+        crow::json::wvalue response;
+        response["fleet_id"]   = fleet_id;
+        response["vehicle_id"] = vehicle_id;
+
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // QUERY STRING  →  /search?speed=60&city=Tokyo
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/search")
+    ([](const crow::request& req)
+    {
+        // Get query parameters
+        auto speed = req.url_params.get("speed");
+        auto city  = req.url_params.get("city");
+
+        crow::json::wvalue response;
+
+        if (speed)
+            response["speed"] = std::string(speed);
+        if (city)
+            response["city"] = std::string(city);
+
+        return crow::response(200, response);
+    });
+
+    app.port(8080).run();
+    return 0;
+}
+
+/*
+TEST COMMANDS:
+──────────────
+curl http://localhost:8080/vehicle/123
+curl http://localhost:8080/driver/john
+curl http://localhost:8080/fleet/5/vehicle/99
+curl "http://localhost:8080/search?speed=60&city=Tokyo"
+*/
+
+content_copy
+
+PART 6: JSON Handling
+#include "crow.h"
+
+int main()
+{
+    crow::SimpleApp app;
+
+    // ─────────────────────────────────────────────────
+    // SENDING JSON RESPONSE
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/vehicle/data")
+    ([]()
+    {
+        // Create JSON object
+        crow::json::wvalue data;
+
+        // Simple values
+        data["id"]      = 1;
+        data["speed"]   = 60.5;
+        data["active"]  = true;
+        data["name"]    = "Toyota Camry";
+
+        // Nested object
+        data["location"]["lat"] = 35.6762;
+        data["location"]["lon"] = 139.6503;
+        data["location"]["city"] = "Tokyo";
+
+        // Array
+        data["alerts"][0] = "Low fuel";
+        data["alerts"][1] = "Oil change due";
+        data["alerts"][2] = "Tire pressure low";
+
+        return crow::response(200, data);
+    });
+
+    // ─────────────────────────────────────────────────
+    // RECEIVING AND PARSING JSON
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/vehicle/update")
+    .methods(crow::HTTPMethod::POST)
+    ([](const crow::request& req)
+    {
+        // Parse JSON from request body
+        auto json = crow::json::load(req.body);
+
+        // Validate JSON
+        if (!json)
+        {
+            return crow::response(400, "Bad JSON!");
+        }
+
+        // Check if field exists and read it
+        if (json.has("speed"))
+        {
+            double speed = json["speed"].d();
+            CROW_LOG_INFO << "Speed: " << speed;
+        }
+
+        if (json.has("location"))
+        {
+            double lat = json["location"]["lat"].d();
+            double lon = json["location"]["lon"].d();
+            CROW_LOG_INFO << "Lat: " << lat
+                          << " Lon: " << lon;
+        }
+
+        crow::json::wvalue response;
+        response["status"]  = "received";
+        response["success"] = true;
+
+        return crow::response(200, response);
+    });
+
+    app.port(8080).run();
+    return 0;
+}
+
+content_copy
+
+PART 7: Middleware
+#include "crow.h"
+
+// ─────────────────────────────────────────────────────
+// CUSTOM MIDDLEWARE
+// Runs BEFORE every request!
+// ─────────────────────────────────────────────────────
+
+struct AuthMiddleware
+{
+    struct context {};
+
+    // Runs BEFORE route handler
+    void before_handle(crow::request& req,
+                       crow::response& res,
+                       context& ctx)
+    {
+        // Check API key in header
+        auto api_key = req.get_header_value("X-API-Key");
+
+        if (api_key != "my-secret-key-123")
+        {
+            // Reject unauthorized request!
+            res.code = 401;
+            res.write("Unauthorized! Invalid API Key!");
+            res.end();
+        }
+    }
+
+    // Runs AFTER route handler
+    void after_handle(crow::request& req,
+                      crow::response& res,
+                      context& ctx)
+    {
+        // Add headers to every response
+        res.add_header("X-Powered-By", "Crow C++");
+        res.add_header("X-Version",    "1.0.0");
+    }
+};
+
+// ─────────────────────────────────────────────────────
+// LOGGING MIDDLEWARE
+// ─────────────────────────────────────────────────────
+struct LogMiddleware
+{
+    struct context {};
+
+    void before_handle(crow::request& req,
+                       crow::response& res,
+                       context& ctx)
+    {
+        CROW_LOG_INFO << "REQUEST: "
+                      << req.method_string()
+                      << " "
+                      << req.url;
+    }
+
+    void after_handle(crow::request& req,
+                      crow::response& res,
+                      context& ctx)
+    {
+        CROW_LOG_INFO << "RESPONSE CODE: "
+                      << res.code;
+    }
+};
+
+int main()
+{
+    // App WITH middleware!
+    crow::App<AuthMiddleware, LogMiddleware> app;
+
+    CROW_ROUTE(app, "/secure/data")
+    ([]()
+    {
+        crow::json::wvalue response;
+        response["secret"] = "Top secret data!";
+        return crow::response(200, response);
+    });
+
+    app.port(8080).run();
+    return 0;
+}
+
+/*
+TEST:
+──────
+# Without API key (FAIL)
+curl http://localhost:8080/secure/data
+→ 401 Unauthorized!
+
+# With API key (SUCCESS)
+curl -H "X-API-Key: my-secret-key-123" \
+     http://localhost:8080/secure/data
+→ {"secret": "Top secret data!"}
+*/
+
+content_copy
+
+PART 8: WebSocket Support
+#include "crow.h"
+
+int main()
+{
+    crow::SimpleApp app;
+
+    // ─────────────────────────────────────────────────
+    // WEBSOCKET ROUTE
+    // Real-time bidirectional communication!
+    // ─────────────────────────────────────────────────
+    CROW_WEBSOCKET_ROUTE(app, "/ws/vehicle")
+    .onopen([](crow::websocket::connection& conn)
+    {
+        // Client connected!
+        CROW_LOG_INFO << "Client connected!";
+        conn.send_text("Welcome to V2X WebSocket!");
+    })
+    .onmessage([](crow::websocket::connection& conn,
+                  const std::string& message,
+                  bool is_binary)
+    {
+        // Message received from client!
+        CROW_LOG_INFO << "Message: " << message;
+
+        // Echo back with extra info
+        conn.send_text("Received: " + message);
+    })
+    .onclose([](crow::websocket::connection& conn,
+                const std::string& reason)
+    {
+        // Client disconnected!
+        CROW_LOG_INFO << "Client disconnected: "
+                      << reason;
+    });
+
+    // Regular HTTP route alongside WebSocket
+    CROW_ROUTE(app, "/")
+    ([]()
+    {
+        return "V2X Server Running!";
+    });
+
+    app.port(8080).run();
+    return 0;
+}
+
+content_copy
+
+PART 9: Multi-threading & Configuration
+#include "crow.h"
+
+int main()
+{
+    crow::SimpleApp app;
+
+    CROW_ROUTE(app, "/status")
+    ([]()
+    {
+        crow::json::wvalue response;
+        response["status"]  = "running";
+        response["threads"] = 4;
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // SERVER CONFIGURATION OPTIONS
+    // ─────────────────────────────────────────────────
+    app
+    .port(8080)              // Set port
+    .multithreaded()         // Enable multi-threading
+    .concurrency(4)          // Use 4 threads
+    .bindaddr("0.0.0.0")    // Bind to all interfaces
+    .run();
+
+    return 0;
+}
+
+content_copy
+
+PART 10: Real World TCU Example
+// ─────────────────────────────────────────────────────
+// REAL WORLD: TCU REST API SERVER
+// Using Crow for vehicle data API
+// ─────────────────────────────────────────────────────
+
+#include "crow.h"
+#include <map>
+#include <string>
+
+// Simulated vehicle data store
+struct VehicleData
+{
+    double speed;
+    double lat;
+    double lon;
+    std::string status;
+    int fuel_level;
+};
+
+std::map<int, VehicleData> vehicles =
+{
+    {1, {60.5, 35.6762, 139.6503, "moving",  80}},
+    {2, {0.0,  34.6937, 135.5023, "parked",  45}},
+    {3, {90.0, 35.0116, 135.7681, "moving",  92}},
+};
+
+int main()
+{
+    crow::SimpleApp app;
+
+    // ─────────────────────────────────────────────────
+    // GET ALL VEHICLES
+    // GET /api/vehicles
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/api/vehicles")
+    .methods(crow::HTTPMethod::GET)
+    ([]()
+    {
+        crow::json::wvalue response;
+        int i = 0;
+
+        for (auto& [id, data] : vehicles)
+        {
+            response["vehicles"][i]["id"]         = id;
+            response["vehicles"][i]["speed"]      = data.speed;
+            response["vehicles"][i]["status"]     = data.status;
+            response["vehicles"][i]["fuel_level"] = data.fuel_level;
+            i++;
+        }
+
+        response["total"] = (int)vehicles.size();
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // GET SPECIFIC VEHICLE
+    // GET /api/vehicle/1
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/api/vehicle/<int>")
+    .methods(crow::HTTPMethod::GET)
+    ([](int id)
+    {
+        if (vehicles.find(id) == vehicles.end())
+        {
+            crow::json::wvalue err;
+            err["error"] = "Vehicle not found!";
+            return crow::response(404, err);
+        }
+
+        auto& data = vehicles[id];
+
+        crow::json::wvalue response;
+        response["id"]              = id;
+        response["speed"]           = data.speed;
+        response["location"]["lat"] = data.lat;
+        response["location"]["lon"] = data.lon;
+        response["status"]          = data.status;
+        response["fuel_level"]      = data.fuel_level;
+
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // UPDATE VEHICLE SPEED
+    // POST /api/vehicle/1/speed
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/api/vehicle/<int>/speed")
+    .methods(crow::HTTPMethod::POST)
+    ([](const crow::request& req, int id)
+    {
+        if (vehicles.find(id) == vehicles.end())
+        {
+            crow::json::wvalue err;
+            err["error"] = "Vehicle not found!";
+            return crow::response(404, err);
+        }
+
+        auto body = crow::json::load(req.body);
+        if (!body || !body.has("speed"))
+        {
+            crow::json::wvalue err;
+            err["error"] = "Speed field required!";
+            return crow::response(400, err);
+        }
+
+        double new_speed     = body["speed"].d();
+        vehicles[id].speed   = new_speed;
+
+        crow::json::wvalue response;
+        response["message"]   = "Speed updated!";
+        response["vehicle_id"]= id;
+        response["new_speed"] = new_speed;
+
+        return crow::response(200, response);
+    });
+
+    // ─────────────────────────────────────────────────
+    // HEALTH CHECK
+    // GET /health
+    // ─────────────────────────────────────────────────
+    CROW_ROUTE(app, "/health")
+    ([]()
+    {
+        crow::json::wvalue response;
+        response["status"]  = "healthy";
+        response["service"] = "TCU API Server";
+        response["version"] = "1.0.0";
+        return crow::response(200, response);
+    });
+
+    CROW_LOG_INFO << "TCU API Server starting on port 8080";
+
+    app.port(8080)
+       .multithreaded()
+       .concurrency(4)
+       .run();
+
+    return 0;
+}
+
+/*
+TEST COMMANDS:
+──────────────
+# Get all vehicles
+curl http://localhost:8080/api/vehicles
+
+# Get vehicle 1
+curl http://localhost:8080/api/vehicle/1
+
+# Update vehicle 1 speed
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -d '{"speed": 75.5}' \
+     http://localhost:8080/api/vehicle/1/speed
+
+# Health check
+curl http://localhost:8080/health
+*/
+
+content_copy
+
+PART 11: Crow vs Other Frameworks
+COMPARISON TABLE:
+════════════════════════════════════════════════════════════
+
+┌──────────────┬──────────┬──────────┬──────────┬────────┐
+│ FEATURE      │ CROW     │ Flask    │ Express  │ Spring │
+│              │ (C++)    │ (Python) │ (NodeJS) │ (Java) │
+├──────────────┼──────────┼──────────┼──────────┼────────┤
+│ Speed        │ ⭐⭐⭐⭐⭐  │ ⭐⭐⭐     │ ⭐⭐⭐⭐   │ ⭐⭐⭐⭐ │
+│ Memory Usage │ Very Low │ Medium   │ Medium   │ High   │
+│ Easy to Use  │ Medium   │ Very Easy│ Easy     │ Hard   │
+│ REST API     │ ✓        │ ✓        │ ✓        │ ✓      │
+│ WebSocket    │ ✓        │ ✗        │ ✓        │ ✓      │
+│ Middleware   │ ✓        │ ✓        │ ✓        │ ✓      │
+│ Best For     │ Embedded │ Prototyp │ Web Apps │ Enterp │
+│              │ Systems  │ ing      │          │ rise   │
+└──────────────┴──────────┴──────────┴──────────┴────────┘
+
+WHY CROW FOR TCU/EMBEDDED SYSTEMS?
+────────────────────────────────────
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│  ✓ C++ = Maximum performance                          │
+│  ✓ Low memory footprint                               │
+│  ✓ No Python/Java runtime needed                     │
+│  ✓ Runs on embedded Linux                            │
+│  ✓ Header only = easy integration                    │
+│  ✓ Fast startup time                                 │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
