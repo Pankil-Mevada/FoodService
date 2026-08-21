@@ -9,6 +9,8 @@ For the exact source file responsible for each architecture concept, see the
 [System Design Code Map](docs/SYSTEM_DESIGN_CODE_MAP.md).
 Practice interview answers using actual repository snippets in
 [System-Design Questions, Answers, and Code](docs/SYSTEM_DESIGN_QA_WITH_CODE.md).
+For local ports, localhost, WSL/mobile access, and production exposure, see
+[Ports and Networking in FoodService](docs/PORTS_AND_NETWORKING.md).
 
 The project demonstrates how multiple independent services communicate while following layered architecture principles such as Controller, Service, Repository, and Database layers.
 
