@@ -2,6 +2,8 @@
 
 For repository-grounded microservice, CRUD, multithreading, scaling, and interview
 question material, see the [FoodService Interview Guide](INTERVIEW_GUIDE.md).
+For a concept-by-concept map from system-design terminology to implementation
+files, see [System Design Concepts Mapped to FoodService Code](SYSTEM_DESIGN_CODE_MAP.md).
 
 ## Runtime flow observability
 

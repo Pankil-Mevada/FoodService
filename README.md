@@ -5,6 +5,10 @@ FoodService is a backend application built using **Modern C++20**, **Crow**, **S
 For an interview-focused explanation of the microservices, CRUD paths,
 multithreading, scaling trade-offs, and model questions, read the
 [FoodService Interview Guide](docs/INTERVIEW_GUIDE.md).
+For the exact source file responsible for each architecture concept, see the
+[System Design Code Map](docs/SYSTEM_DESIGN_CODE_MAP.md).
+Practice interview answers using actual repository snippets in
+[System-Design Questions, Answers, and Code](docs/SYSTEM_DESIGN_QA_WITH_CODE.md).
 
 The project demonstrates how multiple independent services communicate while following layered architecture principles such as Controller, Service, Repository, and Database layers.
 
