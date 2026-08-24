@@ -63,11 +63,21 @@ object storage for photos, consent/retention controls, and payment-provider toke
 
 An external payment provider cannot be treated as a single synchronous database
 call. The implemented safe test flow creates a local pending intent and accepts
-authenticated test/provider callbacks; it never charges a card. A production
-adapter would create a provider intent, verify official webhook signatures,
-update the local payment idempotently, update the order, and emit a notification.
-Provider event IDs should be stored or otherwise deduplicated. Clients display
-pending state and use the SSE snapshot or order-payment polling until terminal.
+authenticated test/provider callbacks; it never charges a card. After Payment
+Service durably applies an allowed provider transition, it calls Order Service's
+authenticated internal `/orders/{id}/payment-status` endpoint. Order Service owns
+the mapping: `processing -> PAYMENT_PENDING`, `succeeded -> CONFIRMED`,
+`failed -> PAYMENT_FAILED`, and `cancelled -> CANCELLED`. Duplicate callbacks are
+idempotent, and payment callbacks never regress confirmed/delivery states.
+
+`ORDER_SYNC_SECRET` authenticates the local service callback and
+`ORDER_SERVICE_URL` configures its destination. If payment persistence succeeds
+but Order Service cannot be updated, Payment Service returns HTTP 502 and asks the
+provider/test caller to retry the same event safely. This is an explicit failure,
+but it is not yet durable delivery: a production design still needs provider
+event IDs, an outbox/message broker, retry storage, and reconciliation. Clients
+display pending state and use the SSE snapshot or order-payment polling until
+terminal.
 
 Do not trust an amount, currency, user, or success status supplied by a browser.
 Resolve the authoritative order server-side, validate webhook signatures over
@@ -128,6 +138,15 @@ beyond customer identity and tracking ownership checks.
 
 - Services use fixed localhost ports and direct HTTP discovery.
 - SQLite databases are service-local files; there is no distributed transaction.
-- Order/payment/notification updates therefore use eventual consistency.
+- Payment-to-order updates use an authenticated synchronous callback with safe
+  retry behavior; there is still no durable outbox or distributed transaction.
+- Notification updates remain best-effort/eventually consistent.
 - The gateway exposes user, restaurant, order, payment, webhook, discovery, and
   tracking routes. Notification CRUD remains a direct-service operation.
+# Delivery serviceability design
+
+The browser provides GPS/manual/map inputs, but it is not the authority for delivery eligibility or pricing. API Gateway stores JWT-owned address rows in its local delivery database for this MVP. It requests the restaurant configuration, applies polygon-or-radius serviceability, computes distance/ETA/fees, and re-runs the same decision during order creation. This prevents a modified browser request from bypassing the delivery zone or lowering the fee.
+
+Rule order: polygon when at least three configured points exist, otherwise radius; base plus per-kilometre fee; then surge (1.25), rain (1.15), and late-night (1.20) multipliers. ETA is preparation time plus distance travel time and operational buffers.
+
+This is a development architecture. Production should use a profile/address service, encrypted personal data, PostGIS/geospatial indexes, road-network routing, a trusted weather feed, an operations-driven surge service, timezone-aware restaurant schedules, observability, and cache/failover policies.

@@ -79,9 +79,20 @@ in Payment Service and must never be committed, logged, or pasted into chat.
 Other payment configuration variables are
 `PAYMENT_SERVICE_PORT` (default 8083), `PAYMENT_DATABASE_PATH` (default
 `payment.db`), `PAYMENT_WEBHOOK_SECRET` (local default `test-webhook-secret`),
-and `PAYMENT_SERVICE_URL` for Order Service/API Gateway discovery. Set a strong
-webhook secret outside local development. Store all secrets in environment
+`PAYMENT_SERVICE_URL` for Order Service/API Gateway discovery,
+`ORDER_SERVICE_URL` (default `http://localhost:8082`) for payment-to-order
+synchronization, and `ORDER_SYNC_SECRET` (local default
+`local-order-sync-secret`). Payment Service and Order Service must receive the
+same order-sync secret. Set strong distinct webhook and internal secrets outside
+local development. Store all secrets in environment
 variables, never source files, frontend JavaScript, logs, or Git.
+
+The PowerShell launcher gives Payment Service and Order Service the same local
+value. Override it when needed without committing the secret:
+
+```powershell
+.\scripts\start-all.ps1 -OrderSyncSecret "choose-a-long-random-local-secret"
+```
 
 After all health endpoints respond, run `python tests/e2e_test.py`.
 
@@ -104,3 +115,12 @@ sharing real GPS**. The customer opens Track driver on the main UI. Browser
 geolocation normally requires HTTPS; `localhost` is allowed for same-device
 testing, while a phone using a LAN IP may require a trusted HTTPS development
 certificate. Stop sharing after delivery.
+# Delivery pricing development switches
+
+API Gateway reads these optional environment variables at quote/order time:
+
+- `DELIVERY_RAIN_MODE=1` applies the development rain multiplier and ETA buffer.
+- `DELIVERY_SURGE_MODE=1` applies the development surge multiplier and ETA buffer.
+- Late-night pricing is automatically active from 23:00 through 05:59 using the API Gateway machine's local clock.
+
+Leave the variables unset for normal local testing. These switches simulate trusted operational signals; they are not a live weather or demand provider.

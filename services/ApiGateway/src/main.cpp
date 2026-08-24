@@ -6,6 +6,7 @@
 #include "client/PaymentClient.h"
 #include "JwtManager.h"
 #include "Database.h"
+#include "DeliveryQuote.h"
 #include <algorithm>
 #include <cstdlib>
 #include <chrono>
@@ -14,6 +15,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <sqlite3.h>
+#include <ctime>
 
 namespace
 {
@@ -56,6 +58,55 @@ crow::response jsonError(int status, const std::string& message)
     body["success"] = false;
     body["message"] = message;
     return crow::response(status, body);
+}
+
+bool validCoordinates(double lat, double lon) { return lat>=-90 && lat<=90 && lon>=-180 && lon<=180; }
+bool envEnabled(const char* name) { const char* value=std::getenv(name); return value && std::string(value)=="1"; }
+bool isLateNight()
+{
+    const std::time_t now=std::time(nullptr); std::tm local{};
+#ifdef _WIN32
+    localtime_s(&local,&now);
+#else
+    localtime_r(&now,&local);
+#endif
+    return local.tm_hour>=23 || local.tm_hour<6;
+}
+std::vector<DeliveryPoint> parsePolygon(const crow::json::rvalue& restaurant)
+{
+    std::vector<DeliveryPoint> result;
+    if (!restaurant.has("deliveryPolygon") || std::string(restaurant["deliveryPolygon"].s()).empty()) return result;
+    const auto json=crow::json::load(std::string(restaurant["deliveryPolygon"].s()));
+    if (!json || json.t()!=crow::json::type::List) return result;
+    for (const auto& point:json) if(point.t()==crow::json::type::List && point.size()>=2)
+        result.push_back({point[0].d(),point[1].d()});
+    return result;
+}
+DeliveryRules rulesFor(const crow::json::rvalue& restaurant)
+{
+    DeliveryRules rules;
+    if(restaurant.has("deliveryRadiusKm")) rules.radiusKm=restaurant["deliveryRadiusKm"].d();
+    if(restaurant.has("baseDeliveryFee")) rules.baseFee=restaurant["baseDeliveryFee"].d();
+    if(restaurant.has("perKmFee")) rules.perKmFee=restaurant["perKmFee"].d();
+    if(restaurant.has("preparationMinutes")) rules.preparationMinutes=restaurant["preparationMinutes"].i();
+    rules.surge=envEnabled("DELIVERY_SURGE_MODE"); rules.rain=envEnabled("DELIVERY_RAIN_MODE"); rules.lateNight=isLateNight();
+    return rules;
+}
+crow::json::wvalue quoteJson(const DeliveryQuote& quote, const DeliveryRules& rules)
+{
+    crow::json::wvalue out; out["serviceable"]=quote.serviceable; out["distanceKm"]=quote.distanceKm;
+    out["deliveryFee"]=quote.fee; out["etaMinutes"]=quote.etaMinutes; out["zoneType"]=quote.zoneType;
+    out["rules"]["surge"]=rules.surge; out["rules"]["rain"]=rules.rain; out["rules"]["lateNight"]=rules.lateNight;
+    return out;
+}
+
+crow::json::wvalue addressRow(sqlite3_stmt* statement)
+{
+    crow::json::wvalue row; row["id"]=sqlite3_column_int(statement,0); row["label"]=reinterpret_cast<const char*>(sqlite3_column_text(statement,1));
+    row["recipient"]=reinterpret_cast<const char*>(sqlite3_column_text(statement,2)); row["phone"]=reinterpret_cast<const char*>(sqlite3_column_text(statement,3));
+    row["addressLine"]=reinterpret_cast<const char*>(sqlite3_column_text(statement,4)); row["latitude"]=sqlite3_column_double(statement,5);
+    row["longitude"]=sqlite3_column_double(statement,6); row["deliveryNotes"]=reinterpret_cast<const char*>(sqlite3_column_text(statement,7));
+    row["isDefault"]=sqlite3_column_int(statement,8)==1; return row;
 }
 
 struct DriverLocation
@@ -129,6 +180,7 @@ int main()
     crow::App<crow::CORSHandler> app;
     Database deliveryDatabase("delivery.db");
     deliveryDatabase.createDriverLocationTable();
+    deliveryDatabase.createCustomerAddressTable();
 
     auto& cors = app.get_middleware<crow::CORSHandler>();
     cors.global()
@@ -265,11 +317,76 @@ CROW_ROUTE(app, "/restaurants/<int>")
         return "API Gateway is Healthy!";
     });
 
-    OrderClient client; 
+    OrderClient client;
+
+    CROW_ROUTE(app, "/addresses")
+    .methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
+    ([&deliveryDatabase](const crow::request& req)
+    {
+        const auto userId=authenticatedUserId(req); if(!userId) return unauthorized();
+        std::lock_guard<std::recursive_mutex> lock(deliveryDatabase.mutex());
+        if(req.method==crow::HTTPMethod::GET) {
+            sqlite3_stmt* statement=nullptr; crow::json::wvalue rows; std::size_t index=0;
+            const char* sql="SELECT id,label,recipient,phone,address_line,latitude,longitude,delivery_notes,is_default FROM customer_addresses WHERE user_id=? ORDER BY is_default DESC,id DESC;";
+            if(sqlite3_prepare_v2(deliveryDatabase.connection(),sql,-1,&statement,nullptr)!=SQLITE_OK) return jsonError(500,"Could not load addresses");
+            sqlite3_bind_int(statement,1,*userId); while(sqlite3_step(statement)==SQLITE_ROW) rows[index++]=addressRow(statement); sqlite3_finalize(statement);
+            return crow::response(rows);
+        }
+        const auto input=crow::json::load(req.body);
+        if(!input || !input.has("label") || !input.has("recipient") || !input.has("phone") || !input.has("addressLine") || !input.has("latitude") || !input.has("longitude"))
+            return jsonError(400,"Label, recipient, phone, address and coordinates are required");
+        const double lat=input["latitude"].d(), lon=input["longitude"].d();
+        if(!validCoordinates(lat,lon) || std::string(input["phone"].s()).size()<7) return jsonError(422,"Address coordinates or phone are invalid");
+        const bool makeDefault=!input.has("isDefault") || input["isDefault"].b();
+        if(makeDefault) { sqlite3_stmt* clear=nullptr; sqlite3_prepare_v2(deliveryDatabase.connection(),"UPDATE customer_addresses SET is_default=0 WHERE user_id=?;",-1,&clear,nullptr); sqlite3_bind_int(clear,1,*userId); sqlite3_step(clear); sqlite3_finalize(clear); }
+        sqlite3_stmt* statement=nullptr; const char* sql="INSERT INTO customer_addresses(user_id,label,recipient,phone,address_line,latitude,longitude,delivery_notes,is_default,created_epoch) VALUES(?,?,?,?,?,?,?,?,?,?);";
+        if(sqlite3_prepare_v2(deliveryDatabase.connection(),sql,-1,&statement,nullptr)!=SQLITE_OK) return jsonError(500,"Could not save address");
+        sqlite3_bind_int(statement,1,*userId); sqlite3_bind_text(statement,2,input["label"].s().data(),-1,SQLITE_TRANSIENT); sqlite3_bind_text(statement,3,input["recipient"].s().data(),-1,SQLITE_TRANSIENT);
+        sqlite3_bind_text(statement,4,input["phone"].s().data(),-1,SQLITE_TRANSIENT); sqlite3_bind_text(statement,5,input["addressLine"].s().data(),-1,SQLITE_TRANSIENT);
+        sqlite3_bind_double(statement,6,lat); sqlite3_bind_double(statement,7,lon); const std::string notes=input.has("deliveryNotes")?std::string(input["deliveryNotes"].s()):"";
+        sqlite3_bind_text(statement,8,notes.c_str(),-1,SQLITE_TRANSIENT); sqlite3_bind_int(statement,9,makeDefault?1:0); sqlite3_bind_int64(statement,10,currentEpoch());
+        const int result=sqlite3_step(statement); sqlite3_finalize(statement); if(result!=SQLITE_DONE) return jsonError(500,"Could not save address");
+        crow::json::wvalue out; out["success"]=true; out["id"]=static_cast<int>(sqlite3_last_insert_rowid(deliveryDatabase.connection())); return crow::response(201,out);
+    });
+
+    CROW_ROUTE(app, "/addresses/<int>/select")
+    .methods(crow::HTTPMethod::PUT)
+    ([&deliveryDatabase](const crow::request& req,int id)
+    {
+        const auto userId=authenticatedUserId(req); if(!userId) return unauthorized(); std::lock_guard<std::recursive_mutex> lock(deliveryDatabase.mutex());
+        sqlite3_stmt* statement=nullptr; sqlite3_prepare_v2(deliveryDatabase.connection(),"UPDATE customer_addresses SET is_default=1 WHERE id=? AND user_id=?;",-1,&statement,nullptr);
+        sqlite3_bind_int(statement,1,id); sqlite3_bind_int(statement,2,*userId); sqlite3_step(statement); const bool found=sqlite3_changes(deliveryDatabase.connection())>0; sqlite3_finalize(statement);
+        if(!found) return jsonError(404,"Address not found"); sqlite3_prepare_v2(deliveryDatabase.connection(),"UPDATE customer_addresses SET is_default=0 WHERE user_id=? AND id<>?;",-1,&statement,nullptr);
+        sqlite3_bind_int(statement,1,*userId); sqlite3_bind_int(statement,2,id); sqlite3_step(statement); sqlite3_finalize(statement);
+        crow::json::wvalue out; out["success"]=true; return crow::response(out);
+    });
+
+    CROW_ROUTE(app, "/addresses/<int>")
+    .methods(crow::HTTPMethod::DELETE)
+    ([&deliveryDatabase](const crow::request& req,int id)
+    {
+        const auto userId=authenticatedUserId(req); if(!userId) return unauthorized(); std::lock_guard<std::recursive_mutex> lock(deliveryDatabase.mutex());
+        sqlite3_stmt* statement=nullptr; sqlite3_prepare_v2(deliveryDatabase.connection(),"DELETE FROM customer_addresses WHERE id=? AND user_id=?;",-1,&statement,nullptr);
+        sqlite3_bind_int(statement,1,id); sqlite3_bind_int(statement,2,*userId); sqlite3_step(statement); const bool removed=sqlite3_changes(deliveryDatabase.connection())>0; sqlite3_finalize(statement);
+        if(!removed) return jsonError(404,"Address not found"); crow::json::wvalue out; out["success"]=true; return crow::response(out);
+    });
+
+    CROW_ROUTE(app, "/delivery/quote")
+    .methods(crow::HTTPMethod::POST)
+    ([&restaurantClient](const crow::request& req)
+    {
+        const auto input=crow::json::load(req.body);
+        if(!input || !input.has("restaurantId") || !input.has("latitude") || !input.has("longitude")) return jsonError(400,"Restaurant and coordinates are required");
+        const double lat=input["latitude"].d(),lon=input["longitude"].d(); if(!validCoordinates(lat,lon)) return jsonError(422,"Coordinates are invalid");
+        const auto restaurant=crow::json::load(restaurantClient.getRestaurantById(input["restaurantId"].i()));
+        if(!restaurant || !restaurant.has("latitude") || !restaurant.has("longitude")) return jsonError(404,"Restaurant location is unavailable");
+        const auto rules=rulesFor(restaurant); const auto quote=calculateDeliveryQuote({restaurant["latitude"].d(),restaurant["longitude"].d()},{lat,lon},rules,parsePolygon(restaurant));
+        return crow::response(quote.serviceable?200:422,quoteJson(quote,rules));
+    });
 
     CROW_ROUTE(app, "/orders")
         .methods(crow::HTTPMethod::POST)
-    ([&client, &restaurantClient](const crow::request& req)
+    ([&client, &restaurantClient, &deliveryDatabase](const crow::request& req)
     {
         const auto userId = authenticatedUserId(req);
         if (!userId) return unauthorized();
@@ -277,29 +394,37 @@ CROW_ROUTE(app, "/restaurants/<int>")
         if (!input || !input.has("restaurantId") || !input.has("totalAmount") ||
             !input.has("deliveryLatitude") || !input.has("deliveryLongitude") || !input.has("deliveryAddress"))
             return jsonError(400, "Restaurant, amount, and delivery location are required");
-        const double deliveryLat = input["deliveryLatitude"].d();
-        const double deliveryLon = input["deliveryLongitude"].d();
+        double deliveryLat = input["deliveryLatitude"].d();
+        double deliveryLon = input["deliveryLongitude"].d();
+        std::string deliveryAddress=input["deliveryAddress"].s();
+        if(input.has("addressId")) {
+            std::lock_guard<std::recursive_mutex> lock(deliveryDatabase.mutex()); sqlite3_stmt* statement=nullptr;
+            sqlite3_prepare_v2(deliveryDatabase.connection(),"SELECT address_line,latitude,longitude FROM customer_addresses WHERE id=? AND user_id=?;",-1,&statement,nullptr);
+            sqlite3_bind_int(statement,1,input["addressId"].i()); sqlite3_bind_int(statement,2,*userId);
+            if(sqlite3_step(statement)!=SQLITE_ROW){ sqlite3_finalize(statement); return jsonError(422,"Select one of your saved delivery addresses"); }
+            deliveryAddress=reinterpret_cast<const char*>(sqlite3_column_text(statement,0)); deliveryLat=sqlite3_column_double(statement,1); deliveryLon=sqlite3_column_double(statement,2); sqlite3_finalize(statement);
+        }
         if (deliveryLat < -90 || deliveryLat > 90 || deliveryLon < -180 || deliveryLon > 180)
             return jsonError(422, "Delivery coordinates are invalid");
         const auto restaurant = crow::json::load(restaurantClient.getRestaurantById(input["restaurantId"].i()));
         if (!restaurant || !restaurant.has("latitude") || !restaurant.has("longitude"))
             return jsonError(404, "Restaurant location is unavailable");
-        const double distance = distanceKm(deliveryLat, deliveryLon,
-            restaurant["latitude"].d(), restaurant["longitude"].d());
-        const double radius = restaurant.has("deliveryRadiusKm") ? restaurant["deliveryRadiusKm"].d() : 8.0;
-        if (distance > radius)
+        const auto rules=rulesFor(restaurant); const auto quote=calculateDeliveryQuote({restaurant["latitude"].d(),restaurant["longitude"].d()},{deliveryLat,deliveryLon},rules,parsePolygon(restaurant));
+        if (!quote.serviceable)
             return jsonError(422, "This address is outside the restaurant delivery area");
         crow::json::wvalue body;
         body["userId"] = *userId;
         body["restaurantId"] = input["restaurantId"].i();
-        body["totalAmount"] = input["totalAmount"].d();
+        const double subtotal=input.has("subtotal")?input["subtotal"].d():input["totalAmount"].d();
+        const double discount=input.has("discountAmount")?input["discountAmount"].d():0.0;
+        body["totalAmount"] = subtotal-discount+quote.fee;
         body["deliveryLatitude"] = deliveryLat;
         body["deliveryLongitude"] = deliveryLon;
-        body["deliveryAddress"] = input["deliveryAddress"].s();
+        body["deliveryAddress"] = deliveryAddress;
         body["itemSummary"] = input.has("itemSummary") ? std::string(input["itemSummary"].s()) : "";
-        body["subtotal"] = input.has("subtotal") ? input["subtotal"].d() : input["totalAmount"].d();
-        body["discountAmount"] = input.has("discountAmount") ? input["discountAmount"].d() : 0.0;
-        body["deliveryFee"] = input.has("deliveryFee") ? input["deliveryFee"].d() : 0.0;
+        body["subtotal"] = subtotal;
+        body["discountAmount"] = discount;
+        body["deliveryFee"] = quote.fee;
         return crow::response(client.createOrder(body.dump()));
     });
 

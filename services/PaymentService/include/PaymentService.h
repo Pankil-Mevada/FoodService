@@ -8,6 +8,7 @@
 #include "Payment.h"
 #include "PaymentRepository.h"
 #include "client/NotificationClient.h"
+#include "client/OrderClient.h"
 
 class PaymentService
 {
@@ -30,6 +31,7 @@ public:
     std::optional<Payment> getPaymentForOrder(int orderId);
     std::optional<Payment> applyProviderEvent(const std::string& transactionId,
         const std::string& status, const std::string& providerPaymentId);
+    bool synchronizeOrder(const Payment& payment) const;
     bool attachProviderOrder(const std::string& transactionId, const std::string& provider,
                              const std::string& providerOrderId);
 
@@ -47,4 +49,5 @@ private:
 
 
     NotificationClient m_notificationClient;
+    OrderClient m_orderClient;
 };

@@ -21,6 +21,7 @@ JSON requests require `Content-Type: application/json`.
 | Orders | `GET /orders` | — | JWT required; returns only orders owned by the signed-in customer |
 | Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress`; optional `itemSummary`, `subtotal`, `discountAmount`, `deliveryFee` | JWT required; validates delivery zone and price arithmetic, derives customer ID |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
+| Internal order sync | `POST /orders/{id}/payment-status` | `paymentStatus`: `processing`, `succeeded`, `failed`, or `cancelled` | Direct Order Service only; requires `X-Internal-Secret`; maps payment state to order state idempotently |
 | Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership and successful payment required; returns the latest real driver GPS fix, freshness, distance-based progress/ETA, and timeline |
 | Driver GPS | `POST /driver/orders/{id}/location` | `latitude`, `longitude`; optional accuracy, speed, heading, delivery status and driver/vehicle profile | `X-Driver-Token` required; verified payment required; stores the real browser GPS fix in `delivery.db` |
 
@@ -37,7 +38,7 @@ test values and do not identify real people or vehicles.
 | Payments | `GET /payments/order/{orderId}` | — | Latest payment for an order |
 | Payments | `GET/PUT/DELETE /payments/{id}` | payment fields for PUT | Operational CRUD |
 | Payments | `GET /payments/stream?orderId={id}` | — | SSE-compatible current-state event with retry hint |
-| Payments | `POST /payments/webhooks/provider` | `transactionId`, `status`, optional `providerPaymentId` | Requires `X-Webhook-Secret` |
+| Payments | `POST /payments/webhooks/provider` | `transactionId`, `status`, optional `providerPaymentId` | Requires `X-Webhook-Secret`; synchronizes the corresponding order or returns 502 for safe retry |
 | Razorpay | `POST /payments/razorpay/order` | `transactionId` | JWT required; creates/reuses a Test Mode order server-side |
 | Razorpay | `POST /payments/razorpay/verify` | `transactionId`, `razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature` | JWT required; HMAC verification required before success |
 | Notifications | `GET /notifications` | — | Direct service; lists notifications |
@@ -56,7 +57,28 @@ Payment states are `pending`, `processing`, `succeeded`, `failed`, and
 `cancelled`. The gateway proxies these payment routes as well as the direct
 Payment Service.
 
+Payment Service calls Order Service with `X-Internal-Secret` after an accepted
+provider transition. Order mapping is `processing -> PAYMENT_PENDING`,
+`succeeded -> CONFIRMED`, `failed -> PAYMENT_FAILED`, and
+`cancelled -> CANCELLED`. A repeated status returns success without regressing a
+later order state. If the payment is durable but Order Service is unavailable,
+the provider endpoint returns HTTP 502 with the durable payment object and a
+retry-safe message.
+
 The implementation returns a mixture of JSON and plain-text errors. Clients
 must check HTTP status before decoding a domain object. Payment provider routes
 and exact status names should be documented here once the provider integration
 lands; do not infer success from the order-create response alone.
+# Delivery address and quote APIs
+
+All `/addresses` operations require the customer's bearer JWT.
+
+- `GET /addresses` lists only the signed-in customer's addresses.
+- `POST /addresses` accepts `label`, `recipient`, `phone`, `addressLine`, `latitude`, `longitude`, `deliveryNotes`, and `isDefault`.
+- `PUT /addresses/{id}/select` makes an owned address the default.
+- `DELETE /addresses/{id}` deletes an owned address.
+- `POST /delivery/quote` accepts `restaurantId`, `latitude`, and `longitude`. It returns `serviceable`, `distanceKm`, `deliveryFee`, `etaMinutes`, `zoneType`, and applied pricing flags. An outside-zone point returns HTTP 422.
+
+`POST /orders` accepts an optional `addressId`. The gateway verifies ownership, loads its coordinates, recalculates the delivery quote, rejects an outside-zone order, and replaces browser-provided delivery fee/total with server-calculated values.
+
+Restaurant configuration supports `deliveryRadiusKm`, `deliveryPolygon` (JSON `[[latitude,longitude], ...]`), `baseDeliveryFee`, `perKmFee`, and `preparationMinutes`. A valid polygon takes precedence over radius.

@@ -27,6 +27,10 @@ public:
     int orderId,
     const std::string& status);
 
+    bool updateOrderPaymentStatus(
+        int orderId,
+        const std::string& paymentStatus);
+
 private:
 
     OrderRepository& m_repository;

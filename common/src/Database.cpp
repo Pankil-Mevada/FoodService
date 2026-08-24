@@ -73,7 +73,11 @@ void Database::createRestaurantTable()
             latitude REAL NOT NULL DEFAULT 23.0225,
             longitude REAL NOT NULL DEFAULT 72.5714,
             delivery_radius_km REAL NOT NULL DEFAULT 8.0,
-            image_url TEXT NOT NULL DEFAULT ''
+            image_url TEXT NOT NULL DEFAULT '',
+            delivery_polygon TEXT NOT NULL DEFAULT '',
+            base_delivery_fee REAL NOT NULL DEFAULT 39.0,
+            per_km_fee REAL NOT NULL DEFAULT 5.0,
+            preparation_minutes INTEGER NOT NULL DEFAULT 20
         );
     )";
 
@@ -97,6 +101,30 @@ void Database::createRestaurantTable()
     sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN longitude REAL NOT NULL DEFAULT 72.5714;", nullptr, nullptr, nullptr);
     sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN delivery_radius_km REAL NOT NULL DEFAULT 8.0;", nullptr, nullptr, nullptr);
     sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN image_url TEXT NOT NULL DEFAULT '';", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN delivery_polygon TEXT NOT NULL DEFAULT '';", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN base_delivery_fee REAL NOT NULL DEFAULT 39.0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN per_km_fee REAL NOT NULL DEFAULT 5.0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(connection(), "ALTER TABLE restaurants ADD COLUMN preparation_minutes INTEGER NOT NULL DEFAULT 20;", nullptr, nullptr, nullptr);
+}
+
+void Database::createCustomerAddressTable()
+{
+    execute(R"(
+        CREATE TABLE IF NOT EXISTS customer_addresses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            label TEXT NOT NULL,
+            recipient TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            address_line TEXT NOT NULL,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
+            delivery_notes TEXT NOT NULL DEFAULT '',
+            is_default INTEGER NOT NULL DEFAULT 0,
+            created_epoch INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_customer_addresses_user ON customer_addresses(user_id);
+    )");
 }
 
 void Database::createOrderTable()

@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [string]$DriverToken = 'local-driver-test-token'
+    [string]$DriverToken = 'local-driver-test-token',
+    [string]$OrderSyncSecret = 'local-order-sync-secret'
 )
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -16,7 +17,8 @@ if (-not $env:RAZORPAY_KEY_ID.StartsWith('rzp_test_')) {
     throw 'RAZORPAY_KEY_ID is not a Test Mode key (expected rzp_test_ prefix).'
 }
 $env:DRIVER_LOCATION_TOKEN = $DriverToken
-$requiredBridge = @('RAZORPAY_KEY_ID/u', 'RAZORPAY_KEY_SECRET/u', 'RAZORPAY_WEBHOOK_SECRET/u', 'DRIVER_LOCATION_TOKEN/u')
+$env:ORDER_SYNC_SECRET = $OrderSyncSecret
+$requiredBridge = @('RAZORPAY_KEY_ID/u', 'RAZORPAY_KEY_SECRET/u', 'RAZORPAY_WEBHOOK_SECRET/u', 'DRIVER_LOCATION_TOKEN/u', 'ORDER_SYNC_SECRET/u')
 $existingBridge = @($env:WSLENV -split ':' | Where-Object { $_ })
 $env:WSLENV = (@($existingBridge + $requiredBridge) | Select-Object -Unique) -join ':'
 wsl bash /mnt/c/Users/Pankil/Documents/ChatGPT/FoodService/scripts/start-all.sh

@@ -1,6 +1,6 @@
 # FoodService product requirements
 
-Updated 2026-08-15. Checked items describe the exact locally implemented and
+Updated 2026-08-24. Checked items describe the exact locally implemented and
 tested slice; they do not imply production restaurant or courier integration.
 
 ## 1. Product vision
@@ -27,6 +27,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - basic order creation and listing
 - SQLite persistence per service
 - test-mode payment intents, idempotency, webhooks, and live status snapshots
+- authenticated payment-to-order synchronization for processing, success, failure, and cancellation
 - notification persistence
 - responsive Plated customer frontend
 - automated end-to-end test harness and dummy-payment script
@@ -48,11 +49,10 @@ The first commercial milestone is a complete single-city ordering journey:
 - passwords are stored/compared/logged as plaintext; hashing utility is incomplete
 - no roles or authorization rules for customer, restaurant, delivery, or admin
 - public restaurant/order mutation routes are insufficiently protected
-- payment completion does not update the corresponding order status
 - API Gateway does not consistently preserve downstream HTTP status codes
 - SSE is reconnect-based status sampling rather than a durable event stream
-- no reusable address book with recipient/phone/notes; current order has one freeform address and coordinates
-- nearby discovery relies on a public development endpoint; no production geocoder/maps/routing contract
+- address book and serviceability work locally; production still needs encrypted profile storage, retention controls, and geospatial indexing
+- map/geocoding and nearby discovery rely on public development endpoints; no production maps/routing contract
 - OpenStreetMap photo coverage is sparse; production needs licensed photo ingestion and owner moderation
 - driver assignment remains manual and the shared local driver token is not production driver identity
 - no tax, fee, coupon, or authoritative pricing engine
@@ -80,6 +80,12 @@ token. Clients must not be trusted to submit arbitrary `userId` values.
 - **P0 — Marketplace MVP:** required for a safe end-to-end ordering pilot.
 - **P1 — Growth:** required for a competitive single-city product.
 - **P2 — Scale:** useful after product-market validation and operational scale.
+
+Requirement status symbols used below:
+
+- ✅ **Done:** implemented and covered by focused validation for the development MVP.
+- 🟡 **Partial:** locally implemented, but a production provider, security, scale, or operational capability remains.
+- ⬜ **Not started:** not implemented yet.
 
 ## 5. Functional requirements
 
@@ -109,24 +115,25 @@ token. Clients must not be trusted to submit arbitrary `userId` values.
 
 Current local MVP coverage:
 
-- [x] capture a freeform delivery address plus browser coordinates on each order
-- [x] determine radius serviceability and reject checkout outside the zone
-- [x] display straight-line progress and distance/speed-based ETA from real driver GPS
+- ✅ Customer can add, list, select, and delete a JWT-owned delivery address.
+- ✅ Address contains label, recipient, phone, coordinates, address line, and delivery notes.
+- ✅ Determine whether a restaurant serves the selected address using a radius or configured polygon.
+- ✅ Prevent quote, checkout, and order creation when the address is outside the delivery zone.
+- ✅ Estimate straight-line distance, delivery fee, and delivery time on the backend.
+- ✅ Display straight-line progress and distance/speed-based ETA from real driver GPS.
 
 Production requirements still open:
 
-- customer can add and select a delivery address
-- address contains label, recipient, phone, coordinates, and delivery notes
-- determine whether a restaurant serves the selected address
-- prevent checkout when an address is outside the delivery zone
-- estimate delivery time and distance
+- 🟡 Move customer addresses from the gateway MVP database to an encrypted profile/address service with retention controls.
+- 🟡 Replace straight-line distance and formula ETA with road-network routing and live traffic.
+- ⬜ Add address verification, apartment/building metadata, and delivery-instruction moderation.
 
 #### P1
 
-- map-based address picker and geocoding
-- [x] live location permission with manual-address fallback and user-triggered nearby discovery (development MVP)
-- configurable restaurant delivery radius or polygon
-- surge, rain, late-night, and distance-based delivery rules
+- 🟡 Map-based address picker and Nominatim geocoding work locally; a contracted production provider and failure policy remain.
+- ✅ Live location permission with manual-address fallback and user-triggered nearby discovery.
+- ✅ Configurable restaurant delivery radius or polygon.
+- 🟡 Distance, simulated surge/rain, and server-clock late-night rules work; trusted weather/demand signals and restaurant-timezone schedules remain.
 
 ### 5.3 Restaurant discovery
 
@@ -257,9 +264,9 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 - [x] verify Razorpay checkout signatures server-side with HMAC-SHA256/OpenSSL
 - idempotent payment creation and webhook handling
 - webhook event deduplication and durable event log
-- successful/failed payment updates both `payment` and `order` consistently
-- payment states map clearly to order states
-- support test success, failure, cancellation, timeout, and duplicate webhook cases
+- [x] successful/failed/cancelled payment callbacks update both `payment` and `order` through the authenticated local synchronization endpoint
+- [x] payment states map to `PAYMENT_PENDING`, `CONFIRMED`, `PAYMENT_FAILED`, and `CANCELLED` without regressing later delivery states
+- [x] support local test success, failure, cancellation, and duplicate callback cases; provider timeout/reconciliation remains open
 - cash-on-delivery is represented as a separate method without fake online payment
 - refund creation, status tracking, and webhook reconciliation
 - all amounts use currency plus integer minor units
@@ -510,14 +517,15 @@ No test may charge real money or use production customer data.
 - fix gateway status propagation and standardize errors
 - [x] derive customer identity from JWT and remove manual user ID (gateway order/payment creation and E2E verified)
 - protect restaurant, order, payment, and notification routes by role
-- make payment webhooks update order status consistently
+- [x] make payment callbacks update order status consistently (authenticated callback, idempotent state mapping, focused C++ test, and expanded E2E coverage)
 - add database migrations, unit tests, and CI
 - create repeatable one-command local startup
 
 ### Phase 1 — Ordering MVP
 
-- [x] local address/serviceability slice: browser coordinates, persisted destination, radius validation
-- production address book, geocoding, privacy retention, and routing provider
+- ✅ Local address book and serviceability: JWT ownership, GPS/manual/map selection, radius/polygon validation, quote, and checkout enforcement.
+- 🟡 Development geocoding and map tiles using OpenStreetMap/Nominatim.
+- ⬜ Production address privacy/retention controls and contracted map/routing provider.
 - menu/category/item/add-on model
 - cart, server-side pricing, taxes, fees, and itemized orders
 - customer restaurant/menu/cart/checkout/order-history screens
@@ -595,3 +603,16 @@ or use real payment credentials.
 
 At the start of each milestone, move selected requirements into an issue or task
 list with an owner, target release, dependencies, and testable acceptance criteria.
+## 15. Marketplace delivery status summary
+
+- ✅ Signed-in customers can add, list, select, and delete delivery addresses.
+- ✅ Each address stores label, recipient, phone, coordinates, address line, and delivery notes.
+- ✅ GPS selection, manual entry, OpenStreetMap click selection, and Nominatim search are available; manual/GPS remain usable if map search fails.
+- ✅ Restaurant serviceability is enforced on the server using a radius or configured polygon.
+- ✅ Checkout is blocked outside the delivery zone and order creation independently rechecks it.
+- ✅ The server estimates straight-line distance, delivery fee, and ETA.
+- ✅ Base/per-kilometre fees and restaurant preparation minutes are configurable per restaurant.
+- 🟡 Surge, rain, and late-night multipliers are server-controlled, but rain and surge currently use development flags rather than real operational feeds.
+- ⬜ Road-network distance, live traffic ETA, trusted weather, demand-driven surge, production geocoding contracts, and large-scale geospatial storage.
+
+Production follow-up: replace straight-line distance with a contracted routing provider, obtain rain/surge signals from trusted operations/weather systems, move addresses to a dedicated profile service with encryption/retention controls, and use a geospatial database/index for large-scale polygon queries.

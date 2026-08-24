@@ -27,6 +27,7 @@ public:
     void createPaymentTable();
     void createNotificationTable();
     void createDriverLocationTable();
+    void createCustomerAddressTable();
 
     Database(const Database&) = delete;
     Database& operator=(const Database&) = delete;

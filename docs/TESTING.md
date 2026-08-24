@@ -65,6 +65,9 @@ eventual timeout and 500-ms interval.
 The suite also sends the same test payment twice with one `Idempotency-Key`,
 checks order-based payment lookup, reads the finite SSE-compatible snapshot, and
 submits an unsigned/unknown webhook that must be rejected without mutation.
+It now verifies `succeeded -> CONFIRMED`, `failed -> PAYMENT_FAILED`, and
+`cancelled -> CANCELLED`, repeats a succeeded callback to prove idempotency, and
+proves that an invalid internal order-sync secret is rejected.
 It resolves `GET /me`, rejects anonymous order creation, and submits a forged
 `userId` to prove the gateway ignores client identity and uses the JWT claim.
 The suite also reads the resulting order list with that JWT; anonymous order
@@ -85,6 +88,27 @@ show distance and **Order here**, while Ahmedabad fixtures show **Outside area**
 Latest verified local result on 2026-08-15: **21 passed, 0 failed, 0 skipped**.
 The WSL C++ build, JavaScript syntax check, Python compilation, and
 `git diff --check` also passed.
+
+## Focused payment/order transition test
+
+The production transition policy is dependency-free and is tested directly:
+
+```bash
+g++ -std=c++20 -Wall -Wextra -Werror \
+  -I services/OrderService/include \
+  tests/payment_order_status_test.cpp \
+  -o /tmp/payment_order_status_test
+/tmp/payment_order_status_test
+```
+
+The test covers processing, success, failure, cancellation, duplicate callbacks,
+non-regression after confirmation/delivery, and invalid transitions. Latest
+verified result on 2026-08-24: **payment/order transition tests passed**.
+
+The full service E2E suite was expanded for the same flow, but must be run after
+regenerating the machine-specific CMake/vcpkg build. The checked-in `build/`
+cache references the removed `/workspaces/FoodService` environment and is not
+valid evidence for the current source tree.
 
 ## Manual checks
 
@@ -123,3 +147,8 @@ The restaurant acceptance scenario now verifies `imageUrl` persistence. Browser
 photo rendering still requires a rebuilt Restaurant Service and API Gateway;
 the legacy `build/` cache is machine-specific and must be regenerated when its
 recorded source or vcpkg paths do not exist.
+# Delivery address and serviceability tests
+
+The dependency-free `tests/delivery_quote_test.cpp` covers near/far radius decisions, polygon inclusion/exclusion, rain pricing, and ETA. UI/API testing should also verify: address JWT isolation; invalid phone/coordinates; selecting/deleting another user's address returns no data/change; GPS denial leaves manual/map entry available; Nominatim failure leaves manual/GPS available; an outside-zone quote and order both return 422; browser fee tampering is replaced by the server quote; and surge/rain/late-night flags appear in the quote.
+
+For local rain/surge checks, start API Gateway with `DELIVERY_RAIN_MODE=1` and/or `DELIVERY_SURGE_MODE=1`. These flags are development controls, not real weather or demand detection.

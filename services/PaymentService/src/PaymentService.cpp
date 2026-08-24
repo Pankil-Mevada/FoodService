@@ -108,6 +108,12 @@ std::optional<Payment> PaymentService::getPaymentByTransactionId(const std::stri
     return m_repository.getPaymentByTransactionId(transactionId);
 }
 
+bool PaymentService::synchronizeOrder(const Payment& payment) const
+{
+    return m_orderClient.synchronizePaymentStatus(
+        payment.getOrderId(), payment.getStatus());
+}
+
 std::optional<Payment> PaymentService::getPaymentByIdempotencyKey(const std::string& idempotencyKey)
 {
     return m_repository.getPaymentByIdempotencyKey(idempotencyKey);

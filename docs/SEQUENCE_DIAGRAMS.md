@@ -280,29 +280,42 @@ stateDiagram-v2
     cancelled --> [*]
 ```
 
-## 5. Current consistency boundary
+## 5. Payment-to-order consistency boundary
 
-The provider webhook updates `payment.db`, and the frontend displays Payment
-Service status. It does **not** currently update the matching `order.db` row
-from `PAYMENT_PENDING` to a final state.
+After an authenticated provider callback is accepted, Payment Service persists
+the payment transition and synchronously calls the authenticated internal Order
+Service payment-status endpoint.
 
 ```mermaid
 sequenceDiagram
     participant Provider as Dummy/real provider
     participant PS as Payment Service
     participant PDB as payment.db
+    participant OS as Order Service
     participant ODB as order.db
 
     Provider->>PS: Webhook: succeeded
-    PS->>PDB: Payment = succeeded
-    Note over PS,ODB: No order-status callback or event exists yet
-    ODB-->>ODB: Order remains PAYMENT_PENDING
+    PS->>PDB: Idempotently set Payment = succeeded
+    PDB-->>PS: Durable payment state
+    PS->>OS: POST /orders/{id}/payment-status<br/>X-Internal-Secret<br/>{paymentStatus: succeeded}
+    OS->>OS: Validate secret and transition policy
+    OS->>ODB: PAYMENT_PENDING -> CONFIRMED
+    ODB-->>OS: Order updated
+    OS-->>PS: HTTP 200 synchronized
+    PS-->>Provider: HTTP 200 payment + order consistent
+
+    alt Order Service unavailable
+        PS-->>Provider: HTTP 502 payment stored; retry safely
+        Note over PS,OS: Duplicate callback re-attempts order synchronization
+    end
 ```
 
-For production consistency, Payment Service should publish a payment-status
-event or call a dedicated authenticated Order Service status endpoint. Order
-Service would update `order.db` to `PAID`, `PAYMENT_FAILED`, or
-`PAYMENT_CANCELLED` using the payment's `orderId`.
+The same endpoint maps `processing -> PAYMENT_PENDING`,
+`failed -> PAYMENT_FAILED`, and `cancelled -> CANCELLED`. Duplicate events are
+accepted without regressing `CONFIRMED` or delivery states. This local synchronous
+callback exposes failures but cannot guarantee delivery after a process crash.
+Production still requires a transactional outbox, durable broker, idempotent
+consumer/event IDs, retries, and payment/order reconciliation.
 
 ## 6. Fetch nearby restaurants from the customer's location
 
@@ -418,3 +431,32 @@ selected maps/routing provider for road-aware ETA.
 - Automated end-to-end flow: `tests/e2e_test.py`
 - Parallel load and persistence verification: `tests/load_test.py`
 - Manual payment simulator: `scripts/test-dummy-payment.ps1`
+# Address selection and protected checkout
+
+```mermaid
+sequenceDiagram
+  actor Customer
+  participant UI as Web UI
+  participant Map as OpenStreetMap/Nominatim
+  participant GW as API Gateway
+  participant DB as Delivery DB
+  participant RS as Restaurant Service
+  participant OS as Order Service
+  Customer->>UI: GPS, manual entry, map search/click
+  UI->>Map: Search/tiles (only after user action)
+  UI->>GW: POST /addresses + JWT
+  GW->>DB: Store address under JWT user ID
+  UI->>GW: POST /delivery/quote
+  GW->>RS: Load radius/polygon and fee rules
+  GW-->>UI: serviceable, distance, fee, ETA, rules
+  alt outside delivery zone
+    UI-->>Customer: Checkout blocked
+  else serviceable
+    UI->>GW: POST /orders + addressId
+    GW->>DB: Verify address belongs to JWT user
+    GW->>RS: Reload restaurant rules
+    GW->>GW: Recalculate quote (do not trust UI)
+    GW->>OS: Create order with server fee/total
+    OS-->>UI: Order created
+  end
+```

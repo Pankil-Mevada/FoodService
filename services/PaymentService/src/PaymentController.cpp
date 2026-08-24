@@ -22,6 +22,14 @@ bool safeEqual(const std::string& a, const std::string& b)
         difference |= static_cast<unsigned char>(i < a.size() ? a[i] : 0) ^ static_cast<unsigned char>(i < b.size() ? b[i] : 0);
     return difference == 0;
 }
+crow::response orderSyncFailure(const Payment& payment)
+{
+    crow::json::wvalue response;
+    response["success"] = false;
+    response["message"] = "Payment was stored but Order Service synchronization failed; retry this provider event safely";
+    response["payment"] = paymentJson(payment);
+    return crow::response(502, response);
+}
 }
 
 PaymentController::PaymentController(PaymentService& service)
@@ -111,6 +119,11 @@ crow::response PaymentController::providerWebhook(const crow::request& req)
     std::string providerId = json.has("providerPaymentId") ? std::string(json["providerPaymentId"].s()) : "";
     auto payment = m_service.applyProviderEvent(json["transactionId"].s(), status, providerId);
     if (!payment) { CROW_LOG_WARNING << "Provider webhook transition rejected"; return crow::response(409, "Payment not found or transition rejected"); }
+    if (!m_service.synchronizeOrder(*payment)) {
+        CROW_LOG_ERROR << "Provider webhook stored payment but order synchronization failed transaction "
+                       << json["transactionId"].s();
+        return orderSyncFailure(*payment);
+    }
     CROW_LOG_INFO << "Provider webhook applied transaction " << json["transactionId"].s() << " status " << status;
     return crow::response(paymentJson(*payment));
 }
@@ -161,6 +174,10 @@ crow::response PaymentController::verifyRazorpayPayment(const crow::request& req
     }
     auto updated = m_service.applyProviderEvent(transactionId, "succeeded", paymentId);
     if (!updated) return crow::response(409, "Payment transition rejected");
+    if (!m_service.synchronizeOrder(*updated)) {
+        CROW_LOG_ERROR << "Razorpay payment stored but order synchronization failed transaction " << transactionId;
+        return orderSyncFailure(*updated);
+    }
     CROW_LOG_INFO << "Razorpay payment verified transaction " << transactionId << " status succeeded";
     return crow::response(paymentJson(*updated));
 }

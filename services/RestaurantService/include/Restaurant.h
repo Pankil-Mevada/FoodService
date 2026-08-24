@@ -15,7 +15,11 @@ public:
         double latitude = 23.0225,
         double longitude = 72.5714,
         double deliveryRadiusKm = 8.0,
-        const std::string& imageUrl = "");
+        const std::string& imageUrl = "",
+        const std::string& deliveryPolygon = "",
+        double baseDeliveryFee = 39.0,
+        double perKmFee = 5.0,
+        int preparationMinutes = 20);
 
     int getId() const;
 
@@ -30,6 +34,10 @@ public:
     double getLongitude() const;
     double getDeliveryRadiusKm() const;
     const std::string& getImageUrl() const;
+    const std::string& getDeliveryPolygon() const;
+    double getBaseDeliveryFee() const;
+    double getPerKmFee() const;
+    int getPreparationMinutes() const;
 
 private:
 
@@ -46,4 +54,8 @@ private:
     double m_longitude{72.5714};
     double m_deliveryRadiusKm{8.0};
     std::string m_imageUrl;
+    std::string m_deliveryPolygon;
+    double m_baseDeliveryFee{39.0};
+    double m_perKmFee{5.0};
+    int m_preparationMinutes{20};
 };

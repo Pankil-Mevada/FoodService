@@ -1,4 +1,5 @@
 #include "OrderService.h"
+#include "PaymentOrderStatus.h"
 #include <iostream>
 
 OrderService::OrderService(OrderRepository& repository)
@@ -90,4 +91,24 @@ bool OrderService::updateOrderStatus(
     return m_repository.updateOrderStatus(
         orderId,
         status);
+}
+
+bool OrderService::updateOrderPaymentStatus(
+    int orderId,
+    const std::string& paymentStatus)
+{
+    const auto order = m_repository.getOrderById(orderId);
+    if (!order) return false;
+
+    const std::string current = order->getStatus();
+    const auto transition = paymentOrderTransition(current, paymentStatus);
+    if (!transition.accepted) return false;
+    if (!transition.updateRequired) return true;
+
+    const bool updated = m_repository.updateOrderStatus(orderId, transition.nextStatus);
+    std::clog << "[payment-order-sync] order=" << orderId
+              << " paymentStatus=" << paymentStatus
+              << " from=" << current << " to=" << transition.nextStatus
+              << " result=" << (updated ? "updated" : "failed") << std::endl;
+    return updated;
 }

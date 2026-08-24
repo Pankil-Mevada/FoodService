@@ -31,7 +31,11 @@ crow::response RestaurantController::registerRestaurant(const crow::request& req
 			json.has("latitude") ? json["latitude"].d() : 23.0225,
 			json.has("longitude") ? json["longitude"].d() : 72.5714,
 			json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0,
-			json.has("imageUrl") ? std::string(json["imageUrl"].s()) : ""
+			json.has("imageUrl") ? std::string(json["imageUrl"].s()) : "",
+            json.has("deliveryPolygon") ? std::string(json["deliveryPolygon"].s()) : "",
+            json.has("baseDeliveryFee") ? json["baseDeliveryFee"].d() : 39.0,
+            json.has("perKmFee") ? json["perKmFee"].d() : 5.0,
+            json.has("preparationMinutes") ? json["preparationMinutes"].i() : 20
 			);
 	if (!UserValidator::validateName(restaurant.getName()))
 	{
@@ -78,6 +82,7 @@ crow::response RestaurantController::getAllRestaurants()
 	    response[index]["longitude"] = restaurant.getLongitude();
 	    response[index]["deliveryRadiusKm"] = restaurant.getDeliveryRadiusKm();
 	    response[index]["imageUrl"] = restaurant.getImageUrl();
+	    response[index]["deliveryPolygon"] = restaurant.getDeliveryPolygon(); response[index]["baseDeliveryFee"] = restaurant.getBaseDeliveryFee(); response[index]["perKmFee"] = restaurant.getPerKmFee(); response[index]["preparationMinutes"] = restaurant.getPreparationMinutes();
 
 	    ++index;
     }
@@ -108,6 +113,7 @@ crow::response RestaurantController::getRestaurantById(int id)
     response["longitude"] = restaurant->getLongitude();
     response["deliveryRadiusKm"] = restaurant->getDeliveryRadiusKm();
     response["imageUrl"] = restaurant->getImageUrl();
+    response["deliveryPolygon"] = restaurant->getDeliveryPolygon(); response["baseDeliveryFee"] = restaurant->getBaseDeliveryFee(); response["perKmFee"] = restaurant->getPerKmFee(); response["preparationMinutes"] = restaurant->getPreparationMinutes();
     
     return crow::response(response);
 }
@@ -132,7 +138,7 @@ crow::response RestaurantController::updateRestaurant(
         json.has("latitude") ? json["latitude"].d() : 23.0225,
         json.has("longitude") ? json["longitude"].d() : 72.5714,
         json.has("deliveryRadiusKm") ? json["deliveryRadiusKm"].d() : 8.0,
-        json.has("imageUrl") ? std::string(json["imageUrl"].s()) : "");
+        json.has("imageUrl") ? std::string(json["imageUrl"].s()) : "", json.has("deliveryPolygon") ? std::string(json["deliveryPolygon"].s()) : "", json.has("baseDeliveryFee") ? json["baseDeliveryFee"].d() : 39.0, json.has("perKmFee") ? json["perKmFee"].d() : 5.0, json.has("preparationMinutes") ? json["preparationMinutes"].i() : 20);
 	
     if (!UserValidator::validateName(restaurant.getName()))
     {

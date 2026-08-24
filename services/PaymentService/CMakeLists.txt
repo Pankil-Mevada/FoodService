@@ -6,6 +6,7 @@ add_executable(PaymentService
     src/PaymentRepository.cpp
     src/RazorpayClient.cpp
     src/client/NotificationClient.cpp
+    src/client/OrderClient.cpp
 )
 
 target_include_directories(PaymentService PRIVATE

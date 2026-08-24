@@ -68,6 +68,8 @@ class Suite:
         self.idempotent_payment_id: int | None = None
         self.test_transaction_id: str | None = None
         self.order_transaction_id: str | None = None
+        self.extra_order_ids: list[int] = []
+        self.extra_payment_ids: list[int] = []
         suffix = uuid.uuid4().hex[:10]
         self.email = f"foodservice-e2e-{suffix}@example.test"
 
@@ -138,6 +140,32 @@ class Suite:
             raise AssertionError(f"anonymous order was accepted: HTTP {status}, {payload}")
         return "HTTP 401"
 
+    def address_book_and_quote(self) -> str:
+        if not self.token or "restaurant" not in self.created:
+            raise SkipTest("requires login and restaurant")
+        status, payload = self.api.request("POST", f"{self.args.gateway}/addresses", {
+            "label": "Home", "recipient": "FoodService E2E", "phone": "+919999999999",
+            "addressLine": "E2E Test Address", "latitude": 23.0240, "longitude": 72.5730,
+            "deliveryNotes": "Test only", "isDefault": True
+        }, token=self.token)
+        self.expect(status, (201,), payload)
+        self.created["address"] = int(payload["id"])
+        status, addresses = self.api.request("GET", f"{self.args.gateway}/addresses", token=self.token)
+        self.expect(status, (200,), addresses)
+        if not any(int(item.get("id", 0)) == self.created["address"] and item.get("recipient") == "FoodService E2E" for item in addresses):
+            raise AssertionError(f"saved address missing or incomplete: {addresses}")
+        status, quote = self.api.request("POST", f"{self.args.gateway}/delivery/quote", {
+            "restaurantId": self.created["restaurant"], "latitude": 23.0240, "longitude": 72.5730
+        })
+        self.expect(status, (200,), quote)
+        if not quote.get("serviceable") or quote.get("distanceKm", 99) >= 8 or quote.get("etaMinutes", 0) <= 0:
+            raise AssertionError(f"nearby address quote is invalid: {quote}")
+        status, outside = self.api.request("POST", f"{self.args.gateway}/delivery/quote", {
+            "restaurantId": self.created["restaurant"], "latitude": 24.0, "longitude": 73.5
+        })
+        self.expect(status, (422,), outside)
+        return f"address {self.created['address']}; {quote['distanceKm']:.2f} km; ₹{quote['deliveryFee']}; {quote['etaMinutes']} min"
+
     def restaurant(self) -> str:
         name = f"E2E Kitchen {uuid.uuid4().hex[:8]}"
         status, payload = self.api.request("POST", f"{self.args.gateway}/restaurants", {
@@ -159,12 +187,13 @@ class Suite:
         return f"restaurant id {match['id']}"
 
     def order_and_payment(self) -> str:
-        if "user" not in self.created or "restaurant" not in self.created:
-            raise SkipTest("requires successful user and restaurant setup")
+        if "user" not in self.created or "restaurant" not in self.created or "address" not in self.created:
+            raise SkipTest("requires successful user, restaurant, and address setup")
         before_status, before = self.api.request("GET", f"{self.args.payments}/payments")
         self.expect(before_status, (200,), before)
         status, payload = self.api.request("POST", f"{self.args.gateway}/orders", {
             "userId": self.created["user"] + 999999, "restaurantId": self.created["restaurant"],
+            "addressId": self.created.get("address"),
             "totalAmount": 12.34, "deliveryLatitude": 23.0240,
             "deliveryLongitude": 72.5730, "deliveryAddress": "E2E Test Address",
             "itemSummary": "Test Biryani × 1", "subtotal": 12.0,
@@ -223,7 +252,88 @@ class Suite:
         self.expect(status, (200,), payload)
         if payload.get("status") != "succeeded":
             raise AssertionError(f"order payment did not succeed: {payload}")
-        return "verified test payment succeeded; delivery may start"
+        status, order = self.api.request(
+            "GET", f"{self.args.orders}/orders/{self.created['order']}")
+        self.expect(status, (200,), order)
+        if order.get("status") != "CONFIRMED":
+            raise AssertionError(f"successful payment did not confirm order: {order}")
+
+        # A duplicate provider event must remain safe and must not regress state.
+        status, duplicate = self.api.request(
+            "POST", f"{self.args.payments}/payments/webhooks/provider",
+            {"transactionId": self.order_transaction_id, "status": "succeeded",
+             "providerPaymentId": payload.get("providerPaymentId", "test_duplicate")},
+            extra_headers={"X-Webhook-Secret": self.args.webhook_secret})
+        self.expect(status, (200,), duplicate)
+        status, order = self.api.request(
+            "GET", f"{self.args.orders}/orders/{self.created['order']}")
+        self.expect(status, (200,), order)
+        if order.get("status") != "CONFIRMED":
+            raise AssertionError(f"duplicate payment event regressed order: {order}")
+        return "succeeded -> CONFIRMED; duplicate event remained idempotent"
+
+    def payment_failure_and_cancellation_sync(self) -> str:
+        if "restaurant" not in self.created or not self.token:
+            raise SkipTest("requires restaurant and authenticated customer")
+        if not self.args.webhook_secret:
+            raise SkipTest("set --webhook-secret for payment/order synchronization")
+
+        observed: list[str] = []
+        for payment_status, expected_order_status in (
+                ("failed", "PAYMENT_FAILED"), ("cancelled", "CANCELLED")):
+            address = f"E2E {payment_status} {uuid.uuid4().hex[:8]}"
+            status, created = self.api.request("POST", f"{self.args.gateway}/orders", {
+                "restaurantId": self.created["restaurant"], "totalAmount": 10.0,
+                "deliveryLatitude": 23.0240, "deliveryLongitude": 72.5730,
+                "deliveryAddress": address, "itemSummary": "Status Test Meal × 1",
+                "subtotal": 10.0, "discountAmount": 0.0, "deliveryFee": 0.0
+            }, token=self.token)
+            self.expect(status, (200, 201), created)
+
+            status, orders = self.api.request("GET", f"{self.args.gateway}/orders", token=self.token)
+            self.expect(status, (200,), orders)
+            order = next((item for item in orders if item.get("deliveryAddress") == address), None)
+            if not order:
+                raise AssertionError(f"{payment_status} test order was not persisted")
+            order_id = int(order["id"])
+            self.extra_order_ids.append(order_id)
+
+            deadline = time.monotonic() + self.args.eventual_timeout
+            payment = None
+            while time.monotonic() < deadline:
+                p_status, candidate = self.api.request(
+                    "GET", f"{self.args.payments}/payments/order/{order_id}")
+                if p_status == 200 and isinstance(candidate, dict):
+                    payment = candidate
+                    break
+                time.sleep(self.args.poll_interval)
+            if not payment:
+                raise AssertionError(f"no payment created for {payment_status} test order")
+            self.extra_payment_ids.append(int(payment["id"]))
+
+            # The Order Service callback is internal and rejects an invalid secret.
+            rejected_status, _ = self.api.request(
+                "POST", f"{self.args.orders}/orders/{order_id}/payment-status",
+                {"paymentStatus": payment_status},
+                extra_headers={"X-Internal-Secret": "wrong-secret"})
+            if rejected_status != 401:
+                raise AssertionError(f"internal order sync accepted invalid secret: HTTP {rejected_status}")
+
+            status, transitioned = self.api.request(
+                "POST", f"{self.args.payments}/payments/webhooks/provider",
+                {"transactionId": payment["transactionId"], "status": payment_status,
+                 "providerPaymentId": f"test_{payment_status}_{uuid.uuid4().hex[:8]}"},
+                extra_headers={"X-Webhook-Secret": self.args.webhook_secret})
+            self.expect(status, (200,), transitioned)
+            status, synchronized = self.api.request(
+                "GET", f"{self.args.orders}/orders/{order_id}")
+            self.expect(status, (200,), synchronized)
+            if synchronized.get("status") != expected_order_status:
+                raise AssertionError(
+                    f"{payment_status} payment did not map to {expected_order_status}: {synchronized}")
+            observed.append(f"{payment_status}->{expected_order_status}")
+
+        return ", ".join(observed) + "; invalid internal secret rejected"
 
     def reject_invalid_razorpay_signature(self) -> str:
         if not self.order_transaction_id:
@@ -388,6 +498,12 @@ class Suite:
             return
         if self.idempotent_payment_id is not None:
             self.api.request("DELETE", f"{self.args.payments}/payments/{self.idempotent_payment_id}")
+        for payment_id in self.extra_payment_ids:
+            self.api.request("DELETE", f"{self.args.payments}/payments/{payment_id}")
+        for order_id in self.extra_order_ids:
+            self.api.request("DELETE", f"{self.args.gateway}/orders/{order_id}", token=self.token)
+        if "address" in self.created:
+            self.api.request("DELETE", f"{self.args.gateway}/addresses/{self.created['address']}", token=self.token)
         targets = [
             ("payment", self.args.payments, "payments", None),
             ("order", self.args.gateway, "orders", None),
@@ -411,11 +527,13 @@ class Suite:
         self.run("auth:current-user", self.current_user)
         self.run("orders:reject-anonymous", self.reject_anonymous_order)
         self.run("restaurants:create-and-list", self.restaurant)
+        self.run("addresses:book-and-delivery-quote", self.address_book_and_quote)
         self.run("orders:reject-outside-delivery-zone", self.reject_outside_delivery_zone)
         self.run("orders:payment-eventual-consistency", self.order_and_payment)
         self.run("orders:reject-tracking-before-payment", self.reject_tracking_before_payment)
         self.run("payments:reject-forged-razorpay-signature", self.reject_invalid_razorpay_signature)
         self.run("payments:complete-order-payment", self.complete_order_payment)
+        self.run("payments:failure-cancellation-order-sync", self.payment_failure_and_cancellation_sync)
         self.run("orders:live-delivery-tracking", self.delivery_tracking)
         self.run("payments:idempotency", self.payment_idempotency)
         self.run("payments:realtime-snapshot", self.realtime_payment_snapshot)

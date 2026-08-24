@@ -11,8 +11,8 @@ RestaurantRepository::RestaurantRepository(Database& database)
 bool RestaurantRepository::saveRestaurant(const Restaurant& restaurant)
 {
     const char* sql =
-        "INSERT INTO restaurants(name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url) "
-        "VALUES(?,?,?,?,?,?,?,?);";
+        "INSERT INTO restaurants(name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url,delivery_polygon,base_delivery_fee,per_km_fee,preparation_minutes) "
+        "VALUES(?,?,?,?,?,?,?,?,?,?,?,?);";
 
     sqlite3_stmt* stmt = nullptr;
 
@@ -37,6 +37,8 @@ bool RestaurantRepository::saveRestaurant(const Restaurant& restaurant)
     sqlite3_bind_double(stmt, 6, restaurant.getLongitude());
     sqlite3_bind_double(stmt, 7, restaurant.getDeliveryRadiusKm());
     sqlite3_bind_text(stmt, 8, restaurant.getImageUrl().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, 9, restaurant.getDeliveryPolygon().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_double(stmt, 10, restaurant.getBaseDeliveryFee()); sqlite3_bind_double(stmt, 11, restaurant.getPerKmFee()); sqlite3_bind_int(stmt, 12, restaurant.getPreparationMinutes());
 
     rc = sqlite3_step(stmt);
 
@@ -50,7 +52,7 @@ std::vector<Restaurant> RestaurantRepository::getAllRestaurants()
     std::vector<Restaurant> restaurants;
 
     const char* sql =
-        "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url FROM restaurants;";
+        "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url,delivery_polygon,base_delivery_fee,per_km_fee,preparation_minutes FROM restaurants;";
 
     sqlite3_stmt* stmt = nullptr;
 
@@ -82,7 +84,7 @@ std::vector<Restaurant> RestaurantRepository::getAllRestaurants()
             sqlite3_column_double(stmt, 5),
             sqlite3_column_double(stmt, 6),
             sqlite3_column_double(stmt, 7),
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)));
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)), reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9)), sqlite3_column_double(stmt,10), sqlite3_column_double(stmt,11), sqlite3_column_int(stmt,12));
     }
 
     sqlite3_finalize(stmt);
@@ -93,7 +95,7 @@ std::vector<Restaurant> RestaurantRepository::getAllRestaurants()
 std::optional<Restaurant> RestaurantRepository::getRestaurantById(int id)
 {
     const char* sql =
-        "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url "
+        "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url,delivery_polygon,base_delivery_fee,per_km_fee,preparation_minutes "
         "FROM restaurants "
         "WHERE id=?;";
 
@@ -129,7 +131,7 @@ std::optional<Restaurant> RestaurantRepository::getRestaurantById(int id)
             sqlite3_column_double(stmt, 5),
             sqlite3_column_double(stmt, 6),
             sqlite3_column_double(stmt, 7),
-            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)));
+            reinterpret_cast<const char*>(sqlite3_column_text(stmt, 8)), reinterpret_cast<const char*>(sqlite3_column_text(stmt, 9)), sqlite3_column_double(stmt,10), sqlite3_column_double(stmt,11), sqlite3_column_int(stmt,12));
 
         sqlite3_finalize(stmt);
 
@@ -145,7 +147,7 @@ bool RestaurantRepository::updateRestaurant(const Restaurant& restaurant)
 {
     const char* sql =
         "UPDATE restaurants "
-        "SET name=?,address=?,phone=?,rating=?,latitude=?,longitude=?,delivery_radius_km=?,image_url=? "
+        "SET name=?,address=?,phone=?,rating=?,latitude=?,longitude=?,delivery_radius_km=?,image_url=?,delivery_polygon=?,base_delivery_fee=?,per_km_fee=?,preparation_minutes=? "
         "WHERE id=?;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -168,7 +170,8 @@ bool RestaurantRepository::updateRestaurant(const Restaurant& restaurant)
     sqlite3_bind_double(stmt, 6, restaurant.getLongitude());
     sqlite3_bind_double(stmt, 7, restaurant.getDeliveryRadiusKm());
     sqlite3_bind_text(stmt, 8, restaurant.getImageUrl().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 9, restaurant.getId());
+    sqlite3_bind_text(stmt,9,restaurant.getDeliveryPolygon().c_str(),-1,SQLITE_TRANSIENT); sqlite3_bind_double(stmt,10,restaurant.getBaseDeliveryFee()); sqlite3_bind_double(stmt,11,restaurant.getPerKmFee()); sqlite3_bind_int(stmt,12,restaurant.getPreparationMinutes());
+    sqlite3_bind_int(stmt, 13, restaurant.getId());
 
     int rc = sqlite3_step(stmt);
 
