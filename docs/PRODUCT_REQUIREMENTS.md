@@ -1,7 +1,9 @@
 # FoodService product requirements
 
-Updated 2026-08-24. Checked items describe the exact locally implemented and
-tested slice; they do not imply production restaurant or courier integration.
+Updated 2026-08-24. Statuses describe the exact locally implemented and
+validated slice; they do not imply production restaurant or courier integration.
+Section 16 is the authoritative whole-document status audit, including the
+reason for partial/open work and its planned delivery phase.
 
 ## 1. Product vision
 
@@ -616,3 +618,265 @@ list with an owner, target release, dependencies, and testable acceptance criter
 - ⬜ Road-network distance, live traffic ETA, trusted weather, demand-driven surge, production geocoding contracts, and large-scale geospatial storage.
 
 Production follow-up: replace straight-line distance with a contracted routing provider, obtain rain/surge signals from trusted operations/weather systems, move addresses to a dedicated profile service with encryption/retention controls, and use a geospatial database/index for large-scale polygon queries.
+
+## 16. Complete requirements status audit
+
+This audit covers every requirements area in this document. “When” means the
+planned roadmap phase, not a promised calendar date. Work is selected in phase
+order after its prerequisites and product/provider decisions are resolved.
+
+### Delivery timing used in this audit
+
+| When | Meaning |
+|---|---|
+| **Now / completed** | Present in the local development MVP and covered by focused checks or the E2E harness. |
+| **Next — Phase 0** | Security, correctness, repeatable builds, migrations, and API foundation; must precede marketplace feature growth. |
+| **Then — Phase 1** | Complete customer ordering, authoritative catalogue/cart/pricing, and basic operator portals. |
+| **Then — Phase 2** | Single-city operational pilot with providers, preparation workflow, notifications, monitoring, and recovery. |
+| **Later — Phase 3** | Delivery operations and growth features after the ordering pilot is stable. |
+| **Later — Phase 4** | Multi-city scale, high availability, fraud/risk, and data platform work. |
+| **Decision required** | Cannot be finalized responsibly until the named business/provider decision is made. |
+
+### Sections 1–4 — Vision, baseline, roles, and priorities
+
+| Requirement area | Status | Why | When |
+|---|---|---|---|
+| Product vision and single-city journey | 🟡 Partial | Customer discovery, local ordering, test payment, and GPS tracking exist; restaurant acceptance and admin/support operations do not. | Phases 1–2 |
+| Current baseline inventory | ✅ Done | The baseline and known blockers reflect the current repository. | Now / completed |
+| Customer role | 🟡 Partial | JWT customer identity and owned orders/addresses exist; verification, secure profile lifecycle, support, and reviews remain. | Phases 0–3 |
+| Restaurant owner/staff roles | ⬜ Not started | There is restaurant CRUD but no authenticated owner/staff identity or portal. | Phase 1 |
+| Delivery-partner role | 🟡 Partial | A token-protected local GPS page exists; onboarding, per-driver identity, task assignment, and earnings do not. | Phase 3 |
+| Administrator/support roles | ⬜ Not started | No RBAC-backed admin/support portal, audit workflow, or case management exists. | Phases 1–2 |
+| P0/P1/P2 prioritization | ✅ Done | Priorities and phased sequencing are documented. | Now / completed |
+
+### Section 5.1 — Identity and accounts
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Register, sign in/out, browser session | 🟡 Partial | Registration, login, JWT storage, and sign-out work, but password storage is not production-safe and the browser session has no refresh/revocation flow. | Phase 0 |
+| Access/refresh tokens, expiry, revocation, multiple devices | ⬜ Not started | Only a basic access JWT exists; there is no session store or rotated refresh token. | Phase 0; multi-device completion Phase 1 |
+| Email/phone verification and password recovery | ⬜ Not started | Verification tokens, provider delivery, reset endpoints, and screens are absent. | Phase 1 |
+| Customer profile and saved addresses | 🟡 Partial | Address book is JWT-owned; name/photo/phone/UPI preferences are partly browser-local and addresses live in the gateway MVP database. | Phase 1 |
+| Role-based authorization | ⬜ Not started | Tokens identify a user but do not carry/enforce marketplace roles. | Next — Phase 0 |
+| Server-derived customer identity | ✅ Done | `/me`, orders, payments, and addresses derive customer identity from verified JWT data. | Now / completed |
+| Security audit events | ⬜ Not started | There is no immutable authentication/account audit store. | Phase 0 |
+| Social sign-in, export/deletion, dietary preferences | ⬜ Not started | Provider integration and privacy/profile models are absent. | Phase 3 |
+
+### Section 5.2 — Location and serviceability
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Add/select structured delivery addresses | ✅ Done | JWT-owned CRUD stores label, recipient, phone, address, coordinates, and notes. | Now / completed |
+| GPS, manual fallback, map picker, geocoding | 🟡 Partial | Browser GPS, manual input, Leaflet/OpenStreetMap, and Nominatim work for development; there is no contracted SLA, quota, or provider failover. | Provider decision, then Phase 2 |
+| Radius/polygon serviceability and checkout blocking | ✅ Done | Quote and order creation both enforce server-side radius or polygon rules. | Now / completed |
+| Distance, delivery fee, and ETA | 🟡 Partial | Backend straight-line estimates work; road routing and live traffic do not. | Provider decision, then Phase 2 |
+| Surge, rain, late-night, distance rules | 🟡 Partial | Distance and server-time rules work; rain/surge are development flags rather than trusted weather/demand signals. | Phase 2 |
+| Production address privacy/geospatial storage | ⬜ Not started | Encryption, retention/deletion, PostGIS indexes, and a dedicated address/profile service are absent. | Phases 1–2 |
+
+### Section 5.3 — Restaurant discovery
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Nearby restaurant discovery/import | 🟡 Partial | User-triggered OpenStreetMap discovery works, but public development data is not an authoritative commercial catalogue. | Phase 2 |
+| Serviceable-only browsing | 🟡 Partial | Cards apply a radius approximation and checkout enforces the authoritative rule; cards do not batch-evaluate polygons/opening state. | Phase 1 |
+| Restaurant cards | 🟡 Partial | Name, rating, address, estimated distance/time, offers, and photos/fallbacks exist; price band and real availability are missing. | Phase 1 |
+| Search and filters | 🟡 Partial | Restaurant/address text search, rating, and favourites exist; dish/cuisine/veg/time/cost/offer filtering requires a real catalogue. | Phase 1 |
+| Restaurant detail/menu/hours/policies | ⬜ Not started | There is no authoritative detail page, hours model, or server menu. | Phase 1 |
+| Closed/busy/paused states | ⬜ Not started | Restaurant capacity and availability state models are absent. | Phase 1 |
+| Recommendations, collections, sorting | ⬜ Not started | No behavioral data, ranking service, or catalogue metadata exists. | Phase 3 |
+| Favourites/recently viewed | 🟡 Partial | Favourites work only in browser storage; recently viewed and account synchronization are absent. | Phase 3 |
+
+### Section 5.4 — Restaurant onboarding and management
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Restaurant business CRUD | 🟡 Partial | Backend CRUD and service-zone/pricing fields exist, but routes are not owner-scoped and there is no management UI. | Phase 0 authorization, Phase 1 portal |
+| Admin approval and verification documents | ⬜ Not started | No approval state, document storage, moderation, or admin workflow exists. | Phase 1 |
+| Hours, holidays, capacity, pause/resume | 🟡 Partial | Preparation time and service zone exist; schedules, capacity, and operational pause states do not. | Phase 1 |
+| Image management | 🟡 Partial | Image URLs and local generated test photos display; upload, licensing, moderation, and owner control are absent. | Phase 1 |
+| Restaurant staff authorization | ⬜ Not started | No staff accounts, restaurant assignment, or permission checks exist. | Phase 1 |
+| Outlets, scheduled menus, settlements/reports | ⬜ Not started | Required outlet, schedule, ledger, and analytics models are absent. | Phases 2–3 |
+
+### Section 5.5 — Menu and catalogue
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Categories and authoritative menu items | ⬜ Not started | The three displayed foods are frontend fixtures, not restaurant-owned database records. | Next major item in Phase 1 |
+| Food type, availability, variants, add-ons | ⬜ Not started | Catalogue schemas and validation rules are absent. | Phase 1 |
+| Integer minor-unit pricing | ⬜ Not started | Existing restaurant/order amounts use floating point. | Phase 1 migration |
+| Server-authoritative item pricing | ⬜ Not started | The server currently trusts submitted subtotal/discount while recalculating only delivery fee/total. | Phase 1 |
+| Combos, nutrition, inventory, import/export | ⬜ Not started | These depend on the base catalogue model. | Phase 3 |
+
+### Section 5.6 — Cart and checkout
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Add/edit/remove quantities | 🟡 Partial | Quantity controls work in the current browser checkout but are based on fixture items. | Phase 1 |
+| One restaurant per cart | 🟡 Partial | The current modal naturally selects one restaurant, but there is no persistent server cart invariant. | Phase 1 |
+| Persisted cart and item notes | ⬜ Not started | Cart/cart-item models and APIs are absent. | Phase 1 |
+| Select address/payment method | ✅ Done | Saved address selection and payment method/checkout surfaces exist. | Now / completed |
+| Complete price breakdown | 🟡 Partial | Subtotal, test discount, delivery fee, and total display; authoritative tax/packaging/item pricing are absent. | Phase 1 |
+| Price/availability revalidation and recovery | ⬜ Not started | No authoritative catalogue exists to revalidate. | Phase 1 |
+| Explicit confirmation | 🟡 Partial | “Place order” is explicit, but there is no final review screen after server repricing. | Phase 1 |
+| Scheduled/group orders, tips, preferences | ⬜ Not started | Supporting models and workflows are absent. | Phase 3 |
+
+### Section 5.7 — Orders
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Customer-owned order listing | ✅ Done | Gateway filters by verified JWT customer identity. | Now / completed |
+| Itemized immutable snapshot | 🟡 Partial | A text item summary and price components persist; immutable order-line records and per-item prices do not. | Phase 1 |
+| Payment/order state consistency | ✅ Done | Authenticated idempotent mapping handles processing, success, failure, and cancellation without regressing delivery states. | Now / completed |
+| Full restaurant/delivery state machine and timestamps | 🟡 Partial | Payment and delivery states exist; accepted/preparing/ready/rejected/refund history with actor/timestamp is incomplete. | Phases 1–2 |
+| Restaurant-scoped orders and acceptance timeout | ⬜ Not started | Restaurant RBAC and operator workflow are absent. | Phase 1 |
+| Customer cancellation policy | 🟡 Partial | Cancellation exists, but policy is not state/actor/time configurable. | Phase 1 |
+| Public order reference and idempotent order creation | ⬜ Not started | Orders expose internal IDs and lack an order idempotency key. | Phase 0 |
+| Reorder, substitutions, proof/PIN, invoice | ⬜ Not started | These depend on itemized orders and restaurant/delivery workflows. | Phase 3 |
+
+### Section 5.8 — Payments and refunds
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Dedicated payment page and UI recovery | ✅ Done | Separate checkout, progress/retry states, popup fallback, refresh recovery, and polling/SSE status are implemented. | Now / completed |
+| Razorpay sandbox order and signature verification | ✅ Done | Provider order creation is backend-only and HMAC verification is server-side; no raw card/UPI secrets are stored. | Now / completed |
+| Payment idempotency and valid transitions | ✅ Done | Unique idempotency keys and constrained state changes are implemented and tested locally. | Now / completed |
+| Webhook durable event log/replay protection | 🟡 Partial | Secret/signature checks and constrained callbacks exist; raw provider-event deduplication and durable event audit are incomplete. | Phase 0 |
+| Payment-to-order synchronization | ✅ Done | Authenticated internal callback maps payment outcomes to order states idempotently. | Now / completed |
+| Provider timeout/reconciliation | ⬜ Not started | No scheduled provider query or mismatch repair job exists. | Phase 2 |
+| Cash on delivery | 🟡 Partial | It appears as a UI method but lacks a dedicated backend COD lifecycle/policy. | Phase 1 |
+| Refunds and reconciliation | ⬜ Not started | Refund entities, provider calls, webhooks, and operator workflows are absent. | Phase 2 |
+| Currency plus integer minor units | ⬜ Not started | Current models use floating point and implicit INR. | Phase 1 migration |
+| Saved tokens, partial refunds, settlements | ⬜ Not started | Provider tokenization and financial ledgers are absent. | Phase 3 |
+
+### Section 5.9 — Live status and notifications
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Live payment/order browser status | 🟡 Partial | Reconnecting SSE snapshots plus polling work; there is no authenticated durable event stream with cursor replay. | Phase 2 |
+| Durable event history | 🟡 Partial | Current state and notifications persist, but a complete append-only order/payment history does not. | Phase 1 |
+| In-app notifications | 🟡 Partial | Notification persistence exists; a complete customer notification center and preferences do not. | Phase 2 |
+| Email/SMS/push, retries, dead letters | ⬜ Not started | Channel providers, templates, delivery attempts, retry queues, and DLQ are absent. | Phase 2 |
+| Restaurant/delivery alerts and chat | ⬜ Not started | Operator applications and messaging/abuse controls are absent. | Phase 3 |
+
+### Section 5.10 — Delivery operations
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Real browser driver GPS and freshness | ✅ Done | Driver portal uses `watchPosition`; latest fix, accuracy, speed, heading, age, and stale state persist/display. | Now / completed |
+| Payment-gated tracking and delivered persistence | ✅ Done | Tracking is unavailable before verified payment; final delivered state persists. | Now / completed |
+| Driver onboarding, identity, availability | ⬜ Not started | The MVP uses a shared development token, not verified per-driver accounts. | Phase 3 |
+| Assignment/dispatch/reassignment | ⬜ Not started | No delivery task queue, matching rules, capacity, or reassignment engine exists. | Phase 3 |
+| State timestamps and pickup/delivery verification | 🟡 Partial | State labels exist; immutable actor/timestamp history, pickup proof, PIN, and photo/signature verification do not. | Phase 3 |
+| Customer privacy and location retention | 🟡 Partial | Customer receives only current tracking data, but consent, scoped driver authorization, retention, and deletion jobs are absent. | Phases 2–3 |
+| Routing, earnings, payouts | ⬜ Not started | No route provider or courier financial ledger exists. | Phase 3 |
+
+### Sections 5.11–5.13 — Reviews, promotions, administration, and support
+
+| Requirement area | Status | Why | When |
+|---|---|---|---|
+| Ratings/reviews | ⬜ Not started | There is no review entity, delivered-order eligibility, moderation, or aggregate recalculation. | Phase 3 |
+| Favourites | 🟡 Partial | Browser-local favourites work but are not synchronized or governed by an API. | Phase 3 |
+| Coupons/promotions | 🟡 Partial | `WELCOME10` is a browser test rule; validity, funding, limits, stacking, abuse checks, and a server ledger are absent. | Phase 3 after authoritative pricing |
+| Admin portal and privileged workflows | ⬜ Not started | No admin RBAC, approval/suspension, refund/configuration, or audit UI exists. | Phase 1 basic; Phase 2 operational |
+| Support tickets, moderation, dashboards, exports | ⬜ Not started | Support and operations data models are absent. | Phases 2–3 |
+
+### Section 6 — Frontend applications
+
+| Application/requirement | Status | Why | When |
+|---|---|---|---|
+| Customer responsive web app | 🟡 Partial | Discovery, auth, addresses/map, fixture menu/cart, payment, orders, profile, and tracking exist; restaurant detail, authoritative cart, support, and full offline/error coverage remain. | Phase 1 |
+| Accessibility foundation | 🟡 Partial | Labels, dialogs, focusable controls, status regions, responsive layouts, and reduced clutter exist; no WCAG audit or cross-browser automation has been completed. | Phases 1–2 |
+| Restaurant portal | ⬜ Not started | No secure staff UI or operational order/menu workflow exists. | Phase 1 |
+| Admin portal | ⬜ Not started | No admin search, approval, refund, audit, or configuration UI exists. | Phase 1 basic; Phase 2 complete |
+| Delivery portal/app | 🟡 Partial | Live GPS sharing form exists; task list, navigation handoff, verification, and earnings do not. | Phase 3 |
+
+### Section 7 — Backend and API
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| API Gateway and domain microservices | ✅ Done | User, restaurant, order, payment, notification services and a gateway communicate over HTTP. | Now / completed |
+| `/api/v1`, status/error consistency, correlation IDs | ⬜ Not started | Routes are unversioned and proxy/error semantics are inconsistent. | Next — Phase 0 |
+| Authentication and server-derived customer identity | 🟡 Partial | Customer identity is server-derived on critical flows; role/restaurant/admin policies are absent. | Phase 0 |
+| Validation, pagination, filtering, sorting | 🟡 Partial | Important fields have targeted validation, but there is no shared field-error framework or bounded collections. | Phase 0 |
+| Idempotency | 🟡 Partial | Payment creation is idempotent; orders, refunds, and raw webhook events are not fully covered. | Phase 0 |
+| Rate limiting and OpenAPI | ⬜ Not started | No limiter or generated/validated API contract exists. | Phase 0 |
+| Database migrations | ⬜ Not started | Services still perform startup-time table creation and ad-hoc `ALTER TABLE`. | Phase 0 |
+| Transactions and cross-service consistency | 🟡 Partial | SQLite writes are serialized and payment/order callbacks are retry-safe; there is no outbox/event bus or distributed recovery. | Phase 0 foundation; Phase 2 outbox |
+| Liveness/readiness separation | ⬜ Not started | Only simple health endpoints exist. | Phase 0 |
+| Service evolution list | 🟡 Partial | Each named service has a minimal foundation; profiles/catalogue/cart/refunds/channels/delivery domains remain. | Phases 1–3 |
+
+### Section 8 — Data requirements
+
+| Requirement area | Status | Why | When |
+|---|---|---|---|
+| Users and customer addresses | 🟡 Partial | Basic users and JWT-owned addresses exist; roles, sessions, verification, secure profiles, and retention do not. | Phases 0–1 |
+| Restaurant and service zones | 🟡 Partial | Restaurant/outlet-like record, radius/polygon, and pricing inputs exist; brands, staff, hours, documents, and availability do not. | Phase 1 |
+| Catalogue and carts | ⬜ Not started | All authoritative catalogue/cart entities are absent. | Phase 1 |
+| Orders and payments | 🟡 Partial | Core records and price/address snapshots exist; line items, full history, attempts/events/refunds, and minor-unit currency do not. | Phases 1–2 |
+| Notifications and delivery attempts | 🟡 Partial | Notifications and latest driver fix persist; channel attempts and full delivery-task/history models do not. | Phases 2–3 |
+| Audit events | ⬜ Not started | No immutable audit entity exists. | Phase 0 |
+| PostgreSQL, constraints, encryption, retention, backups | ⬜ Not started | SQLite is appropriate only for local development; production data governance/operations are absent. | Phase 2 before pilot |
+| UTC timestamps and integer money | 🟡 Partial | Some epochs/timestamps exist, but timezone treatment is inconsistent and money remains floating point. | Phase 1 migration |
+
+### Section 9 — Non-functional requirements
+
+| Requirement area | Status | Why | When |
+|---|---|---|---|
+| Security | 🟡 Partial | JWT checks, output escaping, payment signatures, internal/driver secrets, and no raw-card storage exist; plaintext password handling, missing RBAC, permissive CORS, secret management, rate limits, and audit gaps block production. | Immediate Phase 0 |
+| Reliability | 🟡 Partial | Idempotent payment flow, database busy handling, polling fallback, and explicit UI failures exist; circuit breakers, reconciliation, queues, backups, rollback, and incident procedures do not. | Phases 0–2 |
+| Performance targets | 🟡 Partial | Concurrency/load harnesses and bounded payment fetching exist; current claims are not production capacity evidence and no repeatable environment measures every target. | Phase 0 baseline; Phase 2 pilot verification |
+| Accessibility/browser compatibility | 🟡 Partial | Responsive and semantic foundations exist; WCAG 2.2 AA audit, reduced-motion/high-contrast coverage, and browser matrix tests remain. | Phases 1–2 |
+| Observability | 🟡 Partial | C++ flow logs and local log files exist; structured correlation logs, metrics, traces, dashboards, and alerts are absent. | Phase 2 |
+
+### Section 10 — Testing requirements
+
+| Requirement | Status | Why | When |
+|---|---|---|---|
+| Focused unit tests | 🟡 Partial | Delivery quote and payment/order transition tests exist; coverage is not comprehensive. | Phase 0, continuous |
+| API/E2E tests | 🟡 Partial | Dependency-free local E2E covers major auth/order/payment/tracking/address failures and successes; it is not a complete contract suite. | Phase 0, continuous |
+| Repository/migration tests | ⬜ Not started | Isolated database fixtures and versioned migrations do not exist. | Phase 0 |
+| Browser tests | ⬜ Not started | Critical customer/operator paths are not automated in a browser runner. | Phase 1 |
+| Load tests | 🟡 Partial | A 1,000-client development harness exists; results depend on services/environment and are not a production capacity guarantee. | Phase 0 baseline; Phase 2 sizing |
+| Security tests | 🟡 Partial | JWT, forged signature, unsigned webhook, and tampering cases exist; OWASP/RBAC/rate-limit scanning is incomplete. | Phase 0 |
+| CI execution | ⬜ Not started | Tests are not enforced by a clean GitHub Actions build. | Next — Phase 0 |
+
+### Section 11 — Delivery roadmap status
+
+| Phase | Status | Why / exit requirement | When |
+|---|---|---|---|
+| Phase 0 — Stabilize | 🟡 In progress | JWT identity and payment/order sync are done; password security, RBAC, migrations, CI, API consistency, and repeatable clean build remain. | Current phase |
+| Phase 1 — Ordering MVP | 🟡 Started | Address/serviceability is implemented; authoritative catalogue/cart/pricing and restaurant/admin portals remain. | After Phase 0 exit |
+| Phase 2 — Single-city pilot | ⬜ Not started | Requires stable ordering plus provider/business decisions, production data platform, operations, refunds, notifications, and monitoring. | After Phase 1 exit |
+| Phase 3 — Growth | 🟡 Prototype only | Real browser GPS is an early prototype; production delivery operations and growth domains remain. | After pilot stability |
+| Phase 4 — Scale | ⬜ Not started | Multi-city/HA/fraud/data work is premature before pilot evidence. | After product-market and capacity evidence |
+
+### Section 12 — Marketplace MVP acceptance criteria
+
+| # | Acceptance criterion | Status | Why / when |
+|---:|---|---|---|
+| 1 | Verified customer signs in without manual user ID | 🟡 Partial | No manual ID and JWT identity work; email/phone verification and secure password/session lifecycle remain for Phase 0–1. |
+| 2 | Valid address and serviceable restaurants | 🟡 Partial | Structured address and server enforcement work; card browsing needs authoritative polygon/hours evaluation in Phase 1. |
+| 3 | Available itemized restaurant menu | ⬜ Not started | Phase 1 catalogue. |
+| 4 | Cart with server-calculated breakdown | ⬜ Not started | Phase 1 cart/pricing engine. |
+| 5 | Exactly one order/payment attempt | 🟡 Partial | Payment is idempotent; order creation is not yet idempotent. Phase 0. |
+| 6 | Sandbox success/failure/cancel/timeout | 🟡 Partial | Success/failure/cancel work; provider timeout/reconciliation remains for Phase 2. |
+| 7 | Consistent live payment/order status | ✅ Done | Authenticated state mapping plus UI status refresh are implemented locally. |
+| 8 | Restaurant preparation workflow | ⬜ Not started | Phase 1 restaurant portal/state workflow. |
+| 9 | Complete timeline and notifications | 🟡 Partial | Current states/notifications exist; complete append-only history and channels remain for Phases 1–2. |
+| 10 | Admin transaction audit | ⬜ Not started | Phase 1–2 admin/audit portal. |
+| 11 | Cross-user/restaurant authorization | 🟡 Partial | Customer ownership works on core flows; restaurant/admin RBAC remains Phase 0. |
+| 12 | Critical CI tests without charges | 🟡 Partial | Local tests avoid real charges; clean CI enforcement remains Phase 0. |
+| 13 | Logs, metrics, backups, recovery | ⬜ Not started | Phase 2 operational readiness. |
+
+The Marketplace MVP is therefore **not complete**. The next blocking work is
+Phase 0 security/build/API stabilization, followed by the Phase 1 authoritative
+menu, cart, pricing, and restaurant workflow.
+
+### Sections 13–15 — Decisions, resume process, and delivery summary
+
+| Area | Status | Why | When |
+|---|---|---|---|
+| Launch/business/provider decisions | ⬜ Decision required | Launch model/city, legal/tax rules, maps, messages, hosting, commercial terms, retention, and final provider choices change the architecture and operating cost. | Before committing Phase 2 production integrations |
+| Razorpay provider direction | 🟡 Partial decision | Razorpay test mode is integrated; live activation, compliance, refunds, and commercial approval remain. | Phase 2 |
+| Resume checklist | ✅ Done | The repository contains a reusable continuation prompt and source-of-truth document list. | Now / completed |
+| Delivery address/serviceability summary | ✅ Done for development MVP | Local requirements are implemented and separated from production follow-up. | Production completion in Phase 2 |
