@@ -93,134 +93,111 @@ Requirement status symbols used below:
 
 ### 5.1 Identity and accounts
 
-#### P0
-
-- register, sign in, sign out, and maintain an authenticated browser session
-- access and refresh tokens with expiration and revocation
-- email or phone verification
-- forgot-password and reset-password flow
-- customer profile with name, email, phone, and saved addresses
-- role-based access control enforced at the API, not only in the UI
-- frontend derives the customer ID from `/me` or token claims
-- audit security-sensitive account events
-
-#### P1
-
-- social sign-in
-- account deletion and personal-data export
-- saved dietary preferences and allergens
-- multiple devices and session management
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Register, sign in/out, and browser session | 🟡 Partial | Registration, login, JWT storage, and sign-out work; password storage and refresh/revocation are not production-safe. | Phase 0 |
+| P0 | Access/refresh tokens, expiration, revocation | ⬜ Not started | Only a basic access JWT exists; there is no session store or rotated refresh token. | Phase 0 |
+| P0 | Email or phone verification | ⬜ Not started | Verification tokens, delivery provider, endpoints, and UI are absent. | Phase 1 |
+| P0 | Forgot/reset password | ⬜ Not started | Secure reset tokens, expiry, delivery, and password-change flow are absent. | Phase 1 |
+| P0 | Customer profile and saved addresses | 🟡 Partial | JWT-owned addresses work; profile photo/phone/UPI are partly browser-local and address storage needs production privacy controls. | Phase 1 |
+| P0 | Role-based API authorization | ⬜ Not started | JWT identifies a customer but does not enforce customer/restaurant/driver/admin roles. | Phase 0 |
+| P0 | Server-derived customer ID | ✅ Done | `/me`, order, payment, and address flows derive identity from verified JWT claims. | Completed |
+| P0 | Audit security-sensitive events | ⬜ Not started | There is no immutable account/authentication audit store. | Phase 0 |
+| P1 | Social sign-in | ⬜ Not started | OAuth providers and account-linking rules are absent. | Phase 3 |
+| P1 | Account deletion and data export | ⬜ Not started | Privacy export/deletion workflows and retention policies are absent. | Phase 2 |
+| P1 | Dietary preferences and allergens | ⬜ Not started | Profile and catalogue metadata required to use these preferences do not exist. | Phase 3 |
+| P1 | Multiple devices/session management | ⬜ Not started | There is no server-side session inventory or device revocation. | Phase 1 |
 
 ### 5.2 Location and serviceability
 
-#### P0
-
-Current local MVP coverage:
-
-- ✅ Customer can add, list, select, and delete a JWT-owned delivery address.
-- ✅ Address contains label, recipient, phone, coordinates, address line, and delivery notes.
-- ✅ Determine whether a restaurant serves the selected address using a radius or configured polygon.
-- ✅ Prevent quote, checkout, and order creation when the address is outside the delivery zone.
-- ✅ Estimate straight-line distance, delivery fee, and delivery time on the backend.
-- ✅ Display straight-line progress and distance/speed-based ETA from real driver GPS.
-
-Production requirements still open:
-
-- 🟡 Move customer addresses from the gateway MVP database to an encrypted profile/address service with retention controls.
-- 🟡 Replace straight-line distance and formula ETA with road-network routing and live traffic.
-- ⬜ Add address verification, apartment/building metadata, and delivery-instruction moderation.
-
-#### P1
-
-- 🟡 Map-based address picker and Nominatim geocoding work locally; a contracted production provider and failure policy remain.
-- ✅ Live location permission with manual-address fallback and user-triggered nearby discovery.
-- ✅ Configurable restaurant delivery radius or polygon.
-- 🟡 Distance, simulated surge/rain, and server-clock late-night rules work; trusted weather/demand signals and restaurant-timezone schedules remain.
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Add/list/select/delete delivery addresses | ✅ Done | JWT-owned address CRUD is implemented. | Completed |
+| P0 | Label, recipient, phone, coordinates, notes | ✅ Done | All required structured fields persist in the local address table. | Completed |
+| P0 | Determine restaurant serviceability | ✅ Done | Gateway evaluates configured polygon or radius. | Completed |
+| P0 | Block outside-zone checkout/order | ✅ Done | Quote and order creation independently reject non-serviceable coordinates. | Completed |
+| P0 | Estimate distance, fee, and ETA | 🟡 Partial | Backend straight-line distance and formula ETA work; road routing/live traffic do not. | Phase 2 after maps decision |
+| P0 | Production address privacy/storage | ⬜ Not started | Dedicated encrypted profile service, retention/deletion, and geospatial indexes are absent. | Phases 1–2 |
+| P0 | Address/building verification | ⬜ Not started | Provider verification, apartment metadata, and instruction moderation are absent. | Phase 2 |
+| P1 | Map picker and geocoding | 🟡 Partial | Leaflet/OpenStreetMap/Nominatim work locally without a production SLA, quota, or failover. | Phase 2 after provider decision |
+| P1 | GPS permission with manual fallback | ✅ Done | GPS is user-triggered and manual/map entry remains available when denied. | Completed |
+| P1 | Configurable radius or polygon | ✅ Done | Both restaurant-zone forms are persisted and enforced server-side. | Completed |
+| P1 | Surge/rain/late-night/distance rules | 🟡 Partial | Distance and server-clock rules work; rain/surge use development flags instead of trusted feeds. | Phase 2 |
 
 ### 5.3 Restaurant discovery
 
-#### P0
-
-- browse only active and currently serviceable restaurants
-- restaurant card shows name, cuisine, rating, ETA, price band, and availability
-- search by restaurant, dish, or cuisine
-- filter by cuisine, vegetarian, rating, delivery time, price, and offers
-- restaurant detail page with operating hours, address, policies, and menu
-- clear closed, busy, unavailable, and temporarily paused states
-
-#### P1
-
-- personalized recommendations
-- collections such as trending, healthy, budget, and late-night
-- sorting by relevance, rating, time, cost, and popularity
-- favourites and recently viewed restaurants
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Browse only active/serviceable restaurants | 🟡 Partial | Nearby/radius display exists and checkout is authoritative, but cards do not evaluate polygon, opening hours, pause, or capacity. | Phase 1 |
+| P0 | Complete restaurant cards | 🟡 Partial | Name, rating, address, distance/ETA, offer, and photo/fallback exist; real cuisine, price band, and availability are absent. | Phase 1 |
+| P0 | Search restaurant, dish, or cuisine | 🟡 Partial | Restaurant/address text search works; dish/cuisine search needs the server catalogue. | Phase 1 |
+| P0 | Cuisine/veg/rating/time/price/offer filters | 🟡 Partial | Rating and favourites filters work; remaining filters need catalogue and authoritative pricing. | Phase 1 |
+| P0 | Restaurant detail, hours, policies, menu | ⬜ Not started | No detail route/page, schedule model, policies, or server-owned menu exists. | Phase 1 |
+| P0 | Closed/busy/unavailable/paused states | ⬜ Not started | Operational availability and capacity models are absent. | Phase 1 |
+| P1 | Personalized recommendations | ⬜ Not started | No behavioral events, customer preference model, or ranking system exists. | Phase 3 |
+| P1 | Trending/healthy/budget/late-night collections | ⬜ Not started | Catalogue tags, popularity signals, and schedules are absent. | Phase 3 |
+| P1 | Relevance/rating/time/cost/popularity sorting | 🟡 Partial | Rating display exists; consistent server-side ranking/sorting is absent. | Phase 3 |
+| P1 | Favourites and recently viewed | 🟡 Partial | Favourites are browser-local; account sync and recently viewed are absent. | Phase 3 |
 
 ### 5.4 Restaurant onboarding and management
 
-#### P0
-
-- admin approval before a restaurant becomes publicly visible
-- restaurant owner can create and update business information
-- business hours, holidays, service zones, preparation time, and order capacity
-- upload logo, cover image, food images, and verification documents
-- pause/resume ordering and mark individual items unavailable
-- restaurant users can only modify their assigned restaurant
-
-#### P1
-
-- multiple outlets under one restaurant brand
-- staff accounts and permissions
-- scheduled menus and time-based item availability
-- restaurant settlement and performance reports
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Admin approval before visibility | ⬜ Not started | Approval state, verification workflow, admin RBAC, and portal are absent. | Phase 1 |
+| P0 | Owner manages business information | 🟡 Partial | Restaurant CRUD exists, but it is not owner-scoped and has no management portal. | Phase 0 RBAC, Phase 1 UI |
+| P0 | Hours, holidays, zones, prep time, capacity | 🟡 Partial | Radius/polygon and preparation minutes exist; hours, holidays, and capacity do not. | Phase 1 |
+| P0 | Upload images/documents | 🟡 Partial | Image URLs display; secure upload, storage, licensing, moderation, and verification documents are absent. | Phase 1 |
+| P0 | Pause ordering/item availability | ⬜ Not started | Restaurant/item operational-state models are absent. | Phase 1 |
+| P0 | Assigned-restaurant authorization | ⬜ Not started | Restaurant staff identity and ownership policies are absent. | Phase 0–1 |
+| P1 | Multiple outlets | ⬜ Not started | Brand/outlet hierarchy does not exist. | Phase 2 |
+| P1 | Staff accounts and permissions | ⬜ Not started | Roles and restaurant assignments are absent. | Phase 1 |
+| P1 | Scheduled menus/time availability | ⬜ Not started | Requires catalogue and schedule models. | Phase 2 |
+| P1 | Settlement/performance reports | ⬜ Not started | Financial ledgers and analytics pipeline are absent. | Phase 3 |
 
 ### 5.5 Menu and catalogue
 
-#### P0
-
-- menu categories with explicit ordering
-- items with name, description, image, base price, tax category, and food type
-- vegetarian/non-vegetarian/vegan indicators
-- item availability and stock status
-- item variations such as size and portion
-- add-on groups such as toppings and extras with min/max selection rules
-- prices stored as integer minor units, never floating point
-- server calculates all prices; client totals are never authoritative
-
-#### P1
-
-- combos, meal bundles, scheduled pricing, and inventory quantities
-- allergen and nutritional information
-- catalogue import/export
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Ordered menu categories | ⬜ Not started | Current foods are frontend fixtures; category schema/API is absent. | Phase 1, next major item |
+| P0 | Authoritative item fields and tax category | ⬜ Not started | No restaurant-owned menu-item entity exists. | Phase 1 |
+| P0 | Vegetarian/non-vegetarian/vegan indicators | ⬜ Not started | Food-type metadata is absent. | Phase 1 |
+| P0 | Availability and stock | ⬜ Not started | Inventory/availability fields and workflows are absent. | Phase 1 |
+| P0 | Variations | ⬜ Not started | Variant groups/pricing schemas are absent. | Phase 1 |
+| P0 | Add-ons with min/max rules | ⬜ Not started | Add-on groups and selection validation are absent. | Phase 1 |
+| P0 | Integer minor-unit prices | ⬜ Not started | Current order/restaurant amounts use floating point. | Phase 1 migration |
+| P0 | Server calculates all prices | ⬜ Not started | Server recalculates delivery fee/total, but still accepts fixture subtotal/discount. | Phase 1 |
+| P1 | Combos, scheduled pricing, inventory quantities | ⬜ Not started | These depend on the base catalogue. | Phase 3 |
+| P1 | Allergens and nutrition | ⬜ Not started | Catalogue metadata and moderation are absent. | Phase 3 |
+| P1 | Catalogue import/export | ⬜ Not started | Stable catalogue schema and permissions are prerequisites. | Phase 3 |
 
 ### 5.6 Cart and checkout
 
-#### P0
-
-- add, edit, and remove item quantities
-- enforce one restaurant per cart
-- persist cart for signed-in customers
-- item-level preparation notes
-- select delivery address and payment method
-- display item subtotal, tax, packaging fee, delivery fee, discount, and final total
-- validate current prices and availability before placing the order
-- show clear recovery choices when price or availability changes
-- require explicit final confirmation before order creation
-
-#### P1
-
-- scheduled orders
-- group ordering
-- tips for delivery partners
-- reusable checkout preferences
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Add/edit/remove quantities | 🟡 Partial | Browser quantity controls work for fixture items, not an authoritative cart. | Phase 1 |
+| P0 | One restaurant per cart | 🟡 Partial | Current modal selects one restaurant, but no server cart invariant exists. | Phase 1 |
+| P0 | Persist signed-in cart | ⬜ Not started | Cart/cart-item persistence and APIs are absent. | Phase 1 |
+| P0 | Item preparation notes | ⬜ Not started | Itemized cart/order lines are absent. | Phase 1 |
+| P0 | Select address/payment method | ✅ Done | Saved address selection and checkout payment-method UI exist. | Completed |
+| P0 | Complete subtotal/tax/fees/discount/total | 🟡 Partial | Subtotal, test discount, delivery fee, and total display; tax/packaging and authoritative item prices are absent. | Phase 1 |
+| P0 | Validate prices/availability | ⬜ Not started | No server catalogue exists to validate against. | Phase 1 |
+| P0 | Recovery after price/availability changes | ⬜ Not started | Depends on authoritative repricing and availability validation. | Phase 1 |
+| P0 | Explicit final confirmation | 🟡 Partial | Place Order is explicit, but there is no final server-repriced review screen. | Phase 1 |
+| P1 | Scheduled orders | ⬜ Not started | Scheduling and restaurant-hours models are absent. | Phase 3 |
+| P1 | Group ordering | ⬜ Not started | Shared cart/session model is absent. | Phase 3 |
+| P1 | Delivery tips | ⬜ Not started | Authoritative pricing and courier payout ledger are absent. | Phase 3 |
+| P1 | Reusable checkout preferences | ⬜ Not started | Secure synchronized profile preferences are absent. | Phase 3 |
 
 ### 5.7 Orders
 
-#### P0
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Itemized immutable purchase snapshot | 🟡 Partial | Text item summary and totals persist; immutable order-line names/unit prices/options do not. | Phase 1 |
+| P0 | Customer sees only owned orders | ✅ Done | Gateway filters the list using verified JWT customer identity. | Completed |
+| P0 | Restaurant sees only its orders | ⬜ Not started | Restaurant users, assignments, RBAC, and portal are absent. | Phase 1 |
+| P0 | Complete state machine below | 🟡 Partial | Payment and delivery states work; restaurant acceptance/preparation/refund states and history are incomplete. | Phases 1–2 |
 
-- itemized immutable order snapshot, including item names and prices at purchase
-- customer sees only their own orders
-- restaurant sees only orders for its restaurant
-- order state machine:
+Target state machine:
 
 ```text
 CREATED
@@ -237,132 +214,108 @@ Failure paths:
 PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 ```
 
-- explicit allowed transitions with actor and timestamp
-- order detail includes items, totals, address snapshot, payment, and timeline
-- restaurant accepts or rejects within a configurable time
-- customer cancellation policy based on current state
-- unique public order reference separate from internal database ID
-- idempotent order submission
-
-#### P1
-
-- reorder a previous order
-- substitutions and restaurant/customer clarification
-- proof of delivery and delivery PIN
-- downloadable invoice
+| P0 | Allowed transitions with actor/timestamp | 🟡 Partial | Payment mapping and delivery progression are constrained; complete immutable actor/timestamp history is absent. | Phases 1–2 |
+| P0 | Complete order detail/timeline | 🟡 Partial | Totals, address, summary, payment status, and delivery status display; item lines and full event history are absent. | Phase 1 |
+| P0 | Restaurant accept/reject timeout | ⬜ Not started | Restaurant workflow and timeout scheduler are absent. | Phase 1 |
+| P0 | State-based cancellation policy | 🟡 Partial | Cancellation works, but policy is not configurable by state/actor/time. | Phase 1 |
+| P0 | Public order reference | ⬜ Not started | UI/API expose internal numeric database IDs. | Phase 0 |
+| P0 | Idempotent order submission | ⬜ Not started | Payment has idempotency, but order creation lacks a unique order idempotency key. | Phase 0 |
+| P1 | Reorder | ⬜ Not started | Requires immutable order lines and current catalogue matching. | Phase 3 |
+| P1 | Substitutions/clarification | ⬜ Not started | Messaging and restaurant workflow are absent. | Phase 3 |
+| P1 | Proof of delivery/PIN | ⬜ Not started | Delivery verification model and per-driver identity are absent. | Phase 3 |
+| P1 | Downloadable invoice | ⬜ Not started | Tax/legal decisions and authoritative pricing are prerequisites. | Phase 2 |
 
 ### 5.8 Payments and refunds
 
-- [x] dedicated responsive payment page
-- [x] main-board in-progress, failure/retry, and verified states
-- [x] backend-verified payment required before driver assignment/tracking
-- [x] safe recovery from refresh, provider dismissal, popup blocking, and network errors
-
-#### P0
-
-- [x] integrate Razorpay Standard Checkout in sandbox mode with dummy fallback
-- [x] create Razorpay orders only on the backend
-- never store raw card or UPI credentials
-- [x] verify Razorpay checkout signatures server-side with HMAC-SHA256/OpenSSL
-- idempotent payment creation and webhook handling
-- webhook event deduplication and durable event log
-- [x] successful/failed/cancelled payment callbacks update both `payment` and `order` through the authenticated local synchronization endpoint
-- [x] payment states map to `PAYMENT_PENDING`, `CONFIRMED`, `PAYMENT_FAILED`, and `CANCELLED` without regressing later delivery states
-- [x] support local test success, failure, cancellation, and duplicate callback cases; provider timeout/reconciliation remains open
-- cash-on-delivery is represented as a separate method without fake online payment
-- refund creation, status tracking, and webhook reconciliation
-- all amounts use currency plus integer minor units
-
-#### P1
-
-- saved provider payment tokens
-- partial and multiple refunds
-- restaurant settlement ledger
-- reconciliation report and mismatch alerts
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Dedicated payment page and progress/recovery UI | ✅ Done | Separate checkout, progress/retry, popup fallback, refresh recovery, and status polling/SSE exist. | Completed |
+| P0 | Payment required before driver assignment | ✅ Done | Gateway and Order Service reject delivery tracking/transitions before verified success. | Completed |
+| P0 | Razorpay sandbox checkout | ✅ Done | Real Razorpay test mode plus local dummy fallback is integrated without live charges. | Completed |
+| P0 | Backend-only provider order creation | ✅ Done | Razorpay order API is called from Payment Service. | Completed |
+| P0 | Never store raw card/UPI credentials | ✅ Done | Sensitive checkout fields remain provider-hosted; browser profile stores only a test UPI identifier. | Completed |
+| P0 | Verify provider signature | ✅ Done | Server verifies Razorpay HMAC-SHA256 signature before success. | Completed |
+| P0 | Idempotent payment creation | ✅ Done | Unique idempotency key returns the existing payment instead of duplicating it. | Completed |
+| P0 | Webhook idempotency/event log | 🟡 Partial | State transitions reject duplicates/regressions; durable raw-event deduplication and append-only audit are absent. | Phase 0 |
+| P0 | Payment/order synchronized states | ✅ Done | Authenticated callbacks map processing/success/failure/cancel and preserve later delivery states. | Completed |
+| P0 | Success/failure/cancel/timeout cases | 🟡 Partial | Success, failure, cancellation, and duplicates are covered; provider timeout reconciliation is absent. | Phase 2 |
+| P0 | Cash on delivery | 🟡 Partial | COD is visible as a separate UI method but lacks a backend lifecycle/policy. | Phase 1 |
+| P0 | Refund lifecycle/reconciliation | ⬜ Not started | Refund records, provider operations, webhooks, and admin workflow are absent. | Phase 2 |
+| P0 | Currency and integer minor units | ⬜ Not started | Current payment/order amounts use floating point and implicit INR. | Phase 1 migration |
+| P1 | Saved provider payment tokens | ⬜ Not started | Provider tokenization/consent workflows are absent. | Phase 3 |
+| P1 | Partial/multiple refunds | ⬜ Not started | Base refund model is not implemented. | Phase 3 |
+| P1 | Restaurant settlement ledger | ⬜ Not started | Financial ledger and payout workflow are absent. | Phase 3 |
+| P1 | Reconciliation reports/alerts | ⬜ Not started | Scheduled reconciliation, mismatch store, dashboard, and alerting are absent. | Phase 2–3 |
 
 ### 5.9 Live status and notifications
 
-#### P0
-
-- durable order/payment event history
-- live browser updates through authenticated SSE or WebSocket
-- reconnect from the last received event without losing updates
-- in-app notifications for order and payment transitions
-- email/SMS/push provider abstraction
-- retry failed deliveries with backoff and dead-letter handling
-- customer notification preferences
-
-#### P1
-
-- restaurant new-order alert with acknowledgement
-- delivery-partner task notifications
-- customer/restaurant/support chat with abuse controls
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Durable order/payment event history | 🟡 Partial | Current state and notifications persist; complete append-only state history does not. | Phase 1 |
+| P0 | Authenticated SSE/WebSocket updates | 🟡 Partial | Reconnecting payment SSE snapshots plus polling work; stream auth and durable events are incomplete. | Phase 2 |
+| P0 | Cursor reconnect without loss | ⬜ Not started | SSE has no durable cursor/event replay. | Phase 2 |
+| P0 | In-app transition notifications | 🟡 Partial | Notification persistence exists; complete notification-center UI and all order transitions are not wired. | Phase 2 |
+| P0 | Email/SMS/push abstraction | ⬜ Not started | Providers, templates, and channel interfaces are absent. | Phase 2 |
+| P0 | Retry/backoff/dead letter | ⬜ Not started | No delivery-attempt queue or dead-letter store exists. | Phase 2 |
+| P0 | Customer notification preferences | ⬜ Not started | Synchronized profile preference model is absent. | Phase 2 |
+| P1 | Restaurant new-order alert/acknowledgement | ⬜ Not started | Restaurant portal and acknowledgement workflow are absent. | Phase 2 |
+| P1 | Delivery task notifications | ⬜ Not started | Delivery-task/dispatch domain is absent. | Phase 3 |
+| P1 | Customer/restaurant/support chat | ⬜ Not started | Messaging, moderation, retention, and abuse controls are absent. | Phase 3 |
 
 ### 5.10 Delivery operations
 
-#### P0 for delivery launch; optional for restaurant-pickup MVP
-
-Current local MVP coverage:
-
-- [x] authenticated local driver portal using real browser `watchPosition` GPS
-- [x] durable latest driver fix, accuracy/speed/heading, 30-second stale detection, and distance-based ETA
-- [x] persist final `DELIVERED` state in `order.db`
-
-Production requirements still open:
-
-- delivery-partner onboarding and approval
-- online/offline availability
-- assign a delivery task manually or using a simple dispatch rule
-- delivery state transitions and timestamps
-- pickup and delivery verification
-- customer sees coarse live status without exposing unnecessary personal data
-
-#### P1
-
-- production location consent, retention/deletion jobs, and per-driver authorization
-- route/ETA integration
-- automatic dispatch and reassignment
-- earnings and payout ledger
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Real browser GPS driver portal | ✅ Done | Local token-protected portal uses `watchPosition`. | Completed development MVP |
+| P0 | Latest fix, accuracy/speed/heading/stale/ETA | ✅ Done | Backend persists and UI displays these values with 30-second freshness. | Completed development MVP |
+| P0 | Persist delivered state | ✅ Done | Final `DELIVERED` state is synchronized into Order Service storage. | Completed development MVP |
+| P0 | Partner onboarding/approval | ⬜ Not started | Driver account, KYC/verification, approval, and device identity are absent. | Phase 3 |
+| P0 | Online/offline availability | ⬜ Not started | Driver availability/capacity model is absent. | Phase 3 |
+| P0 | Manual/simple assignment | ⬜ Not started | No delivery task queue or dispatch policy exists. | Phase 3 |
+| P0 | Transitions and timestamps | 🟡 Partial | Status progression exists; immutable actor/timestamp event history is incomplete. | Phase 3 |
+| P0 | Pickup/delivery verification | ⬜ Not started | PIN/photo/signature/handoff proof is absent. | Phase 3 |
+| P0 | Privacy-preserving customer tracking | 🟡 Partial | Customer receives limited current data, but consent, retention, per-driver scope, and deletion policies are absent. | Phases 2–3 |
+| P1 | Production consent/retention/per-driver auth | ⬜ Not started | Shared development token is not a production identity or consent system. | Phase 3 |
+| P1 | Road route/ETA integration | ⬜ Not started | No contracted routing provider exists. | Phase 2–3 |
+| P1 | Automatic dispatch/reassignment | ⬜ Not started | Matching, capacity, timeout, and reassignment engine are absent. | Phase 3 |
+| P1 | Earnings/payout ledger | ⬜ Not started | Courier finance and settlement models are absent. | Phase 3 |
 
 ### 5.11 Ratings and reviews
 
-#### P1
-
-- only customers with delivered orders can review
-- separate food, restaurant, and delivery ratings
-- one review per order with an edit window
-- restaurant responses
-- report, moderation, and anti-abuse workflow
-- aggregate ratings recalculated from approved reviews
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P1 | Delivered customers can review | ⬜ Not started | Review entity/API and delivered-order eligibility checks are absent. | Phase 3 |
+| P1 | Food/restaurant/delivery ratings | ⬜ Not started | Itemized orders and review dimensions are absent. | Phase 3 |
+| P1 | One review/order with edit window | ⬜ Not started | Review uniqueness, lifecycle, and timestamps are absent. | Phase 3 |
+| P1 | Restaurant responses | ⬜ Not started | Restaurant identity/portal and response model are absent. | Phase 3 |
+| P1 | Reporting/moderation/anti-abuse | ⬜ Not started | Admin moderation, reports, fraud signals, and audit workflow are absent. | Phase 3 |
+| P1 | Approved aggregate ratings | ⬜ Not started | Approved review source data and recalculation jobs are absent. | Phase 3 |
 
 ### 5.12 Offers and promotions
 
-#### P1
-
-- coupons with validity, usage limits, minimum order, restaurant, and user rules
-- restaurant-funded and platform-funded discounts
-- deterministic server-side promotion calculation
-- referral credits and promotional wallet ledger
-- prevent stacking or abuse according to configured rules
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P1 | Coupon validity/limits/minimum/restaurant/user rules | 🟡 Partial | `WELCOME10` demonstrates UI calculation only; durable rule and redemption models are absent. | Phase 3 after pricing engine |
+| P1 | Restaurant/platform funding | ⬜ Not started | Promotion funding and settlement attribution are absent. | Phase 3 |
+| P1 | Server-side promotion calculation | ⬜ Not started | Discount is currently calculated in the browser fixture flow. | Phase 1 base pricing, Phase 3 rules |
+| P1 | Referral credits/wallet ledger | ⬜ Not started | Credit ledger, expiry, and accounting controls are absent. | Phase 3 |
+| P1 | Stacking/abuse prevention | ⬜ Not started | Server promotion engine, usage history, and fraud rules are absent. | Phase 3 |
 
 ### 5.13 Administration and support
 
-#### P0
-
-- protected admin portal
-- approve/suspend restaurants and users
-- search customers, restaurants, orders, payments, and notifications
-- view a complete order/payment event timeline
-- cancel orders and initiate test/refund operations with audit reason
-- configure service zones, fees, taxes, and platform settings
-- immutable audit log for privileged actions
-
-#### P1
-
-- support tickets and internal notes
-- content moderation
-- operational dashboard for order volume, failures, and SLA breaches
-- CSV exports with access controls
+| Priority | Requirement | Status | Why | Planned phase |
+|---|---|---|---|---|
+| P0 | Protected admin portal | ⬜ Not started | Admin role, authorization policy, and UI are absent. | Phase 1 |
+| P0 | Approve/suspend restaurants/users | ⬜ Not started | Approval/suspension states, reasons, audit, and workflows are absent. | Phase 1 |
+| P0 | Cross-domain operational search | ⬜ Not started | No admin search API/index or protected detail UI exists. | Phase 1–2 |
+| P0 | Complete order/payment timeline | 🟡 Partial | Current states can be queried, but append-only cross-service event history is absent. | Phase 1–2 |
+| P0 | Cancel/refund with audit reason | 🟡 Partial | Customer cancellation exists; admin identity, refund action, reason, and audit are absent. | Phase 2 |
+| P0 | Configure zones/fees/taxes/platform | 🟡 Partial | Restaurant radius/polygon and fee fields are configurable through APIs; protected admin UI, taxes, and global settings are absent. | Phase 1–2 |
+| P0 | Immutable privileged-action audit | ⬜ Not started | Audit event model/store does not exist. | Phase 0 |
+| P1 | Support tickets/internal notes | ⬜ Not started | Support entities, permissions, SLA, and UI are absent. | Phase 2 |
+| P1 | Content moderation | ⬜ Not started | Moderation queues and policies are absent. | Phase 3 |
+| P1 | Operational dashboard/SLA alerts | ⬜ Not started | Metrics pipeline, dashboards, and alert rules are absent. | Phase 2 |
+| P1 | Access-controlled CSV exports | ⬜ Not started | Admin RBAC, export jobs, and data-redaction rules are absent. | Phase 3 |
 
 ## 6. Frontend applications
 
