@@ -4,6 +4,9 @@ For repository-grounded microservice, CRUD, multithreading, scaling, and intervi
 question material, see the [FoodService Interview Guide](INTERVIEW_GUIDE.md).
 For a concept-by-concept map from system-design terminology to implementation
 files, see [System Design Concepts Mapped to FoodService Code](SYSTEM_DESIGN_CODE_MAP.md).
+For the exact 30 concepts from the system-design learning image, including
+implemented/partial/missing status, code excerpts, patterns, and production
+improvements, see [FoodService: 30 System-Design Concepts](SYSTEM_DESIGN_30_CONCEPTS.md).
 
 ## Runtime flow observability
 

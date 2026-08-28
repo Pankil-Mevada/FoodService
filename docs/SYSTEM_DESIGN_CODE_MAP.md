@@ -503,6 +503,7 @@ Use this concise answer:
 
 ## Related documents
 
+- [The 30 system-design concepts explained](SYSTEM_DESIGN_30_CONCEPTS.md)
 - [Architecture](ARCHITECTURE.md)
 - [Sequence diagrams](SEQUENCE_DIAGRAMS.md)
 - [Concurrency diagrams](CONCURRENCY_DIAGRAMS.md)
