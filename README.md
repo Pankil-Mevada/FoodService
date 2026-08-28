@@ -21,6 +21,9 @@ setup, and failure troubleshooting, follow the
 For a route-by-route explanation of gateway startup, JWT authentication,
 microservice calls, order/payment/tracking sequences, and debugging, read the
 [API Gateway code-flow guide](docs/API_GATEWAY_CODE_FLOW.md).
+For the structure of methods, paths, query parameters, headers, JSON bodies,
+status codes, CORS preflight, and FoodService HTTP examples, see the
+[HTTP request and response format guide](docs/HTTP_REQUEST_RESPONSE_FORMAT.md).
 
 The project demonstrates how multiple independent services communicate while following layered architecture principles such as Controller, Service, Repository, and Database layers.
 
