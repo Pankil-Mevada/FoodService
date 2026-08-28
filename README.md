@@ -1,5 +1,7 @@
 # 🍔 FoodService - C++ Microservices Backend
 
+[![FoodService CI](https://github.com/Pankil-Mevada/FoodService/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/Pankil-Mevada/FoodService/actions/workflows/ci.yml)
+
 FoodService is a backend application built using **Modern C++20**, **Crow**, **SQLite**, and **JWT Authentication** following a **Microservices Architecture**.
 
 For an interview-focused explanation of the microservices, CRUD paths,
@@ -13,6 +15,9 @@ For local ports, localhost, WSL/mobile access, and production exposure, see
 [Ports and Networking in FoodService](docs/PORTS_AND_NETWORKING.md).
 For login tokens, Bearer headers, trusted identity, and route authorization, see
 [JWT Authentication in FoodService](docs/JWT_AUTHENTICATION.md).
+For the branch strategy, local checks, automated GitHub pipeline, protected-branch
+setup, and failure troubleshooting, follow the
+[Git toolchain and automated pipeline guide](docs/GIT_PIPELINE.md).
 
 The project demonstrates how multiple independent services communicate while following layered architecture principles such as Controller, Service, Repository, and Database layers.
 

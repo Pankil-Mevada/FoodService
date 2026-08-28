@@ -1,5 +1,29 @@
 # Testing strategy
 
+## Continuous integration
+
+Every pull request to `develop` or `main` runs the GitHub Actions workflow in
+`.github/workflows/ci.yml`. The `quality` job performs fast source checks and
+dependency-free C++ tests. The `build-and-e2e` job performs a clean Release
+build, CTest, and the HTTP E2E suite against all six running services. CI uses
+temporary databases and test-only secrets; it never performs a real payment.
+
+Run the fast Windows preflight from the repository root:
+
+```powershell
+.\scripts\ci-local.ps1
+```
+
+Run the exact Linux fast check, or its full build variant, from WSL:
+
+```bash
+bash scripts/ci-local.sh
+VCPKG_ROOT="$HOME/vcpkg" bash scripts/ci-local.sh --full
+```
+
+See [Git toolchain and automated pipeline](GIT_PIPELINE.md) for the complete
+branch workflow, required checks, GitHub settings, and log troubleshooting.
+
 ## Razorpay sandbox checkout
 
 Configure `rzp_test_...` credentials using `docs/SETUP.md`, restart Payment
