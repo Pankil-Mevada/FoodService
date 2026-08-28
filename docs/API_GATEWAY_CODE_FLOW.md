@@ -450,4 +450,3 @@ Receive -> Authenticate -> Validate -> Authorize
 
 Not every current route implements every stage. That difference helps identify
 simple proxy routes, orchestration routes, and remaining security work.
-
