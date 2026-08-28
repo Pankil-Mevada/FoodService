@@ -18,6 +18,9 @@ For login tokens, Bearer headers, trusted identity, and route authorization, see
 For the branch strategy, local checks, automated GitHub pipeline, protected-branch
 setup, and failure troubleshooting, follow the
 [Git toolchain and automated pipeline guide](docs/GIT_PIPELINE.md).
+For a route-by-route explanation of gateway startup, JWT authentication,
+microservice calls, order/payment/tracking sequences, and debugging, read the
+[API Gateway code-flow guide](docs/API_GATEWAY_CODE_FLOW.md).
 
 The project demonstrates how multiple independent services communicate while following layered architecture principles such as Controller, Service, Repository, and Database layers.
 
