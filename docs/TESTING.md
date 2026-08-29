@@ -1,5 +1,14 @@
 # Testing strategy
 
+## Correlation-ID test
+
+`correlation_id_test` verifies accepted characters, the 64-character limit,
+header-injection rejection, preservation of a safe client ID, and unique valid
+fallback generation. For a visible manual check, send
+`X-Correlation-ID: manual-123` to a gateway route, inspect the same response
+header, and watch the gateway terminal for matching `request.start` and
+`request.finish` lines.
+
 ## Continuous integration
 
 Every pull request to `develop` or `main` runs the GitHub Actions workflow in

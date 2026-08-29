@@ -752,7 +752,7 @@ order after its prerequisites and product/provider decisions are resolved.
 | Requirement | Status | Why | When |
 |---|---|---|---|
 | API Gateway and domain microservices | ✅ Done | User, restaurant, order, payment, notification services and a gateway communicate over HTTP. | Now / completed |
-| `/api/v1`, status/error consistency, correlation IDs | 🟡 Partial | Gateway now preserves downstream status and maps connection/transport failures to 502 and timeouts to 504; routes remain unversioned and shared error codes/correlation IDs are absent. | Phase 0 |
+| `/api/v1`, status/error consistency, correlation IDs | 🟡 Partial | Gateway preserves downstream status, maps transport failures, and now returns/forwards/logs a safe correlation ID; routes remain unversioned and shared error codes plus downstream structured tracing are absent. | Phase 0 |
 | Authentication and server-derived customer identity | 🟡 Partial | Customer identity is server-derived on critical flows; role/restaurant/admin policies are absent. | Phase 0 |
 | Validation, pagination, filtering, sorting | 🟡 Partial | Important fields have targeted validation, but there is no shared field-error framework or bounded collections. | Phase 0 |
 | Idempotency | 🟡 Partial | Payment creation is idempotent; orders, refunds, and raw webhook events are not fully covered. | Phase 0 |

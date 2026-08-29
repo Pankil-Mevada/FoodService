@@ -1,4 +1,5 @@
 #include "client/HttpClient.h"
+#include "CorrelationId.h"
 
 #include <curl/curl.h>
 
@@ -46,6 +47,11 @@ HttpResult perform(const std::string& method, const std::string& url,
     }
     for (const auto& value : extraHeaders)
         headers = curl_slist_append(headers, value.c_str());
+    if (!currentCorrelationId.empty())
+    {
+        const std::string value = "X-Correlation-ID: " + currentCorrelationId;
+        headers = curl_slist_append(headers, value.c_str());
+    }
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_USERAGENT,

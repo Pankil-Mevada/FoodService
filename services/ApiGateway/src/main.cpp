@@ -7,6 +7,7 @@
 #include "JwtManager.h"
 #include "Database.h"
 #include "DeliveryQuote.h"
+#include "CorrelationMiddleware.h"
 #include <algorithm>
 #include <cstdlib>
 #include <chrono>
@@ -194,7 +195,7 @@ void removeDriverLocation(Database& database, int orderId)
 
 int main()
 {
-    crow::App<crow::CORSHandler> app;
+    crow::App<crow::CORSHandler, CorrelationMiddleware> app;
     Database deliveryDatabase("delivery.db");
     deliveryDatabase.createDriverLocationTable();
     deliveryDatabase.createCustomerAddressTable();
@@ -202,7 +203,8 @@ int main()
     auto& cors = app.get_middleware<crow::CORSHandler>();
     cors.global()
         .origin("*")
-        .headers("Content-Type", "Authorization", "Idempotency-Key", "X-Webhook-Secret", "X-Driver-Token")
+        .headers("Content-Type", "Authorization", "Idempotency-Key", "X-Webhook-Secret", "X-Driver-Token", "X-Correlation-ID")
+        .expose("X-Correlation-ID")
         .methods(
             crow::HTTPMethod::GET,
             crow::HTTPMethod::POST,

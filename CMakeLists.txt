@@ -36,4 +36,9 @@ if(BUILD_TESTING)
     target_include_directories(http_result_test PRIVATE
         ${CMAKE_SOURCE_DIR}/services/ApiGateway/include)
     add_test(NAME http_result COMMAND http_result_test)
+
+    add_executable(correlation_id_test tests/correlation_id_test.cpp)
+    target_include_directories(correlation_id_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/services/ApiGateway/include)
+    add_test(NAME correlation_id COMMAND correlation_id_test)
 endif()

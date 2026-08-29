@@ -1,5 +1,25 @@
 # HTTP API reference
 
+## Request correlation
+
+Clients may send `X-Correlation-ID` using 1-64 letters, digits, hyphens,
+underscores, or periods. The API Gateway keeps a valid supplied value; otherwise
+it generates an identifier. Every gateway response returns the identifier, and
+synchronous calls to downstream services carry the same header. Gateway logs
+include the ID, HTTP method, URL, and status.
+
+```http
+POST /login HTTP/1.1
+Host: localhost:8085
+Content-Type: application/json
+X-Correlation-ID: login-browser-42
+
+{"email":"customer@example.com","password":"test-only"}
+```
+
+This is request correlation, not complete distributed tracing: downstream
+services receive the header but do not yet emit structured spans or metrics.
+
 Default base URLs are API Gateway `http://127.0.0.1:8085`, User `:8080`,
 Restaurant `:8081`, Order `:8082`, Payment `:8083`, and Notification `:8084`.
 JSON requests require `Content-Type: application/json`.

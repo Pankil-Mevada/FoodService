@@ -1,5 +1,20 @@
 # Architecture and design
 
+## Correlated synchronous request flow
+
+The API Gateway middleware chooses one safe `X-Correlation-ID` per incoming
+request and stores it only for the lifetime of the Crow worker thread. The HTTP
+client adds it to calls made to downstream services. The gateway returns the
+same ID to the browser and logs request start/finish records. It clears the
+thread-local value after responding so a reused worker cannot leak an old ID.
+
+```text
+Browser -- X-Correlation-ID --> API Gateway middleware
+                                  |-- same ID --> downstream service
+                                  |<-- response --|
+Browser <-- same ID ------------ API Gateway + correlated logs
+```
+
 ## Payment-gated delivery invariant
 
 The browser opens `frontend/payment.html` as a separate checkout surface. It
