@@ -24,9 +24,6 @@ struct JwtMiddleware
         }
 
         auto authHeader = req.get_header_value("Authorization");
-        std::cout << "UserService received header: ["
-          << authHeader << "]" << std::endl;
-
         if (authHeader.empty())
         {
             res.code = 401;

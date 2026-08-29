@@ -10,7 +10,6 @@ UserRepository::UserRepository(Database& database)
 
 bool UserRepository::saveUser(const User& user)
 {
-	std::cout<<" Save User "<<std::endl;
     const char* sql =
         "INSERT INTO users(name,email,password)"
         "VALUES(?,?,?);";
@@ -44,9 +43,20 @@ bool UserRepository::saveUser(const User& user)
     }
 
     sqlite3_finalize(stmt);
-	std::cout<<" Save User "<<std::endl;
-
     return true;
+}
+
+bool UserRepository::updatePasswordHash(int id, const std::string& passwordHash)
+{
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(m_database.connection(),
+            "UPDATE users SET password=? WHERE id=?;", -1, &stmt, nullptr) != SQLITE_OK)
+        return false;
+    sqlite3_bind_text(stmt, 1, passwordHash.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 2, id);
+    const int rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+    return rc == SQLITE_DONE && sqlite3_changes(m_database.connection()) > 0;
 }
 
 std::vector<User> UserRepository::getAllUsers()

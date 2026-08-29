@@ -13,6 +13,7 @@ public:
     bool saveUser(const User& user);
     std::vector<User> getAllUsers();
 	std::optional<User> getUserById(int id);
+	bool updatePasswordHash(int id, const std::string& passwordHash);
 	bool updateUser(const User& user);
 
 bool deleteUser(int id);

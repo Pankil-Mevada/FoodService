@@ -2,6 +2,7 @@
 
 #include <argon2.h>
 #include <stdexcept>
+#include <random>
 #include <vector>
 
 namespace
@@ -16,6 +17,12 @@ constexpr uint32_t HashLength = 32;
 std::string PasswordHasher::hashPassword(const std::string& password)
 {
     std::vector<uint8_t> salt(SaltLength);
+    std::random_device random;
+    for (auto& byte : salt) byte = static_cast<uint8_t>(random());
+
+    const auto encodedLength = argon2_encodedlen(
+        TimeCost, MemoryCost, Parallelism, SaltLength, HashLength, Argon2_id);
+    std::vector<char> encoded(encodedLength);
 
     if (argon2id_hash_encoded(
             TimeCost,
@@ -26,13 +33,13 @@ std::string PasswordHasher::hashPassword(const std::string& password)
             salt.data(),
             salt.size(),
             HashLength,
-            nullptr,
-            0) != ARGON2_OK)
+            encoded.data(),
+            encoded.size()) != ARGON2_OK)
     {
         throw std::runtime_error("Failed to hash password");
     }
 
-    return {};
+    return std::string(encoded.data());
 }
 
 bool PasswordHasher::verifyPassword(

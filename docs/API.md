@@ -54,9 +54,16 @@ the response or timeout while other workers remain available.
 | API | Method and path | Request body | Notes |
 |---|---|---|---|
 | Gateway | `GET /health` | — | Gateway health |
-| Auth | `POST /register` | `name`, `email`, `password` | Creates user; 201 or 409 |
+| Auth | `POST /register` | `name`, `email`, `password` | Creates user; password requires 10–128 characters with uppercase, lowercase, number, and symbol; 201 or 409 |
 | Auth | `POST /login` | `email`, `password` | Returns JWT in `token` |
 | Auth | `GET /me` | — | JWT required; returns the signed-in user |
+
+Passwords are stored as salted Argon2id hashes. Existing local-development
+plaintext records are upgraded after their next successful login. Passwords,
+hashes, bearer tokens, and authorization headers must never appear in logs.
+Email syntax validation is implemented, but email ownership verification still
+requires a mail provider plus expiring one-time tokens, resend/abuse controls,
+API endpoints, and UI before accounts can be called email-verified.
 | Users | `GET /users` | — | `Authorization: Bearer <JWT>` |
 | Users | `GET /users/{id}` | — | JWT required |
 | Users | `PUT /users/{id}` | `name`, `email`, `password` | JWT required |

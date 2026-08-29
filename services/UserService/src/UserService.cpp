@@ -1,4 +1,6 @@
 #include "UserService.h"
+#include "PasswordHasher.h"
+#include <iostream>
 
 UserService::UserService(UserRepository& repository)
     : m_repository(repository)
@@ -13,7 +15,14 @@ bool UserService::registerUser(const User& user)
 	{
 		return false;
 	}
-    return m_repository.saveUser(user);
+    try {
+        User secured(user.getId(), user.getName(), user.getEmail(),
+                     PasswordHasher::hashPassword(user.getPassword()));
+        return m_repository.saveUser(secured);
+    } catch (const std::exception&) {
+        std::clog << "[ERROR] event=user.registration_failed reason=password_hashing" << std::endl;
+        return false;
+    }
 }
 std::vector<User> UserService::getAllUsers()
 {
@@ -39,27 +48,32 @@ std::optional<std::string> UserService::login(
     const std::string& email,
     const std::string& password)
 {
-    std::cout << "Login email    : " << email << std::endl;
-    std::cout << "Login password : " << password << std::endl;
-
     auto user = m_repository.findByEmail(email);
 
     if (!user.has_value())
     {
-        std::cout << "User not found" << std::endl;
+        std::clog << "[WARNING] event=user.login_rejected reason=invalid_credentials" << std::endl;
         return std::nullopt;
     }
 
-    std::cout << "DB email       : " << user->getEmail() << std::endl;
-    std::cout << "DB password    : " << user->getPassword() << std::endl;
-
-    if (user->getPassword() != password)
+    const bool encoded = user->getPassword().rfind("$argon2id$", 0) == 0;
+    const bool passwordMatches = encoded
+        ? PasswordHasher::verifyPassword(password, user->getPassword())
+        : user->getPassword() == password;
+    if (!passwordMatches)
     {
-        std::cout << "Password mismatch" << std::endl;
+        std::clog << "[WARNING] event=user.login_rejected reason=invalid_credentials" << std::endl;
         return std::nullopt;
     }
 
-    std::cout << "Password matched" << std::endl;
+    if (!encoded) {
+        try {
+            m_repository.updatePasswordHash(user->getId(), PasswordHasher::hashPassword(password));
+            std::clog << "[INFO] event=user.password_hash_upgraded userId=" << user->getId() << std::endl;
+        } catch (const std::exception&) {
+            std::clog << "[ERROR] event=user.password_hash_upgrade_failed userId=" << user->getId() << std::endl;
+        }
+    }
 
     JwtManager jwt;
 
@@ -67,7 +81,7 @@ std::optional<std::string> UserService::login(
         user->getId(),
         user->getEmail());
 
-    std::cout << "JWT generated" << std::endl;
+    std::clog << "[INFO] event=user.login_succeeded userId=" << user->getId() << std::endl;
 
     return token;
 }

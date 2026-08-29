@@ -30,6 +30,14 @@ invalid request, and one controlled dependency failure. Confirm the relevant
 service, status, duration, and correlation ID. Never add secrets or bodies to
 these records; see [Runtime logging](LOGGING.md).
 
+`account_security_test` verifies strong email/password validation, salted
+Argon2id output, successful verification, wrong-password rejection, and unique
+hashes for the same password. The registration integration check must also
+confirm weak passwords return HTTP 400 and User Service logs contain no
+password, hash, JWT, or Authorization-header values. Browser testing must use
+two accounts and confirm one account's photo, phone, and test UPI preference do
+not appear after signing into the other account.
+
 ## Continuous integration
 
 Every pull request to `develop` or `main` runs the GitHub Actions workflow in
@@ -199,7 +207,9 @@ valid evidence for the current source tree.
 - Profile photo is resized to 256×256, favourites survive refresh, and invalid test UPI IDs are rejected; no UPI PIN is requested.
 - Craving shortcuts preselect the matching menu item; rating and favourite filters update the restaurant grid.
 - Tracking starts assigned at three minutes and persists delivered at zero ETA.
-- Dummy credentials only: plaintext password storage/logging is open security debt.
+- New passwords use Argon2id, legacy local records upgrade on successful login,
+  and credential values must not appear in logs. Email ownership verification
+  remains open until a delivery provider and one-time-token workflow are added.
 
 ## Scope and limitations
 

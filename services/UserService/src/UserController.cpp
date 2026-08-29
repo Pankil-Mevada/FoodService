@@ -21,6 +21,8 @@ crow::response UserController::registerUser(const crow::request& req)
 	{
 		return crow::response(400, "Invalid JSON");
 	}
+	if (!json.has("name") || !json.has("email") || !json.has("password"))
+		return crow::response(400, "Name, email, and password are required");
 
 	User user(
 			0,
@@ -41,7 +43,7 @@ crow::response UserController::registerUser(const crow::request& req)
 
 	if (!UserValidator::validatePassword(user.getPassword()))
 	{
-		return crow::response(400, "Password must be at least 6 characters");
+		return crow::response(400, "Password must be 10-128 characters and include uppercase, lowercase, number, and symbol");
 	}
 
 	bool status = m_service.registerUser(user);
@@ -117,6 +119,8 @@ crow::response UserController::updateUser(
     {
         return crow::response(400, "Invalid JSON");
     }
+    if (!json.has("name") || !json.has("email") || !json.has("password"))
+        return crow::response(400, "Name, email, and password are required");
 
     User user(
         id,
@@ -136,7 +140,7 @@ crow::response UserController::updateUser(
 
     if (!UserValidator::validatePassword(user.getPassword()))
     {
-	    return crow::response(400, "Password must be at least 6 characters");
+	    return crow::response(400, "Password must be 10-128 characters and include uppercase, lowercase, number, and symbol");
     }
     bool status = m_service.updateUser(user);
 
@@ -185,6 +189,8 @@ crow::response UserController::login(
     {
         return crow::response(400, "Invalid JSON");
     }
+	if (!json.has("email") || !json.has("password"))
+		return crow::response(400, "Email and password are required");
 
 
     auto token =

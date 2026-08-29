@@ -97,11 +97,11 @@ Requirement status symbols used below:
 
 | Priority | Requirement | Status | Why | Planned phase |
 |---|---|---|---|---|
-| P0 | Register, sign in/out, and browser session | 🟡 Partial | Registration, login, JWT storage, and sign-out work; password storage and refresh/revocation are not production-safe. | Phase 0 |
+| P0 | Register, sign in/out, and browser session | 🟡 Partial | Registration, login, JWT storage, sign-out, Argon2id password hashing, credential-safe logs, and stronger validation work; refresh/revocation remain absent. | Phase 0 |
 | P0 | Access/refresh tokens, expiration, revocation | ⬜ Not started | Only a basic access JWT exists; there is no session store or rotated refresh token. | Phase 0 |
-| P0 | Email or phone verification | ⬜ Not started | Verification tokens, delivery provider, endpoints, and UI are absent. | Phase 1 |
+| P0 | Email or phone verification | ⬜ Not started | Email syntax is validated, but ownership verification still needs expiring one-time tokens, a delivery provider, resend/abuse controls, endpoints, and UI. | Phase 1 |
 | P0 | Forgot/reset password | ⬜ Not started | Secure reset tokens, expiry, delivery, and password-change flow are absent. | Phase 1 |
-| P0 | Customer profile and saved addresses | 🟡 Partial | JWT-owned addresses work; profile photo/phone/UPI are partly browser-local and address storage needs production privacy controls. | Phase 1 |
+| P0 | Customer profile and saved addresses | 🟡 Partial | JWT-owned addresses work and browser-local photo/phone/UPI data is isolated by authenticated user ID; server-side profile storage and production privacy controls remain. | Phase 1 |
 | P0 | Role-based API authorization | ⬜ Not started | JWT identifies a customer but does not enforce customer/restaurant/driver/admin roles. | Phase 0 |
 | P0 | Server-derived customer ID | ✅ Done | `/me`, order, payment, and address flows derive identity from verified JWT claims. | Completed |
 | P0 | Audit security-sensitive events | ⬜ Not started | There is no immutable account/authentication audit store. | Phase 0 |
@@ -610,10 +610,10 @@ order after its prerequisites and product/provider decisions are resolved.
 
 | Requirement | Status | Why | When |
 |---|---|---|---|
-| Register, sign in/out, browser session | 🟡 Partial | Registration, login, JWT storage, and sign-out work, but password storage is not production-safe and the browser session has no refresh/revocation flow. | Phase 0 |
+| Register, sign in/out, browser session | 🟡 Partial | Registration, login, JWT storage, sign-out, Argon2id hashing, and stronger validation work; the browser session still has no refresh/revocation flow. | Phase 0 |
 | Access/refresh tokens, expiry, revocation, multiple devices | ⬜ Not started | Only a basic access JWT exists; there is no session store or rotated refresh token. | Phase 0; multi-device completion Phase 1 |
 | Email/phone verification and password recovery | ⬜ Not started | Verification tokens, provider delivery, reset endpoints, and screens are absent. | Phase 1 |
-| Customer profile and saved addresses | 🟡 Partial | Address book is JWT-owned; name/photo/phone/UPI preferences are partly browser-local and addresses live in the gateway MVP database. | Phase 1 |
+| Customer profile and saved addresses | 🟡 Partial | Address book is JWT-owned; browser-local name/photo/phone/UPI preferences are now isolated per authenticated user, while server-side profile storage and address-service migration remain. | Phase 1 |
 | Role-based authorization | ⬜ Not started | Tokens identify a user but do not carry/enforce marketplace roles. | Next — Phase 0 |
 | Server-derived customer identity | ✅ Done | `/me`, orders, payments, and addresses derive customer identity from verified JWT data. | Now / completed |
 | Security audit events | ⬜ Not started | There is no immutable authentication/account audit store. | Phase 0 |
