@@ -116,6 +116,10 @@ crow::json::wvalue quoteJson(const DeliveryQuote& quote, const DeliveryRules& ru
     crow::json::wvalue out; out["serviceable"]=quote.serviceable; out["distanceKm"]=quote.distanceKm;
     out["deliveryFee"]=quote.fee; out["etaMinutes"]=quote.etaMinutes; out["zoneType"]=quote.zoneType;
     out["rules"]["surge"]=rules.surge; out["rules"]["rain"]=rules.rain; out["rules"]["lateNight"]=rules.lateNight;
+    if (!quote.serviceable)
+        out["message"] = "This restaurant does not deliver to the selected address (" +
+            std::to_string(quote.distanceKm).substr(0, std::to_string(quote.distanceKm).find('.') + 2) +
+            " km away; delivery zone " + std::to_string(rules.radiusKm).substr(0, std::to_string(rules.radiusKm).find('.') + 2) + " km)";
     return out;
 }
 

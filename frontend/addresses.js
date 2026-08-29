@@ -2,7 +2,7 @@
 let addressMap,addressMarker;
 state.addresses=[]; state.selectedAddress=null; state.deliveryQuote=null;
 config.paths.addresses='/addresses'; config.paths.quote='/delivery/quote';
-async function refreshDeliveryQuote(restaurantId){if(!restaurantId||!state.location)throw new Error('Choose a restaurant and delivery address');try{state.deliveryQuote=await request(config.paths.quote,{method:'POST',body:JSON.stringify({restaurantId,latitude:+state.location.latitude,longitude:+state.location.longitude})});renderPrice();return state.deliveryQuote}catch(e){state.deliveryQuote=null;renderPrice();throw new Error(`Checkout blocked: ${e.message}`)}}
+async function refreshDeliveryQuote(restaurantId){if(!restaurantId||!state.location)throw new Error('Choose a restaurant and delivery address');try{state.deliveryQuoteError='';state.deliveryQuote=await request(config.paths.quote,{method:'POST',body:JSON.stringify({restaurantId,latitude:+state.location.latitude,longitude:+state.location.longitude})});renderPrice();return state.deliveryQuote}catch(e){state.deliveryQuote=null;state.deliveryQuoteError=e.message;renderPrice();throw new Error(`Checkout blocked: ${e.message}`)}}
 
 function setAddressPoint(lat,lon,label='Pinned location'){
   const latitude=Number(lat),longitude=Number(lon); const form=$('#address-form');
