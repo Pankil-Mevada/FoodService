@@ -266,7 +266,9 @@ void Database::createDriverLocationTable()
             driver_contact TEXT NOT NULL,
             vehicle_type TEXT NOT NULL,
             vehicle_plate TEXT NOT NULL,
-            updated_epoch INTEGER NOT NULL
+            updated_epoch INTEGER NOT NULL,
+            status_changed_epoch INTEGER NOT NULL DEFAULT 0
         );
     )");
+    sqlite3_exec(connection(), "ALTER TABLE driver_locations ADD COLUMN status_changed_epoch INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
 }

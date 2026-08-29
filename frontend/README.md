@@ -58,6 +58,11 @@ After successful backend signature verification, checkout shows a three-second
 confirmation and automatically returns to that dialog. The manual return link
 remains available as a fallback.
 
+The homepage uses an original three-panel marketplace rail and a CSS-driven
+motion reel built from local generated test-food images. It makes no third-party
+video request and honours `prefers-reduced-motion`. Delivered history records
+are terminal and expose no tracking or cancellation controls.
+
 ## Files
 
 - `index.html` — semantic application structure and dialogs

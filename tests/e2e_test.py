@@ -398,17 +398,24 @@ class Suite:
             raise AssertionError(f"tracking was not backed by a fresh real GPS record: {payload}")
         if payload.get("driverLatitude") != driver_payload["latitude"] or payload.get("driverName") != "E2E Driver":
             raise AssertionError(f"stored driver GPS/profile was not returned: {payload}")
-        driver_payload.update({"latitude": 23.0240, "longitude": 72.5730, "status": "DELIVERED"})
-        status, advanced = self.api.request(
-            "POST", f"{self.args.gateway}/driver/orders/{self.created['order']}/location",
-            driver_payload, extra_headers={"X-Driver-Token": self.args.driver_token})
-        self.expect(status, (202,), advanced)
+        for delivery_status in ("PICKED_UP", "ON_THE_WAY", "ARRIVING", "DELIVERED"):
+            if self.args.delivery_step_delay:
+                time.sleep(self.args.delivery_step_delay)
+            driver_payload.update({"latitude": 23.0240, "longitude": 72.5730,
+                                   "status": delivery_status})
+            status, advanced = self.api.request(
+                "POST", f"{self.args.gateway}/driver/orders/{self.created['order']}/location",
+                driver_payload, extra_headers={"X-Driver-Token": self.args.driver_token})
+            self.expect(status, (202,), advanced)
         status, delivered = self.api.request(
             "GET", f"{self.args.gateway}/orders/{self.created['order']}/tracking",
             token=self.token)
         self.expect(status, (200,), delivered)
         if delivered.get("status") != "DELIVERED" or delivered.get("progressPercent") != 100:
             raise AssertionError(f"delivered status was not persisted: {delivered}")
+        status, cancellation = self.api.request(
+            "DELETE", f"{self.args.gateway}/orders/{self.created['order']}", token=self.token)
+        self.expect(status, (409,), cancellation)
         return "no fabricated fix -> authenticated real GPS -> delivered at customer coordinates"
 
     def notifications(self) -> str:
@@ -575,6 +582,8 @@ def parse_args() -> argparse.Namespace:
                         help="local test webhook secret; pass an empty value to skip transition test")
     parser.add_argument("--driver-token", default="local-driver-test-token",
                         help="local driver GPS ingestion token")
+    parser.add_argument("--delivery-step-delay", type=float, default=30.0,
+                        help="seconds to wait between delivery lifecycle transitions")
     return parser.parse_args()
 
 

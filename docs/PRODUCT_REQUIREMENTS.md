@@ -219,7 +219,7 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 | P0 | Allowed transitions with actor/timestamp | 🟡 Partial | Payment mapping and delivery progression are constrained; complete immutable actor/timestamp history is absent. | Phases 1–2 |
 | P0 | Complete order detail/timeline | 🟡 Partial | Totals, address, summary, payment status, and delivery status display; item lines and full event history are absent. | Phase 1 |
 | P0 | Restaurant accept/reject timeout | ⬜ Not started | Restaurant workflow and timeout scheduler are absent. | Phase 1 |
-| P0 | State-based cancellation policy | 🟡 Partial | Cancellation works, but policy is not configurable by state/actor/time. | Phase 1 |
+| P0 | State-based cancellation policy | 🟡 Partial | Delivered orders are protected by gateway policy and hide cancellation in the UI; configurable actor/time policies for earlier stages remain. | Phase 1 |
 | P0 | Public order reference | ⬜ Not started | UI/API expose internal numeric database IDs. | Phase 0 |
 | P0 | Idempotent order submission | ⬜ Not started | Payment has idempotency, but order creation lacks a unique order idempotency key. | Phase 0 |
 | P1 | Reorder | ⬜ Not started | Requires immutable order lines and current catalogue matching. | Phase 3 |

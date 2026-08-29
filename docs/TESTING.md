@@ -18,6 +18,12 @@ After successful Razorpay test verification, verify that checkout counts down
 for three seconds and navigates to `/?view=orders`, where the paid order appears
 in the dedicated history dialog.
 
+Delivery E2E advances through every state in order. Local runs use the real
+30-second delay; CI sets `DELIVERY_STATUS_DELAY_SECONDS=0` and passes
+`--delivery-step-delay 0`. The suite also verifies that cancelling a delivered
+order returns `409`. Manually confirm that delivered history cards show neither
+**Track driver** nor **Cancel**.
+
 ## Continuous integration
 
 Every pull request to `develop` or `main` runs the GitHub Actions workflow in

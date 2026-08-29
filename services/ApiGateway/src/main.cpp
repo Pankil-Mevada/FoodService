@@ -131,8 +131,23 @@ struct DriverLocation
 {
     double latitude{}, longitude{}, accuracy{}, speed{}, heading{};
     std::string status, name, contact, vehicleType, vehiclePlate;
-    long long updatedEpoch{};
+    long long updatedEpoch{}, statusChangedEpoch{};
 };
+
+int deliveryStatusIndex(const std::string& status)
+{
+    const std::vector<std::string> states={"ASSIGNED","PICKED_UP","ON_THE_WAY","ARRIVING","DELIVERED"};
+    const auto found=std::find(states.begin(),states.end(),status);
+    return found==states.end() ? -1 : static_cast<int>(std::distance(states.begin(),found));
+}
+
+int deliveryTransitionDelaySeconds()
+{
+    const char* configured=std::getenv("DELIVERY_STATUS_DELAY_SECONDS");
+    if (!configured || !*configured) return 30;
+    try { return std::clamp(std::stoi(configured),0,300); }
+    catch (...) { return 30; }
+}
 
 long long currentEpoch()
 {
@@ -150,7 +165,7 @@ bool driverTokenValid(const crow::request& req)
 bool saveDriverLocation(Database& database, int orderId, const DriverLocation& value)
 {
     std::lock_guard<std::recursive_mutex> lock(database.mutex());
-    const char* sql = "INSERT INTO driver_locations(order_id,latitude,longitude,accuracy_m,speed_mps,heading,delivery_status,driver_name,driver_contact,vehicle_type,vehicle_plate,updated_epoch) VALUES(?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(order_id) DO UPDATE SET latitude=excluded.latitude,longitude=excluded.longitude,accuracy_m=excluded.accuracy_m,speed_mps=excluded.speed_mps,heading=excluded.heading,delivery_status=excluded.delivery_status,driver_name=excluded.driver_name,driver_contact=excluded.driver_contact,vehicle_type=excluded.vehicle_type,vehicle_plate=excluded.vehicle_plate,updated_epoch=excluded.updated_epoch;";
+    const char* sql = "INSERT INTO driver_locations(order_id,latitude,longitude,accuracy_m,speed_mps,heading,delivery_status,driver_name,driver_contact,vehicle_type,vehicle_plate,updated_epoch,status_changed_epoch) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(order_id) DO UPDATE SET latitude=excluded.latitude,longitude=excluded.longitude,accuracy_m=excluded.accuracy_m,speed_mps=excluded.speed_mps,heading=excluded.heading,delivery_status=excluded.delivery_status,driver_name=excluded.driver_name,driver_contact=excluded.driver_contact,vehicle_type=excluded.vehicle_type,vehicle_plate=excluded.vehicle_plate,updated_epoch=excluded.updated_epoch,status_changed_epoch=CASE WHEN driver_locations.delivery_status=excluded.delivery_status THEN driver_locations.status_changed_epoch ELSE excluded.status_changed_epoch END;";
     sqlite3_stmt* statement = nullptr;
     if (sqlite3_prepare_v2(database.connection(), sql, -1, &statement, nullptr) != SQLITE_OK) return false;
     sqlite3_bind_int(statement, 1, orderId); sqlite3_bind_double(statement, 2, value.latitude);
@@ -162,6 +177,7 @@ bool saveDriverLocation(Database& database, int orderId, const DriverLocation& v
     sqlite3_bind_text(statement, 10, value.vehicleType.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(statement, 11, value.vehiclePlate.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int64(statement, 12, value.updatedEpoch);
+    sqlite3_bind_int64(statement, 13, value.statusChangedEpoch);
     const int result = sqlite3_step(statement); sqlite3_finalize(statement);
     return result == SQLITE_DONE;
 }
@@ -170,7 +186,7 @@ std::optional<DriverLocation> loadDriverLocation(Database& database, int orderId
 {
     std::lock_guard<std::recursive_mutex> lock(database.mutex());
     sqlite3_stmt* statement = nullptr;
-    const char* sql = "SELECT latitude,longitude,accuracy_m,speed_mps,heading,delivery_status,driver_name,driver_contact,vehicle_type,vehicle_plate,updated_epoch FROM driver_locations WHERE order_id=?;";
+    const char* sql = "SELECT latitude,longitude,accuracy_m,speed_mps,heading,delivery_status,driver_name,driver_contact,vehicle_type,vehicle_plate,updated_epoch,status_changed_epoch FROM driver_locations WHERE order_id=?;";
     if (sqlite3_prepare_v2(database.connection(), sql, -1, &statement, nullptr) != SQLITE_OK) return std::nullopt;
     sqlite3_bind_int(statement, 1, orderId); std::optional<DriverLocation> result;
     if (sqlite3_step(statement) == SQLITE_ROW)
@@ -179,7 +195,8 @@ std::optional<DriverLocation> loadDriverLocation(Database& database, int orderId
         value.accuracy = sqlite3_column_double(statement, 2); value.speed = sqlite3_column_double(statement, 3); value.heading = sqlite3_column_double(statement, 4);
         value.status = reinterpret_cast<const char*>(sqlite3_column_text(statement, 5)); value.name = reinterpret_cast<const char*>(sqlite3_column_text(statement, 6));
         value.contact = reinterpret_cast<const char*>(sqlite3_column_text(statement, 7)); value.vehicleType = reinterpret_cast<const char*>(sqlite3_column_text(statement, 8));
-        value.vehiclePlate = reinterpret_cast<const char*>(sqlite3_column_text(statement, 9)); value.updatedEpoch = sqlite3_column_int64(statement, 10); result = value;
+        value.vehiclePlate = reinterpret_cast<const char*>(sqlite3_column_text(statement, 9)); value.updatedEpoch = sqlite3_column_int64(statement, 10);
+        value.statusChangedEpoch = sqlite3_column_int64(statement, 11); result = value;
     }
     sqlite3_finalize(statement); return result;
 }
@@ -592,6 +609,21 @@ CROW_ROUTE(app, "/driver/orders/<int>/location")
     location.vehicleType = input.has("vehicleType") ? std::string(input["vehicleType"].s()) : "Delivery vehicle";
     location.vehiclePlate = input.has("vehiclePlate") ? std::string(input["vehiclePlate"].s()) : "Not shared";
     location.updatedEpoch = currentEpoch();
+    const auto previousLocation=loadDriverLocation(deliveryDatabase,id);
+    location.statusChangedEpoch=location.updatedEpoch;
+    if (!previousLocation && location.status != "ASSIGNED")
+        return jsonError(409,"Delivery tracking must start with ASSIGNED");
+    if (previousLocation && previousLocation->status != location.status)
+    {
+        if (deliveryStatusIndex(location.status) != deliveryStatusIndex(previousLocation->status)+1)
+            return jsonError(409,"Delivery status must advance one step at a time");
+        const int delay=deliveryTransitionDelaySeconds();
+        const long long waitUntil=previousLocation->statusChangedEpoch+delay;
+        if (location.updatedEpoch < waitUntil)
+            return jsonError(409,"Wait "+std::to_string(waitUntil-location.updatedEpoch)+" seconds before the next delivery status");
+    }
+    else if (previousLocation)
+        location.statusChangedEpoch=previousLocation->statusChangedEpoch;
     if (!saveDriverLocation(deliveryDatabase, id, location)) return jsonError(500, "Could not store driver location");
     if (std::string(order["status"].s()) != location.status)
     {
@@ -605,6 +637,7 @@ CROW_ROUTE(app, "/driver/orders/<int>/location")
     CROW_LOG_WARNING << "Real driver GPS accepted order=" << id << " accuracyM=" << location.accuracy;
     crow::json::wvalue response; response["success"] = true; response["orderId"] = id;
     response["updatedEpoch"] = location.updatedEpoch; response["status"] = location.status;
+    response["nextStatusAllowedEpoch"] = location.statusChangedEpoch + deliveryTransitionDelaySeconds();
     return crow::response(202, response);
 });
 
@@ -646,10 +679,6 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
     const double remainingKm = distanceKm(location->latitude, location->longitude, endLat, endLon);
     double progress = std::clamp(1.0 - remainingKm / totalKm, 0.0, 1.0);
     std::string deliveryStatus = location->status;
-    if (remainingKm <= 0.05 && deliveryStatus != "DELIVERED")
-    {
-        deliveryStatus = "DELIVERED"; client.updateOrderStatus(id, deliveryStatus);
-    }
     if (deliveryStatus == "DELIVERED") progress = 1.0;
     const double etaSpeedMps = location->speed >= 0.5 ? location->speed : 5.56;
     const int remainingSeconds = deliveryStatus == "DELIVERED" ? 0 : static_cast<int>(std::ceil(remainingKm * 1000.0 / etaSpeedMps));
@@ -663,6 +692,7 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
     response["accuracyMeters"] = location->accuracy; response["speedMps"] = location->speed;
     response["heading"] = location->heading; response["locationAgeSeconds"] = ageSeconds;
     response["live"] = ageSeconds <= 30;
+    response["nextStatusAllowedEpoch"] = location->statusChangedEpoch + deliveryTransitionDelaySeconds();
     response["restaurantLatitude"] = startLat;
     response["restaurantLongitude"] = startLon;
     response["customerLatitude"] = endLat;
@@ -742,6 +772,12 @@ CROW_ROUTE(app, "/orders/<int>")
 .methods(crow::HTTPMethod::DELETE)
 ([&client, &deliveryDatabase](int id)
 {
+    const auto existing=client.getOrderById(id);
+    if (!existing.transportSucceeded() || existing.statusCode != 200)
+        return downstreamResponse(existing);
+    const auto order=crow::json::load(existing.body);
+    if (order && order.has("status") && std::string(order["status"].s())=="DELIVERED")
+        return jsonError(409,"Delivered orders cannot be cancelled");
     const auto result = client.deleteOrder(id);
     removeDriverLocation(deliveryDatabase, id);
     return downstreamResponse(result);

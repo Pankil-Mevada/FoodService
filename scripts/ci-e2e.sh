@@ -22,6 +22,7 @@ start_service() {
 
 export FOODSERVICE_DB_DIR="$run_dir"
 export PAYMENT_SERVICE_DB="$run_dir/payment.db"
+export DELIVERY_STATUS_DELAY_SECONDS=0
 
 start_service users "$build_dir/services/UserService/UserService"
 start_service restaurants "$build_dir/services/RestaurantService/RestaurantService"
@@ -50,4 +51,5 @@ done
 
 python3 tests/e2e_test.py \
   --webhook-secret "${PAYMENT_WEBHOOK_SECRET:-test-webhook-secret}" \
-  --driver-token "${DRIVER_LOCATION_TOKEN:-ci-only-driver-location-token}"
+  --driver-token "${DRIVER_LOCATION_TOKEN:-ci-only-driver-location-token}" \
+  --delivery-step-delay 0

@@ -24,6 +24,13 @@ Successful `POST /orders` responses include the exact new `orderId`. The web
 client uses this server-issued identifier to navigate directly to Razorpay Test
 Mode checkout instead of searching order history for the newest record.
 
+Driver GPS updates may repeat the current delivery status at any frequency, but
+status changes must advance exactly one stage and wait 30 seconds by default:
+`ASSIGNED`, `PICKED_UP`, `ON_THE_WAY`, `ARRIVING`, `DELIVERED`. Successful
+location responses include `nextStatusAllowedEpoch`; early or skipped changes
+return `409`. `DELIVERY_STATUS_DELAY_SECONDS` can override the delay for an
+isolated test environment. Deleting a delivered order also returns `409`.
+
 Default base URLs are API Gateway `http://127.0.0.1:8085`, User `:8080`,
 Restaurant `:8081`, Order `:8082`, Payment `:8083`, and Notification `:8084`.
 JSON requests require `Content-Type: application/json`.

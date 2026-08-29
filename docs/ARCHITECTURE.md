@@ -15,6 +15,15 @@ Browser -- X-Correlation-ID --> API Gateway middleware
 Browser <-- same ID ------------ API Gateway + correlated logs
 ```
 
+## Timed delivery state machine
+
+The gateway stores both the latest GPS timestamp and a separate status-change
+timestamp. Frequent GPS fixes therefore do not restart the transition timer.
+The ingestion route accepts only the next lifecycle state after the configured
+30-second development delay and then asks Order Service to persist it. This is
+an API invariant; hiding controls in the browser is only an additional UX rule.
+Delivered orders cannot be cancelled through the gateway.
+
 ## Payment-gated delivery invariant
 
 The browser opens `frontend/payment.html` as a separate checkout surface. It

@@ -86,3 +86,27 @@ body{background:#fffaf4}
 .price-breakdown{background:#fff3ec;border:1px solid #f0ded4}
 
 @media(max-width:620px){.journey-strip{align-items:flex-start;flex-direction:column;padding:42px 20px}.journey-strip .btn{width:100%}.checkout-address{grid-template-columns:auto 1fr}.checkout-address .mini{grid-column:2;justify-self:start}.orders-modal{padding:28px 18px}}
+
+/* Animated marketplace home */
+.hero{margin-bottom:24px}
+.motion-reel{position:relative;width:min(30vw,370px);aspect-ratio:1;border-radius:38% 62% 52% 48%;overflow:hidden;border:14px solid #fff;box-shadow:0 32px 80px #6f302d30;transform:rotate(2deg);z-index:1}
+.food-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);animation:food-reel 12s infinite ease-in-out}
+.frame-one{animation-delay:0s}.frame-two{animation-delay:4s}.frame-three{animation-delay:8s}
+.reel-caption{position:absolute;left:18px;bottom:18px;z-index:3;padding:9px 13px;border-radius:999px;background:#241d1dcc;color:#fff;font-size:12px;font-weight:800;letter-spacing:.03em;backdrop-filter:blur(8px)}
+@keyframes food-reel{0%{opacity:0;transform:scale(1.1)}8%,28%{opacity:1;transform:scale(1)}36%,100%{opacity:0;transform:scale(.96)}}
+.service-rail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding:28px clamp(24px,6vw,92px) 72px;background:linear-gradient(180deg,#fff8f1 0,#ff5b28 0,#f0442e 100%)}
+.service-tile{position:relative;min-height:390px;padding:32px;border-radius:32px;background:#fffdfb;overflow:hidden;box-shadow:0 24px 60px #76211326;transition:transform .3s ease,box-shadow .3s ease}
+.service-tile:hover{transform:translateY(-8px);box-shadow:0 32px 70px #7621133b}
+.service-tile>span{position:absolute;right:26px;top:23px;color:#ded2cd;font:800 46px/1 Fraunces}
+.service-tile p{margin:0;color:#df4935;font-size:11px;font-weight:800;letter-spacing:.14em}
+.service-tile h2{font:800 clamp(31px,3.2vw,48px)/.95 Fraunces;margin:16px 0 12px;max-width:70%}
+.service-tile small{display:block;max-width:62%;color:var(--muted);font-size:14px;line-height:1.5}
+.service-tile>img{position:absolute;width:55%;height:48%;right:-5%;bottom:-3%;object-fit:cover;border-radius:52% 48% 0 50%;filter:saturate(1.08);transition:transform .5s ease}
+.service-tile:hover>img{transform:scale(1.06) rotate(-2deg)}
+.service-arrow{position:absolute;left:32px;bottom:30px;width:52px;height:52px;border:0;border-radius:50%;background:#f15235;color:#fff;font-size:27px;cursor:pointer;transition:transform .25s}
+.service-arrow:hover{transform:translateX(5px)}
+.tracking-tile{background:#fff6ed}.payment-tile{background:#fff1ef}
+
+@media(max-width:900px){.service-rail{grid-template-columns:1fr}.service-tile{min-height:300px}.service-tile>img{width:44%;height:65%}.service-tile h2{max-width:60%}}
+@media(max-width:620px){.motion-reel{width:220px;border-width:9px}.service-rail{padding:18px 12px 42px}.service-tile{min-height:270px;padding:25px;border-radius:25px}.service-tile h2{font-size:34px}.service-tile small{max-width:58%}.service-arrow{left:25px;bottom:24px}.service-tile>img{width:48%;height:55%}}
+@media(prefers-reduced-motion:reduce){.food-frame{animation:none}.frame-one{opacity:1;transform:none}.service-tile,.service-tile>img,.service-arrow{transition:none}}
