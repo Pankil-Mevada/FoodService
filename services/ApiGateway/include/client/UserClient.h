@@ -8,25 +8,25 @@ class UserClient
 {
 public:
 
-    std::string registerUser(
+    HttpResult registerUser(
         const std::string& jsonBody);
 
-    std::string login(
+    HttpResult login(
         const std::string& jsonBody);
 
-    std::string getAllUsers(
+    HttpResult getAllUsers(
         const std::string& authHeader);
 
-    std::string getUserById(
+    HttpResult getUserById(
         int id,
         const std::string& authHeader);
 
-    std::string updateUser(
+    HttpResult updateUser(
         int id,
         const std::string& jsonBody,
         const std::string& authHeader);
 
-    std::string deleteUser(
+    HttpResult deleteUser(
         int id,
         const std::string& authHeader);
 

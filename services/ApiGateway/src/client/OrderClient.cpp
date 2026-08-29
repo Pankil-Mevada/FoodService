@@ -18,7 +18,7 @@ size_t WriteCallback(
 }
 }
 
-std::string OrderClient::createOrder(
+HttpResult OrderClient::createOrder(
     const std::string& jsonBody)
 {
        return m_httpClient.post(
@@ -26,13 +26,13 @@ std::string OrderClient::createOrder(
         jsonBody);
 }
 
-std::string OrderClient::getAllOrders()
+HttpResult OrderClient::getAllOrders()
 {
      return m_httpClient.get(
         "http://localhost:8082/orders");
 }
 
-std::string OrderClient::getOrderById(int id)
+HttpResult OrderClient::getOrderById(int id)
 {
  return m_httpClient.get(
         "http://localhost:8082/orders/" +
@@ -40,7 +40,7 @@ std::string OrderClient::getOrderById(int id)
 }
 
 
-std::string OrderClient::updateOrder(
+HttpResult OrderClient::updateOrder(
     int id,
     const std::string& jsonBody)
 {
@@ -50,7 +50,7 @@ std::string OrderClient::updateOrder(
         jsonBody);
 }
 
-std::string OrderClient::deleteOrder(
+HttpResult OrderClient::deleteOrder(
     int id)
 {
 return m_httpClient.remove(
@@ -58,7 +58,7 @@ return m_httpClient.remove(
         std::to_string(id));
 }
 
-std::string OrderClient::updateOrderStatus(int id, const std::string& status)
+HttpResult OrderClient::updateOrderStatus(int id, const std::string& status)
 {
     return m_httpClient.post(
         "http://localhost:8082/orders/" + std::to_string(id) + "/status",

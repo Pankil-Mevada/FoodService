@@ -4,6 +4,22 @@ Default base URLs are API Gateway `http://127.0.0.1:8085`, User `:8080`,
 Restaurant `:8081`, Order `:8082`, Payment `:8083`, and Notification `:8084`.
 JSON requests require `Content-Type: application/json`.
 
+## Gateway downstream behavior
+
+The Gateway preserves HTTP status codes returned by User, Restaurant, Order,
+and Payment services. Its synchronous libcurl calls have a 2-second connection
+timeout and a 10-second total timeout for GET, POST, PUT, and DELETE.
+
+- A downstream timeout returns `504` with
+  `{"success":false,"message":"A downstream service timed out"}`.
+- DNS, connection, and other transport failures return `502` with
+  `{"success":false,"message":"A downstream service is unavailable"}`.
+- A valid downstream response retains its original status and body.
+
+The transport error text is logged server-side but is not returned to clients.
+This is a bounded synchronous design; the request's Gateway worker waits until
+the response or timeout while other workers remain available.
+
 | API | Method and path | Request body | Notes |
 |---|---|---|---|
 | Gateway | `GET /health` | — | Gateway health |
@@ -65,8 +81,9 @@ later order state. If the payment is durable but Order Service is unavailable,
 the provider endpoint returns HTTP 502 with the durable payment object and a
 retry-safe message.
 
-The implementation returns a mixture of JSON and plain-text errors. Clients
-must check HTTP status before decoding a domain object. Payment provider routes
+The implementation still returns a mixture of JSON and plain-text domain errors,
+although Gateway-generated transport errors are JSON. Clients must check HTTP
+status before decoding a domain object. Payment provider routes
 and exact status names should be documented here once the provider integration
 lands; do not infer success from the order-create response alone.
 # Delivery address and quote APIs

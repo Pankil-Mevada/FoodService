@@ -150,7 +150,13 @@ libcurl to:
 3. attach JSON, authorization, or extra headers;
 4. send the request with `curl_easy_perform()`;
 5. collect response bytes through `WriteCallback`;
-6. return the response body as `std::string`.
+6. return `HttpResult` containing the status, body, failure category, and safe
+   diagnostic text.
+
+All methods use a 2-second connection timeout and a 10-second total timeout.
+The calling Gateway worker waits synchronously, but its wait is bounded. The
+gateway preserves a valid downstream status, maps timeout to `504`, and maps
+DNS/connection/other transport failure to `502`.
 
 Example order call:
 
@@ -381,10 +387,11 @@ Gateway-native validation uses helpers such as:
 - `jsonError(422, ...)` -> invalid coordinates or unserviceable address;
 - `jsonError(503, ...)` -> nearby provider unavailable.
 
-However, `HttpClient` currently returns only the downstream response body. It
-does not preserve the downstream HTTP status code. Some proxy-only routes can
-therefore return a gateway `200` containing an error body produced by a backend
-service. Fixing transport-level error propagation is an important roadmap item.
+`HttpClient` now returns a structured `HttpResult`, so proxy routes preserve
+downstream HTTP status. If no HTTP response arrives, the Gateway returns a safe
+JSON `504` for timeout or `502` for other transport failure. The internal curl
+error is logged but not exposed to the browser. Domain services still use a mix
+of JSON and plain-text errors, and correlation IDs/shared error codes remain.
 
 ## 14. How to debug the gateway
 
@@ -430,8 +437,8 @@ tracking problem    -> Gateway 8085 -> Order 8082 + Payment 8083 + Restaurant 80
 |---|---|---|
 | `main.cpp` contains routing, SQL, orchestration, and calculations | Hard to test and maintain | Split into controllers, application services, repositories, and middleware. |
 | Most service URLs are hard-coded | Cannot move services cleanly between environments | Configure every base URL through environment or service discovery. |
-| libcurl errors/status codes are discarded | Backend failures can look like empty or successful gateway responses | Return a structured result containing HTTP status, body, and transport error. |
-| POST/PUT/DELETE lack consistent timeouts | A slow service can hold gateway worker capacity | Add connect/request timeouts and bounded retry policies. |
+| Synchronous libcurl holds one worker until response/timeout | Enough slow calls can exhaust worker capacity | Add metrics/circuit breaking first; evaluate async transport from measured load. |
+| Downstream headers are not generally forwarded | Metadata such as retry hints can be lost | Add an allowlisted response-header model. |
 | Some routes lack consistent JWT/ownership/role checks | Possible unauthorized access | Apply centralized authentication and authorization middleware. |
 | CORS allows `*` | Too permissive for production | Configure an explicit frontend-origin allowlist. |
 | Addresses and GPS share gateway SQLite | Couples unrelated domains and limits scaling | Move to profile/address and delivery-location services. |

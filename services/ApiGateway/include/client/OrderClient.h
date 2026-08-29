@@ -8,22 +8,22 @@ class OrderClient
 {
 public:
 
-    std::string createOrder(
+    HttpResult createOrder(
         const std::string& jsonBody);
 
-    std::string getAllOrders();
+    HttpResult getAllOrders();
 
-    std::string getOrderById(
+    HttpResult getOrderById(
         int id);
 
-    std::string updateOrder(
+    HttpResult updateOrder(
         int id,
         const std::string& jsonBody);
 
-    std::string deleteOrder(
+    HttpResult deleteOrder(
         int id);
 
-    std::string updateOrderStatus(
+    HttpResult updateOrderStatus(
         int id,
         const std::string& status);
 

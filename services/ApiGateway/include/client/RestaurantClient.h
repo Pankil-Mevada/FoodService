@@ -6,22 +6,22 @@ class RestaurantClient
 {
 public:
 
-    std::string registerRestaurant(
+    HttpResult registerRestaurant(
         const std::string& jsonBody);
 
-    std::string getAllRestaurants();
+    HttpResult getAllRestaurants();
 
-    std::string getRestaurantById(
+    HttpResult getRestaurantById(
         int id);
 
-    std::string updateRestaurant(
+    HttpResult updateRestaurant(
         int id,
         const std::string& jsonBody);
 
-    std::string deleteRestaurant(
+    HttpResult deleteRestaurant(
         int id);
 
-    std::string discoverNearby(
+    HttpResult discoverNearby(
         double latitude,
         double longitude);
 

@@ -21,6 +21,14 @@ FoodService is a C++20/Crow microservice application. Each domain service owns
 its HTTP controller, business service, repository, and SQLite persistence. The
 API Gateway is the browser-facing façade.
 
+Gateway-to-service transport is currently synchronous: the Crow worker handling
+a request waits for libcurl to finish. Every method uses a 2-second connection
+timeout and 10-second total timeout, so a dependency cannot hold that worker
+indefinitely. `HttpResult` carries the downstream status/body/failure category;
+the gateway preserves valid downstream HTTP status, maps a timeout to `504`, and
+maps connection/other transport failures to `502`. Other Crow workers can still
+serve requests, but this is bounded blocking rather than asynchronous I/O.
+
 ```text
 Browser/UI -> API Gateway :8085
                  |-> OpenStreetMap Overpass (user-triggered discovery)

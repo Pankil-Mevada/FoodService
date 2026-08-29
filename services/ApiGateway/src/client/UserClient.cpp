@@ -1,6 +1,6 @@
 #include "client/UserClient.h"
 
-std::string UserClient::registerUser(
+HttpResult UserClient::registerUser(
     const std::string& jsonBody)
 {
     return m_httpClient.post(
@@ -8,7 +8,7 @@ std::string UserClient::registerUser(
         jsonBody);
 }
 
-std::string UserClient::login(
+HttpResult UserClient::login(
     const std::string& jsonBody)
 {
     return m_httpClient.post(
@@ -16,7 +16,7 @@ std::string UserClient::login(
         jsonBody);
 }
 
-std::string UserClient::getAllUsers(
+HttpResult UserClient::getAllUsers(
     const std::string& authHeader)
 {
     return m_httpClient.get(
@@ -24,7 +24,7 @@ std::string UserClient::getAllUsers(
         authHeader);
 }
 
-std::string UserClient::getUserById(
+HttpResult UserClient::getUserById(
     int id,
     const std::string& authHeader)
 {
@@ -34,7 +34,7 @@ std::string UserClient::getUserById(
         authHeader);
 }
 
-std::string UserClient::updateUser(
+HttpResult UserClient::updateUser(
     int id,
     const std::string& jsonBody,
     const std::string& authHeader)
@@ -46,7 +46,7 @@ std::string UserClient::updateUser(
         authHeader);
 }
 
-std::string UserClient::deleteUser(
+HttpResult UserClient::deleteUser(
     int id,
     const std::string& authHeader)
 {

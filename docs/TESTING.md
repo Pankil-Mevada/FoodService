@@ -24,6 +24,22 @@ VCPKG_ROOT="$HOME/vcpkg" bash scripts/ci-local.sh --full
 See [Git toolchain and automated pipeline](GIT_PIPELINE.md) for the complete
 branch workflow, required checks, GitHub settings, and log troubleshooting.
 
+### Gateway status and transport mapping
+
+`tests/http_result_test.cpp` verifies that normal downstream statuses are
+preserved, timeouts map to `504`, connection/other failures map to `502`, and a
+response without either a valid status or failure is treated as bad gateway.
+It is registered with CTest and compiled by the fast Linux CI script.
+
+```bash
+g++ -std=c++20 -Wall -Wextra -Werror \
+  -Iservices/ApiGateway/include tests/http_result_test.cpp \
+  -o /tmp/http_result_test
+/tmp/http_result_test
+```
+
+The full CTest suite also runs it as `http_result`.
+
 ## Razorpay sandbox checkout
 
 Configure `rzp_test_...` credentials using `docs/SETUP.md`, restart Payment

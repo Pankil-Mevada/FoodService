@@ -1,6 +1,6 @@
 # FoodService product requirements
 
-Updated 2026-08-24. Statuses describe the exact locally implemented and
+Updated 2026-08-29. Statuses describe the exact locally implemented and
 validated slice; they do not imply production restaurant or courier integration.
 Section 16 is the authoritative whole-document status audit, including the
 reason for partial/open work and its planned delivery phase.
@@ -41,7 +41,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - local three-item test menu with generated photos, quantities, `WELCOME10`, delivery fee, and persisted price breakdown
 - browser-local customer profile photo, display name, phone, test UPI ID, and favourite restaurants
 - location-first discovery UI with craving shortcuts, offer presentation, rating/favourite filters, and richer delivery cards
-- latest local E2E evidence: 21 passed, 0 failed, 0 skipped
+- latest local E2E evidence: 26 passed, 0 failed, 0 skipped
 
 ### Gaps that block a real marketplace
 
@@ -51,7 +51,9 @@ The first commercial milestone is a complete single-city ordering journey:
 - passwords are stored/compared/logged as plaintext; hashing utility is incomplete
 - no roles or authorization rules for customer, restaurant, delivery, or admin
 - public restaurant/order mutation routes are insufficiently protected
-- API Gateway does not consistently preserve downstream HTTP status codes
+- API Gateway uses bounded synchronous service calls and preserves downstream
+  status codes; API versioning, correlation IDs, shared errors, retries, and
+  circuit breaking remain
 - SSE is reconnect-based status sampling rather than a durable event stream
 - address book and serviceability work locally; production still needs encrypted profile storage, retention controls, and geospatial indexing
 - map/geocoding and nearby discovery rely on public development endpoints; no production maps/routing contract
@@ -350,7 +352,8 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 ### P0 architecture improvements
 
 - version public routes under `/api/v1`
-- preserve downstream HTTP status, headers, and structured errors at the gateway
+- [x] preserve downstream HTTP status and map transport timeout/unavailability
+  to structured gateway errors; general downstream-header forwarding remains
 - consistent response/error schema with a request correlation ID
 - authentication and authorization policy per route
 - server-derived user/restaurant identity
@@ -418,7 +421,7 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 ### Reliability — P0
 
 - retries only for safe/idempotent operations
-- timeouts and circuit breaking on service calls
+- [x] bounded connect/total timeouts on gateway service calls; circuit breaking remains
 - no order remains indefinitely in an unexplained intermediate state
 - reconciliation jobs for payment/order mismatches
 - graceful degradation when notification or recommendation systems fail
@@ -469,7 +472,8 @@ No test may charge real money or use production customer data.
 
 ### Phase 0 — Stabilize the current foundation
 
-- fix gateway status propagation and standardize errors
+- [x] preserve gateway downstream status and map transport timeout/unavailability;
+  complete shared error schema and correlation IDs remain
 - [x] derive customer identity from JWT and remove manual user ID (gateway order/payment creation and E2E verified)
 - protect restaurant, order, payment, and notification routes by role
 - [x] make payment callbacks update order status consistently (authenticated callback, idempotent state mapping, focused C++ test, and expanded E2E coverage)
@@ -748,7 +752,7 @@ order after its prerequisites and product/provider decisions are resolved.
 | Requirement | Status | Why | When |
 |---|---|---|---|
 | API Gateway and domain microservices | ✅ Done | User, restaurant, order, payment, notification services and a gateway communicate over HTTP. | Now / completed |
-| `/api/v1`, status/error consistency, correlation IDs | ⬜ Not started | Routes are unversioned and proxy/error semantics are inconsistent. | Next — Phase 0 |
+| `/api/v1`, status/error consistency, correlation IDs | 🟡 Partial | Gateway now preserves downstream status and maps connection/transport failures to 502 and timeouts to 504; routes remain unversioned and shared error codes/correlation IDs are absent. | Phase 0 |
 | Authentication and server-derived customer identity | 🟡 Partial | Customer identity is server-derived on critical flows; role/restaurant/admin policies are absent. | Phase 0 |
 | Validation, pagination, filtering, sorting | 🟡 Partial | Important fields have targeted validation, but there is no shared field-error framework or bounded collections. | Phase 0 |
 | Idempotency | 🟡 Partial | Payment creation is idempotent; orders, refunds, and raw webhook events are not fully covered. | Phase 0 |
@@ -776,7 +780,7 @@ order after its prerequisites and product/provider decisions are resolved.
 | Requirement area | Status | Why | When |
 |---|---|---|---|
 | Security | 🟡 Partial | JWT checks, output escaping, payment signatures, internal/driver secrets, and no raw-card storage exist; plaintext password handling, missing RBAC, permissive CORS, secret management, rate limits, and audit gaps block production. | Immediate Phase 0 |
-| Reliability | 🟡 Partial | Idempotent payment flow, database busy handling, polling fallback, and explicit UI failures exist; circuit breakers, reconciliation, queues, backups, rollback, and incident procedures do not. | Phases 0–2 |
+| Reliability | 🟡 Partial | Idempotent payment flow, database busy handling, polling fallback, bounded 2-second connect/10-second gateway calls, status propagation, and explicit failures exist; circuit breakers, reconciliation, queues, backups, rollback, and incident procedures do not. | Phases 0–2 |
 | Performance targets | 🟡 Partial | Concurrency/load harnesses and bounded payment fetching exist; current claims are not production capacity evidence and no repeatable environment measures every target. | Phase 0 baseline; Phase 2 pilot verification |
 | Accessibility/browser compatibility | 🟡 Partial | Responsive and semantic foundations exist; WCAG 2.2 AA audit, reduced-motion/high-contrast coverage, and browser matrix tests remain. | Phases 1–2 |
 | Observability | 🟡 Partial | C++ flow logs and local log files exist; structured correlation logs, metrics, traces, dashboards, and alerts are absent. | Phase 2 |
@@ -785,19 +789,19 @@ order after its prerequisites and product/provider decisions are resolved.
 
 | Requirement | Status | Why | When |
 |---|---|---|---|
-| Focused unit tests | 🟡 Partial | Delivery quote and payment/order transition tests exist; coverage is not comprehensive. | Phase 0, continuous |
+| Focused unit tests | 🟡 Partial | Delivery quote, payment/order transition, and gateway HTTP status/failure mapping tests exist; coverage is not comprehensive. | Phase 0, continuous |
 | API/E2E tests | 🟡 Partial | Dependency-free local E2E covers major auth/order/payment/tracking/address failures and successes; it is not a complete contract suite. | Phase 0, continuous |
 | Repository/migration tests | ⬜ Not started | Isolated database fixtures and versioned migrations do not exist. | Phase 0 |
 | Browser tests | ⬜ Not started | Critical customer/operator paths are not automated in a browser runner. | Phase 1 |
 | Load tests | 🟡 Partial | A 1,000-client development harness exists; results depend on services/environment and are not a production capacity guarantee. | Phase 0 baseline; Phase 2 sizing |
 | Security tests | 🟡 Partial | JWT, forged signature, unsigned webhook, and tampering cases exist; OWASP/RBAC/rate-limit scanning is incomplete. | Phase 0 |
-| CI execution | ⬜ Not started | Tests are not enforced by a clean GitHub Actions build. | Next — Phase 0 |
+| CI execution | ✅ Done | GitHub Actions runs source checks, a clean CMake/vcpkg build, CTest, and six-service E2E tests without real payment credentials. | Completed |
 
 ### Section 11 — Delivery roadmap status
 
 | Phase | Status | Why / exit requirement | When |
 |---|---|---|---|
-| Phase 0 — Stabilize | 🟡 In progress | JWT identity and payment/order sync are done; password security, RBAC, migrations, CI, API consistency, and repeatable clean build remain. | Current phase |
+| Phase 0 — Stabilize | 🟡 In progress | JWT identity, payment/order sync, CI, and bounded gateway status propagation are done; password security, RBAC, migrations, versioning, correlation IDs, and complete API consistency remain. | Current phase |
 | Phase 1 — Ordering MVP | 🟡 Started | Address/serviceability is implemented; authoritative catalogue/cart/pricing and restaurant/admin portals remain. | After Phase 0 exit |
 | Phase 2 — Single-city pilot | ⬜ Not started | Requires stable ordering plus provider/business decisions, production data platform, operations, refunds, notifications, and monitoring. | After Phase 1 exit |
 | Phase 3 — Growth | 🟡 Prototype only | Real browser GPS is an early prototype; production delivery operations and growth domains remain. | After pilot stability |
@@ -818,7 +822,7 @@ order after its prerequisites and product/provider decisions are resolved.
 | 9 | Complete timeline and notifications | 🟡 Partial | Current states/notifications exist; complete append-only history and channels remain for Phases 1–2. |
 | 10 | Admin transaction audit | ⬜ Not started | Phase 1–2 admin/audit portal. |
 | 11 | Cross-user/restaurant authorization | 🟡 Partial | Customer ownership works on core flows; restaurant/admin RBAC remains Phase 0. |
-| 12 | Critical CI tests without charges | 🟡 Partial | Local tests avoid real charges; clean CI enforcement remains Phase 0. |
+| 12 | Critical CI tests without charges | ✅ Done | Clean GitHub Actions builds and tests the service flow using only test/dummy credentials. |
 | 13 | Logs, metrics, backups, recovery | ⬜ Not started | Phase 2 operational readiness. |
 
 The Marketplace MVP is therefore **not complete**. The next blocking work is

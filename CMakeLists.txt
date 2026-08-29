@@ -31,4 +31,9 @@ if(BUILD_TESTING)
     target_include_directories(payment_order_status_test PRIVATE
         ${CMAKE_SOURCE_DIR}/services/OrderService/include)
     add_test(NAME payment_order_status COMMAND payment_order_status_test)
+
+    add_executable(http_result_test tests/http_result_test.cpp)
+    target_include_directories(http_result_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/services/ApiGateway/include)
+    add_test(NAME http_result COMMAND http_result_test)
 endif()

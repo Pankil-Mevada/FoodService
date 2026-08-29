@@ -417,6 +417,36 @@ dispatch. Production still requires driver accounts, assignment-scoped tokens,
 background mobile tracking, HTTPS, retention/deletion enforcement, and a
 selected maps/routing provider for road-aware ETA.
 
+## Bounded synchronous Gateway call
+
+```mermaid
+sequenceDiagram
+  participant UI as Browser
+  participant GW as API Gateway worker
+  participant HC as HttpClient/libcurl
+  participant SVC as Domain service
+  UI->>GW: HTTP request
+  GW->>HC: synchronous downstream call
+  HC->>SVC: HTTP (connect timeout 2s, total 10s)
+  Note over GW,HC: This one Gateway worker waits
+  alt service responds
+    SVC-->>HC: status + body
+    HC-->>GW: HttpResult
+    GW-->>UI: preserve downstream status/body
+  else total timeout
+    HC-->>GW: Timeout failure
+    GW-->>UI: 504 JSON error
+  else DNS/connect/transport failure
+    HC-->>GW: Transport failure
+    GW-->>UI: 502 JSON error
+  end
+  Note over GW: Other Crow workers remain available
+```
+
+This prevents an unavailable dependency from holding a Gateway worker forever.
+It does not yet provide asynchronous I/O, retries, circuit breaking, or a
+request correlation ID.
+
 ## Source-code map
 
 - Browser orchestration: `frontend/app.js`

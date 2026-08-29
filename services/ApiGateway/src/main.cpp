@@ -60,6 +60,23 @@ crow::response jsonError(int status, const std::string& message)
     return crow::response(status, body);
 }
 
+crow::response downstreamResponse(const HttpResult& result)
+{
+    const int status = gatewayStatusFor(result);
+    const bool validHttpStatus = result.statusCode >= 100 && result.statusCode <= 599;
+    if (!result.transportSucceeded() || !validHttpStatus)
+    {
+        CROW_LOG_ERROR << "Downstream request failed status=" << status
+                       << " error=" << result.error;
+        return jsonError(status, status == 504
+            ? "A downstream service timed out"
+            : "A downstream service is unavailable");
+    }
+    crow::response response(status, result.body);
+    response.set_header("Content-Type", "application/json");
+    return response;
+}
+
 bool validCoordinates(double lat, double lon) { return lat>=-90 && lat<=90 && lon>=-180 && lon<=180; }
 bool envEnabled(const char* name) { const char* value=std::getenv(name); return value && std::string(value)=="1"; }
 bool isLateNight()
@@ -202,16 +219,14 @@ CROW_ROUTE(app, "/register")
 .methods(crow::HTTPMethod::POST)
 ([&userClient](const crow::request& req)
 {
-    return crow::response(
-        userClient.registerUser(req.body));
+    return downstreamResponse(userClient.registerUser(req.body));
 });
 
 CROW_ROUTE(app, "/login")
 .methods(crow::HTTPMethod::POST)
 ([&userClient](const crow::request& req)
 {
-    return crow::response(
-        userClient.login(req.body));
+    return downstreamResponse(userClient.login(req.body));
 });
 
 CROW_ROUTE(app, "/me")
@@ -220,7 +235,7 @@ CROW_ROUTE(app, "/me")
 {
     const auto userId = authenticatedUserId(req);
     if (!userId) return unauthorized();
-    return crow::response(userClient.getUserById(
+    return downstreamResponse(userClient.getUserById(
         *userId, req.get_header_value("Authorization")));
 });
 
@@ -230,9 +245,8 @@ CROW_ROUTE(app, "/users")
     switch (req.method)
     {
         case crow::HTTPMethod::GET:
-            return crow::response(
-                userClient.getAllUsers(
-    req.get_header_value("Authorization")));
+            return downstreamResponse(userClient.getAllUsers(
+                req.get_header_value("Authorization")));
 
         default:
             return crow::response(405);
@@ -245,23 +259,16 @@ CROW_ROUTE(app, "/users/<int>")
     switch (req.method)
     {
         case crow::HTTPMethod::GET:
-            return crow::response(
-                userClient.getUserById(
-    id,
-    req.get_header_value("Authorization")));
+            return downstreamResponse(userClient.getUserById(
+                id, req.get_header_value("Authorization")));
 
         case crow::HTTPMethod::PUT:
-            return crow::response(
-                userClient.updateUser(
-    id,
-    req.body,
-    req.get_header_value("Authorization")));
+            return downstreamResponse(userClient.updateUser(
+                id, req.body, req.get_header_value("Authorization")));
 
         case crow::HTTPMethod::DELETE:
-            return crow::response(
-                userClient.deleteUser(
-    id,
-    req.get_header_value("Authorization")));
+            return downstreamResponse(userClient.deleteUser(
+                id, req.get_header_value("Authorization")));
 
         default:
             return crow::response(405);
@@ -274,12 +281,10 @@ CROW_ROUTE(app, "/restaurants")
     switch (req.method)
     {
         case crow::HTTPMethod::GET:
-            return crow::response(
-                restaurantClient.getAllRestaurants());
+            return downstreamResponse(restaurantClient.getAllRestaurants());
 
         case crow::HTTPMethod::POST:
-            return crow::response(
-                restaurantClient.registerRestaurant(req.body));
+            return downstreamResponse(restaurantClient.registerRestaurant(req.body));
 
         default:
             return crow::response(405);
@@ -296,16 +301,13 @@ CROW_ROUTE(app, "/restaurants/<int>")
     switch (req.method)
     {
         case crow::HTTPMethod::GET:
-            return crow::response(
-                restaurantClient.getRestaurantById(id));
+            return downstreamResponse(restaurantClient.getRestaurantById(id));
 
         case crow::HTTPMethod::PUT:
-            return crow::response(
-                restaurantClient.updateRestaurant(id, req.body));
+            return downstreamResponse(restaurantClient.updateRestaurant(id, req.body));
 
         case crow::HTTPMethod::DELETE:
-            return crow::response(
-                restaurantClient.deleteRestaurant(id));
+            return downstreamResponse(restaurantClient.deleteRestaurant(id));
 
         default:
             return crow::response(405);
@@ -341,8 +343,10 @@ CROW_ROUTE(app, "/restaurants/<int>")
         if(makeDefault) { sqlite3_stmt* clear=nullptr; sqlite3_prepare_v2(deliveryDatabase.connection(),"UPDATE customer_addresses SET is_default=0 WHERE user_id=?;",-1,&clear,nullptr); sqlite3_bind_int(clear,1,*userId); sqlite3_step(clear); sqlite3_finalize(clear); }
         sqlite3_stmt* statement=nullptr; const char* sql="INSERT INTO customer_addresses(user_id,label,recipient,phone,address_line,latitude,longitude,delivery_notes,is_default,created_epoch) VALUES(?,?,?,?,?,?,?,?,?,?);";
         if(sqlite3_prepare_v2(deliveryDatabase.connection(),sql,-1,&statement,nullptr)!=SQLITE_OK) return jsonError(500,"Could not save address");
-        sqlite3_bind_int(statement,1,*userId); sqlite3_bind_text(statement,2,input["label"].s().data(),-1,SQLITE_TRANSIENT); sqlite3_bind_text(statement,3,input["recipient"].s().data(),-1,SQLITE_TRANSIENT);
-        sqlite3_bind_text(statement,4,input["phone"].s().data(),-1,SQLITE_TRANSIENT); sqlite3_bind_text(statement,5,input["addressLine"].s().data(),-1,SQLITE_TRANSIENT);
+        const std::string label=input["label"].s(), recipient=input["recipient"].s();
+        const std::string phone=input["phone"].s(), addressLine=input["addressLine"].s();
+        sqlite3_bind_int(statement,1,*userId); sqlite3_bind_text(statement,2,label.c_str(),-1,SQLITE_TRANSIENT); sqlite3_bind_text(statement,3,recipient.c_str(),-1,SQLITE_TRANSIENT);
+        sqlite3_bind_text(statement,4,phone.c_str(),-1,SQLITE_TRANSIENT); sqlite3_bind_text(statement,5,addressLine.c_str(),-1,SQLITE_TRANSIENT);
         sqlite3_bind_double(statement,6,lat); sqlite3_bind_double(statement,7,lon); const std::string notes=input.has("deliveryNotes")?std::string(input["deliveryNotes"].s()):"";
         sqlite3_bind_text(statement,8,notes.c_str(),-1,SQLITE_TRANSIENT); sqlite3_bind_int(statement,9,makeDefault?1:0); sqlite3_bind_int64(statement,10,currentEpoch());
         const int result=sqlite3_step(statement); sqlite3_finalize(statement); if(result!=SQLITE_DONE) return jsonError(500,"Could not save address");
@@ -378,7 +382,10 @@ CROW_ROUTE(app, "/restaurants/<int>")
         const auto input=crow::json::load(req.body);
         if(!input || !input.has("restaurantId") || !input.has("latitude") || !input.has("longitude")) return jsonError(400,"Restaurant and coordinates are required");
         const double lat=input["latitude"].d(),lon=input["longitude"].d(); if(!validCoordinates(lat,lon)) return jsonError(422,"Coordinates are invalid");
-        const auto restaurant=crow::json::load(restaurantClient.getRestaurantById(input["restaurantId"].i()));
+        const auto restaurantResult=restaurantClient.getRestaurantById(input["restaurantId"].i());
+        if (!restaurantResult.transportSucceeded() || restaurantResult.statusCode != 200)
+            return downstreamResponse(restaurantResult);
+        const auto restaurant=crow::json::load(restaurantResult.body);
         if(!restaurant || !restaurant.has("latitude") || !restaurant.has("longitude")) return jsonError(404,"Restaurant location is unavailable");
         const auto rules=rulesFor(restaurant); const auto quote=calculateDeliveryQuote({restaurant["latitude"].d(),restaurant["longitude"].d()},{lat,lon},rules,parsePolygon(restaurant));
         return crow::response(quote.serviceable?200:422,quoteJson(quote,rules));
@@ -406,7 +413,10 @@ CROW_ROUTE(app, "/restaurants/<int>")
         }
         if (deliveryLat < -90 || deliveryLat > 90 || deliveryLon < -180 || deliveryLon > 180)
             return jsonError(422, "Delivery coordinates are invalid");
-        const auto restaurant = crow::json::load(restaurantClient.getRestaurantById(input["restaurantId"].i()));
+        const auto restaurantResult = restaurantClient.getRestaurantById(input["restaurantId"].i());
+        if (!restaurantResult.transportSucceeded() || restaurantResult.statusCode != 200)
+            return downstreamResponse(restaurantResult);
+        const auto restaurant = crow::json::load(restaurantResult.body);
         if (!restaurant || !restaurant.has("latitude") || !restaurant.has("longitude"))
             return jsonError(404, "Restaurant location is unavailable");
         const auto rules=rulesFor(restaurant); const auto quote=calculateDeliveryQuote({restaurant["latitude"].d(),restaurant["longitude"].d()},{deliveryLat,deliveryLon},rules,parsePolygon(restaurant));
@@ -425,7 +435,7 @@ CROW_ROUTE(app, "/restaurants/<int>")
         body["subtotal"] = subtotal;
         body["discountAmount"] = discount;
         body["deliveryFee"] = quote.fee;
-        return crow::response(client.createOrder(body.dump()));
+        return downstreamResponse(client.createOrder(body.dump()));
     });
 
 CROW_ROUTE(app, "/orders")
@@ -434,7 +444,10 @@ CROW_ROUTE(app, "/orders")
 {
     const auto userId = authenticatedUserId(req);
     if (!userId) return unauthorized();
-    const auto orders = crow::json::load(client.getAllOrders());
+    const auto orderResult = client.getAllOrders();
+    if (!orderResult.transportSucceeded() || orderResult.statusCode != 200)
+        return downstreamResponse(orderResult);
+    const auto orders = crow::json::load(orderResult.body);
     if (!orders) return jsonError(502, "Order Service returned an invalid response");
     crow::json::wvalue filtered;
     std::size_t index = 0;
@@ -450,8 +463,7 @@ CROW_ROUTE(app, "/orders/<int>")
 .methods(crow::HTTPMethod::GET)
 ([&client](int id)
 {
-    return crow::response(
-        client.getOrderById(id));
+    return downstreamResponse(client.getOrderById(id));
 });
 
 CROW_ROUTE(app, "/restaurants/discover")
@@ -468,12 +480,18 @@ CROW_ROUTE(app, "/restaurants/discover")
     if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180)
         return jsonError(422, "Coordinates are invalid");
 
-    const auto provider = crow::json::load(restaurantClient.discoverNearby(latitude, longitude));
+    const auto providerResult = restaurantClient.discoverNearby(latitude, longitude);
+    if (!providerResult.transportSucceeded() || providerResult.statusCode != 200)
+        return downstreamResponse(providerResult);
+    const auto provider = crow::json::load(providerResult.body);
     if (!provider || !provider.has("elements"))
         return jsonError(503, "Nearby restaurant provider is temporarily unavailable");
 
     std::unordered_set<std::string> existingNames;
-    const auto existing = crow::json::load(restaurantClient.getAllRestaurants());
+    const auto existingResult = restaurantClient.getAllRestaurants();
+    if (!existingResult.transportSucceeded() || existingResult.statusCode != 200)
+        return downstreamResponse(existingResult);
+    const auto existing = crow::json::load(existingResult.body);
     if (existing)
         for (const auto& restaurant : existing)
             if (restaurant.has("name")) existingNames.insert(std::string(restaurant["name"].s()));
@@ -516,7 +534,9 @@ CROW_ROUTE(app, "/restaurants/discover")
         body["longitude"] = restaurantLon;
         body["deliveryRadiusKm"] = 8.0;
         body["imageUrl"] = imageUrl;
-        restaurantClient.registerRestaurant(body.dump());
+        const auto importedResult = restaurantClient.registerRestaurant(body.dump());
+        if (!importedResult.transportSucceeded() || importedResult.statusCode < 200 || importedResult.statusCode >= 300)
+            continue;
         existingNames.insert(name);
         ++imported;
     }
@@ -546,9 +566,15 @@ CROW_ROUTE(app, "/driver/orders/<int>/location")
     const double latitude = input["latitude"].d(), longitude = input["longitude"].d();
     if (!std::isfinite(latitude) || !std::isfinite(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180)
         return jsonError(422, "Driver coordinates are invalid");
-    const auto order = crow::json::load(client.getOrderById(id));
+    const auto orderResult = client.getOrderById(id);
+    if (!orderResult.transportSucceeded() || orderResult.statusCode != 200)
+        return downstreamResponse(orderResult);
+    const auto order = crow::json::load(orderResult.body);
     if (!order || !order.has("id")) return jsonError(404, "Order not found");
-    const auto payment = crow::json::load(paymentClient.getPaymentForOrder(id));
+    const auto paymentResult = paymentClient.getPaymentForOrder(id);
+    if (!paymentResult.transportSucceeded() || paymentResult.statusCode != 200)
+        return downstreamResponse(paymentResult);
+    const auto payment = crow::json::load(paymentResult.body);
     if (!payment || !payment.has("status") || std::string(payment["status"].s()) != "succeeded")
         return jsonError(409, "Driver location is accepted only after verified payment");
     DriverLocation location;
@@ -567,7 +593,10 @@ CROW_ROUTE(app, "/driver/orders/<int>/location")
     if (!saveDriverLocation(deliveryDatabase, id, location)) return jsonError(500, "Could not store driver location");
     if (std::string(order["status"].s()) != location.status)
     {
-        const auto updated = crow::json::load(client.updateOrderStatus(id, location.status));
+        const auto updateResult = client.updateOrderStatus(id, location.status);
+        if (!updateResult.transportSucceeded() || updateResult.statusCode != 200)
+            return downstreamResponse(updateResult);
+        const auto updated = crow::json::load(updateResult.body);
         if (!updated || !updated.has("success") || !updated["success"].b())
             return jsonError(409, "Order status transition was rejected");
     }
@@ -583,16 +612,25 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
 {
     const auto userId = authenticatedUserId(req);
     if (!userId) return unauthorized();
-    const auto order = crow::json::load(client.getOrderById(id));
+    const auto orderResult = client.getOrderById(id);
+    if (!orderResult.transportSucceeded() || orderResult.statusCode != 200)
+        return downstreamResponse(orderResult);
+    const auto order = crow::json::load(orderResult.body);
     if (!order || !order.has("id")) return jsonError(404, "Order not found");
     if (order["userId"].i() != *userId) return jsonError(403, "This order belongs to another customer");
-    const auto payment = crow::json::load(paymentClient.getPaymentForOrder(id));
+    const auto paymentResult = paymentClient.getPaymentForOrder(id);
+    if (!paymentResult.transportSucceeded() || paymentResult.statusCode != 200)
+        return downstreamResponse(paymentResult);
+    const auto payment = crow::json::load(paymentResult.body);
     if (!payment || !payment.has("status") || std::string(payment["status"].s()) != "succeeded") {
         CROW_LOG_WARNING << "Tracking rejected order=" << id << " reason=payment-not-succeeded";
         return jsonError(409, "Driver assignment starts only after verified payment");
     }
     CROW_LOG_INFO << "Tracking allowed order=" << id << " payment=succeeded";
-    const auto restaurant = crow::json::load(restaurantClient.getRestaurantById(order["restaurantId"].i()));
+    const auto restaurantResult = restaurantClient.getRestaurantById(order["restaurantId"].i());
+    if (!restaurantResult.transportSucceeded() || restaurantResult.statusCode != 200)
+        return downstreamResponse(restaurantResult);
+    const auto restaurant = crow::json::load(restaurantResult.body);
     if (!restaurant || !restaurant.has("latitude")) return jsonError(404, "Restaurant location unavailable");
 
     const double startLat = restaurant["latitude"].d();
@@ -657,33 +695,37 @@ CROW_ROUTE(app, "/payments").methods(crow::HTTPMethod::POST)
     body["amount"] = input["amount"].d();
     body["paymentMethod"] = input["paymentMethod"].s();
     if (input.has("idempotencyKey")) body["idempotencyKey"] = input["idempotencyKey"].s();
-    return crow::response(paymentClient.createPayment(body.dump(), req.get_header_value("Idempotency-Key")));
+    return downstreamResponse(paymentClient.createPayment(
+        body.dump(), req.get_header_value("Idempotency-Key")));
 });
 CROW_ROUTE(app, "/payments/<int>").methods(crow::HTTPMethod::GET)
-([&paymentClient](int id) { return crow::response(paymentClient.getPayment(id)); });
+([&paymentClient](int id) { return downstreamResponse(paymentClient.getPayment(id)); });
 CROW_ROUTE(app, "/payments/order/<int>").methods(crow::HTTPMethod::GET)
-([&paymentClient](int id) { return crow::response(paymentClient.getPaymentForOrder(id)); });
+([&paymentClient](int id) { return downstreamResponse(paymentClient.getPaymentForOrder(id)); });
 CROW_ROUTE(app, "/payments/stream").methods(crow::HTTPMethod::GET)
 ([&paymentClient](const crow::request& req) {
     const char* id = req.url_params.get("orderId");
     if (!id) return crow::response(422);
-    crow::response response(paymentClient.getPaymentStream(id));
+    const auto result = paymentClient.getPaymentStream(id);
+    if (!result.transportSucceeded() || result.statusCode != 200)
+        return downstreamResponse(result);
+    crow::response response(static_cast<int>(result.statusCode), result.body);
     response.set_header("Content-Type", "text/event-stream"); response.set_header("Cache-Control", "no-cache");
     return response;
 });
 CROW_ROUTE(app, "/payments/webhooks/provider").methods(crow::HTTPMethod::POST)
-([&paymentClient](const crow::request& req) { return crow::response(paymentClient.providerWebhook(req.body, req.get_header_value("X-Webhook-Secret"))); });
+([&paymentClient](const crow::request& req) { return downstreamResponse(paymentClient.providerWebhook(req.body, req.get_header_value("X-Webhook-Secret"))); });
 CROW_ROUTE(app, "/payments/razorpay/order").methods(crow::HTTPMethod::POST)
 ([&paymentClient](const crow::request& req) {
     if (!authenticatedUserId(req)) return unauthorized();
     CROW_LOG_INFO << "Gateway forwarding Razorpay order creation";
-    return crow::response(paymentClient.createRazorpayOrder(req.body));
+    return downstreamResponse(paymentClient.createRazorpayOrder(req.body));
 });
 CROW_ROUTE(app, "/payments/razorpay/verify").methods(crow::HTTPMethod::POST)
 ([&paymentClient](const crow::request& req) {
     if (!authenticatedUserId(req)) return unauthorized();
     CROW_LOG_INFO << "Gateway forwarding Razorpay signature verification";
-    return crow::response(paymentClient.verifyRazorpayPayment(req.body));
+    return downstreamResponse(paymentClient.verifyRazorpayPayment(req.body));
 });
 
 CROW_ROUTE(app, "/orders/<int>")
@@ -691,10 +733,7 @@ CROW_ROUTE(app, "/orders/<int>")
 ([&client](const crow::request& req,
            int id)
 {
-    return crow::response(
-        client.updateOrder(
-            id,
-            req.body));
+    return downstreamResponse(client.updateOrder(id, req.body));
 });
 
 CROW_ROUTE(app, "/orders/<int>")
@@ -703,7 +742,7 @@ CROW_ROUTE(app, "/orders/<int>")
 {
     const auto result = client.deleteOrder(id);
     removeDriverLocation(deliveryDatabase, id);
-    return crow::response(result);
+    return downstreamResponse(result);
 });
 
     app.loglevel(crow::LogLevel::Warning)

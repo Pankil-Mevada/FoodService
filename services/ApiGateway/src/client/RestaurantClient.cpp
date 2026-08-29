@@ -2,7 +2,7 @@
 #include <curl/curl.h>
 #include <cstdlib>
 
-std::string RestaurantClient::registerRestaurant(
+HttpResult RestaurantClient::registerRestaurant(
     const std::string& jsonBody)
 {
     return m_httpClient.post(
@@ -10,13 +10,13 @@ std::string RestaurantClient::registerRestaurant(
         jsonBody);
 }
 
-std::string RestaurantClient::getAllRestaurants()
+HttpResult RestaurantClient::getAllRestaurants()
 {
     return m_httpClient.get(
         "http://localhost:8081/restaurants");
 }
 
-std::string RestaurantClient::getRestaurantById(
+HttpResult RestaurantClient::getRestaurantById(
     int id)
 {
     return m_httpClient.get(
@@ -24,7 +24,7 @@ std::string RestaurantClient::getRestaurantById(
         std::to_string(id));
 }
 
-std::string RestaurantClient::updateRestaurant(
+HttpResult RestaurantClient::updateRestaurant(
     int id,
     const std::string& jsonBody)
 {
@@ -34,7 +34,7 @@ std::string RestaurantClient::updateRestaurant(
         jsonBody);
 }
 
-std::string RestaurantClient::deleteRestaurant(
+HttpResult RestaurantClient::deleteRestaurant(
     int id)
 {
     return m_httpClient.remove(
@@ -42,13 +42,13 @@ std::string RestaurantClient::deleteRestaurant(
         std::to_string(id));
 }
 
-std::string RestaurantClient::discoverNearby(double latitude, double longitude)
+HttpResult RestaurantClient::discoverNearby(double latitude, double longitude)
 {
     const std::string query = "[out:json][timeout:15];nwr(around:5000," +
         std::to_string(latitude) + "," + std::to_string(longitude) +
         ")[\"amenity\"=\"restaurant\"][\"name\"];out center tags 20;";
     CURL* curl = curl_easy_init();
-    if (!curl) return {};
+    if (!curl) return {0, "", TransportFailure::Other, "Could not initialize URL encoder"};
     char* encoded = curl_easy_escape(curl, query.c_str(), static_cast<int>(query.size()));
     const char* configured = std::getenv("FOODSERVICE_OVERPASS_URL");
     const std::string endpoint = configured && *configured ? configured :
