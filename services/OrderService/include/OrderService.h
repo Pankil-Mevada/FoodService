@@ -13,7 +13,7 @@ public:
 
     explicit OrderService(OrderRepository& repository);
 
-    bool createOrder(const Order& order);
+    std::optional<int> createOrder(const Order& order);
 
     std::vector<Order> getAllOrders();
 

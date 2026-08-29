@@ -21,9 +21,9 @@
         <div class="safety"><b>Test payments only</b><span>Never enter a real card, real UPI PIN, OTP, or banking password.</span></div>
         <p id="error" class="error" role="alert"></p>
         <button id="pay" class="pay">Open Razorpay Test Checkout</button>
-        <a class="return" href="/">Return to orders</a>
+        <a class="return" href="/?view=orders">Return to orders</a>
       </div>
-      <div id="result" class="result" hidden><span id="result-icon"></span><h2 id="result-title"></h2><p id="result-copy"></p><a class="pay link" href="/">Return to order tracking</a><button id="retry" class="return" hidden>Try payment again</button></div>
+      <div id="result" class="result" hidden><span id="result-icon"></span><h2 id="result-title"></h2><p id="result-copy"></p><a class="pay link" href="/?view=orders">View order history and tracking</a><button id="retry" class="return" hidden>Try payment again</button></div>
     </section>
     <aside><p class="eyebrow">What happens next</p><h2>Payment first.<br>Driver second.</h2><ol><li>Razorpay creates a sandbox transaction.</li><li>FoodService verifies the returned signature on the backend.</li><li>Only a verified payment unlocks driver assignment and tracking.</li></ol><div class="shield">✓ Key Secret stays on the server</div></aside>
   </main>

@@ -40,14 +40,15 @@ crow::response OrderController::createOrder(
         std::abs(order.getTotalAmount() - (order.getSubtotal() - order.getDiscountAmount() + order.getDeliveryFee())) > 0.01)
         return crow::response(422, "Order price breakdown is invalid");
 
-    bool status = m_service.createOrder(order);
+    const auto orderId = m_service.createOrder(order);
 
     crow::json::wvalue response;
 
-    if (status)
+    if (orderId)
     {
         response["success"] = true;
         response["message"] = "Order created successfully";
+        response["orderId"] = *orderId;
 
         return crow::response(201, response);
     }

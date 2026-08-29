@@ -8,7 +8,7 @@ OrderService::OrderService(OrderRepository& repository)
 }
 
 
-bool OrderService::createOrder(const Order& order)
+std::optional<int> OrderService::createOrder(const Order& order)
 {
     std::clog << "[order-flow] create start user=" << order.getUserId()
               << " restaurant=" << order.getRestaurantId() << " amount=" << order.getTotalAmount() << std::endl;
@@ -19,7 +19,7 @@ bool OrderService::createOrder(const Order& order)
     if (!restaurantFound)
     {
         std::clog << "[order-flow] create rejected reason=restaurant-not-found" << std::endl;
-        return false;
+        return std::nullopt;
     }
 
     auto orderId =
@@ -28,7 +28,7 @@ bool OrderService::createOrder(const Order& order)
     if (!orderId.has_value())
     {
         std::clog << "[order-flow] create failed stage=database-save" << std::endl;
-        return false;
+        return std::nullopt;
     }
 
     bool paymentStatus =
@@ -52,7 +52,7 @@ else
     std::clog << "[order-flow] create failed order=" << *orderId << " stage=payment-record" << std::endl;
 }
 
-return paymentStatus;
+return paymentStatus ? orderId : std::nullopt;
 }
 std::vector<Order> OrderService::getAllOrders()
 {

@@ -50,6 +50,11 @@ headline, search control, photograph, rating, and ETA badge never overlap. On
 phones, compact proof points and horizontally scrollable food cards preserve
 comfortable touch targets.
 
+Checkout shows the selected server-backed address as a non-editable summary.
+After the backend returns the new `orderId`, the browser navigates directly to
+the separate Razorpay Test Mode page. Order history is available from the
+dedicated **Orders** navigation dialog rather than occupying the discovery page.
+
 ## Files
 
 - `index.html` — semantic application structure and dialogs

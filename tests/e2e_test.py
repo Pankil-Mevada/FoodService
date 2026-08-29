@@ -202,12 +202,16 @@ class Suite:
         self.expect(status, (200, 201), payload)
         if not isinstance(payload, dict) or payload.get("success") is not True:
             raise AssertionError(f"order creation was not accepted: {payload}")
+        if int(payload.get("orderId", 0)) <= 0:
+            raise AssertionError(f"order creation did not return its checkout ID: {payload}")
         status, orders = self.api.request("GET", f"{self.args.gateway}/orders", token=self.token)
         self.expect(status, (200,), orders)
         candidates = [item for item in orders if item.get("userId") == self.created["user"]]
         if not candidates:
             raise AssertionError("created order absent from list")
         order = max(candidates, key=lambda item: item["id"])
+        if int(payload["orderId"]) != int(order["id"]):
+            raise AssertionError(f"returned orderId does not identify the created order: {payload}")
         if order.get("itemSummary") != "Test Biryani × 1":
             raise AssertionError(f"order items were not persisted: {order}")
         if abs(float(order.get("subtotal", 0)) - 12.0) > 0.001 or abs(float(order.get("discountAmount", 0)) - 1.0) > 0.001:

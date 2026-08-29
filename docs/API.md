@@ -20,6 +20,10 @@ X-Correlation-ID: login-browser-42
 This is request correlation, not complete distributed tracing: downstream
 services receive the header but do not yet emit structured spans or metrics.
 
+Successful `POST /orders` responses include the exact new `orderId`. The web
+client uses this server-issued identifier to navigate directly to Razorpay Test
+Mode checkout instead of searching order history for the newest record.
+
 Default base URLs are API Gateway `http://127.0.0.1:8085`, User `:8080`,
 Restaurant `:8081`, Order `:8082`, Payment `:8083`, and Notification `:8084`.
 JSON requests require `Content-Type: application/json`.

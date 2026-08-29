@@ -9,6 +9,12 @@ fallback generation. For a visible manual check, send
 header, and watch the gateway terminal for matching `request.start` and
 `request.finish` lines.
 
+For the customer checkout UI, verify that the selected saved address is shown
+as a locked summary, **Change** returns to the address book, successful order
+creation navigates directly to `payment.html?orderId=...`, and **Orders** opens
+the dedicated history dialog. The E2E suite asserts that `POST /orders` returns
+the ID of the order that was persisted.
+
 ## Continuous integration
 
 Every pull request to `develop` or `main` runs the GitHub Actions workflow in

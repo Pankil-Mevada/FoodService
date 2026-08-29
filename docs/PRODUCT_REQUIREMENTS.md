@@ -674,7 +674,7 @@ order after its prerequisites and product/provider decisions are resolved.
 | Select address/payment method | ✅ Done | Saved address selection and payment method/checkout surfaces exist. | Now / completed |
 | Complete price breakdown | 🟡 Partial | Subtotal, test discount, delivery fee, and total display; authoritative tax/packaging/item pricing are absent. | Phase 1 |
 | Price/availability revalidation and recovery | ⬜ Not started | No authoritative catalogue exists to revalidate. | Phase 1 |
-| Explicit confirmation | 🟡 Partial | “Place order” is explicit, but there is no final review screen after server repricing. | Phase 1 |
+| Explicit confirmation | 🟡 Partial | Checkout locks the selected saved address, shows server-derived delivery pricing, and navigates directly to payment after creation; a separate final review step after complete authoritative item repricing remains. | Phase 1 |
 | Scheduled/group orders, tips, preferences | ⬜ Not started | Supporting models and workflows are absent. | Phase 3 |
 
 ### Section 5.7 — Orders
