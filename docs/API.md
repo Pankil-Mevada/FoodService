@@ -76,7 +76,7 @@ API endpoints, and UI before accounts can be called email-verified.
 | Orders | `POST /orders` | `restaurantId`, `totalAmount`, `deliveryLatitude`, `deliveryLongitude`, `deliveryAddress`; optional `itemSummary`, `subtotal`, `discountAmount`, `deliveryFee` | JWT required; validates delivery zone and price arithmetic, derives customer ID |
 | Orders | `GET/PUT/DELETE /orders/{id}` | same IDs/amount for PUT | CRUD |
 | Internal order sync | `POST /orders/{id}/payment-status` | `paymentStatus`: `processing`, `succeeded`, `failed`, or `cancelled` | Direct Order Service only; requires `X-Internal-Secret`; maps payment state to order state idempotently |
-| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership and successful payment required; returns the latest real driver GPS fix, freshness, distance-based progress/ETA, and timeline |
+| Delivery | `GET /orders/{id}/tracking` | — | JWT/ownership and successful payment required; returns latest GPS, freshness, `routeProgressPercent` for map position, `progressPercent` for persisted delivery stage, ETA, and timeline |
 | Driver GPS | `POST /driver/orders/{id}/location` | `latitude`, `longitude`; optional accuracy, speed, heading, delivery status and driver/vehicle profile | `X-Driver-Token` required; verified payment required; stores the real browser GPS fix in `delivery.db` |
 
 Tracking returns HTTP `409` until the latest payment has durable status

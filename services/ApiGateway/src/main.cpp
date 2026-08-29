@@ -683,9 +683,11 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
     const long long ageSeconds = std::max(0LL, currentEpoch() - location->updatedEpoch);
     const double totalKm = std::max(0.001, distanceKm(startLat, startLon, endLat, endLon));
     const double remainingKm = distanceKm(location->latitude, location->longitude, endLat, endLon);
-    double progress = std::clamp(1.0 - remainingKm / totalKm, 0.0, 1.0);
+    double routeProgress = std::clamp(1.0 - remainingKm / totalKm, 0.0, 1.0);
     std::string deliveryStatus = location->status;
-    if (deliveryStatus == "DELIVERED") progress = 1.0;
+    if (order.has("status") && deliveryStatusIndex(std::string(order["status"].s())) > deliveryStatusIndex(deliveryStatus))
+        deliveryStatus = std::string(order["status"].s());
+    if (deliveryStatus == "DELIVERED") routeProgress = 1.0;
     const double etaSpeedMps = location->speed >= 0.5 ? location->speed : 5.56;
     const int remainingSeconds = deliveryStatus == "DELIVERED" ? 0 : static_cast<int>(std::ceil(remainingKm * 1000.0 / etaSpeedMps));
     crow::json::wvalue response;
@@ -703,14 +705,15 @@ CROW_ROUTE(app, "/orders/<int>/tracking")
     response["restaurantLongitude"] = startLon;
     response["customerLatitude"] = endLat;
     response["customerLongitude"] = endLon;
-    response["progressPercent"] = static_cast<int>(progress * 100);
+    const int stageIndex = std::max(0, deliveryStatusIndex(deliveryStatus));
+    response["progressPercent"] = stageIndex * 25;
+    response["routeProgressPercent"] = static_cast<int>(routeProgress * 100);
     response["etaMinutes"] = remainingSeconds == 0 ? 0 : static_cast<int>(std::ceil(remainingSeconds / 60.0));
     response["remainingSeconds"] = remainingSeconds;
     response["status"] = deliveryStatus;
     response["lastUpdatedEpoch"] = location->updatedEpoch;
     const std::string stages[] = {"ASSIGNED", "PICKED_UP", "ON_THE_WAY", "ARRIVING", "DELIVERED"};
-    int currentStage = deliveryStatus == "ASSIGNED" ? 0 : deliveryStatus == "PICKED_UP" ? 1 :
-        deliveryStatus == "ON_THE_WAY" ? 2 : deliveryStatus == "ARRIVING" ? 3 : 4;
+    int currentStage = stageIndex;
     for (int i = 0; i < 5; ++i)
     {
         response["timeline"][i]["status"] = stages[i];

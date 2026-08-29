@@ -24,6 +24,13 @@ Delivery E2E advances through every state in order. Local runs use the real
 order returns `409`. Manually confirm that delivered history cards show neither
 **Track driver** nor **Cancel**.
 
+The development driver portal automatically submits the next valid delivery
+state every 30 seconds while real GPS sharing remains active. Tracking reports
+delivery-stage progress (`0/25/50/75/100`) separately from geographic route
+progress used to position the scooter. Reaching the destination coordinates
+does not by itself prove delivery; production must replace the development
+automation with driver confirmation and proof-of-delivery controls.
+
 For logging verification, make one successful request, one unauthorized or
 invalid request, and one controlled dependency failure. Confirm the relevant
 `.run` files contain INFO, WARNING, and ERROR completion records with matching
