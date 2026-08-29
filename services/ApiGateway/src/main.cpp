@@ -8,6 +8,7 @@
 #include "Database.h"
 #include "DeliveryQuote.h"
 #include "CorrelationMiddleware.h"
+#include "RequestLoggingMiddleware.h"
 #include <algorithm>
 #include <cstdlib>
 #include <chrono>
@@ -212,7 +213,8 @@ void removeDriverLocation(Database& database, int orderId)
 
 int main()
 {
-    crow::App<crow::CORSHandler, CorrelationMiddleware> app;
+    crow::App<crow::CORSHandler, CorrelationMiddleware, RequestLoggingMiddleware> app;
+    RequestLoggingMiddleware::setServiceName("gateway");
     Database deliveryDatabase("delivery.db");
     deliveryDatabase.createDriverLocationTable();
     deliveryDatabase.createCustomerAddressTable();
@@ -783,7 +785,7 @@ CROW_ROUTE(app, "/orders/<int>")
     return downstreamResponse(result);
 });
 
-    app.loglevel(crow::LogLevel::Warning)
+    app.loglevel(configuredLogLevel())
        .port(8085)
        .concurrency(128)
        .run();

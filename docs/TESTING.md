@@ -24,6 +24,12 @@ Delivery E2E advances through every state in order. Local runs use the real
 order returns `409`. Manually confirm that delivered history cards show neither
 **Track driver** nor **Cancel**.
 
+For logging verification, make one successful request, one unauthorized or
+invalid request, and one controlled dependency failure. Confirm the relevant
+`.run` files contain INFO, WARNING, and ERROR completion records with matching
+service, status, duration, and correlation ID. Never add secrets or bodies to
+these records; see [Runtime logging](LOGGING.md).
+
 ## Continuous integration
 
 Every pull request to `develop` or `main` runs the GitHub Actions workflow in

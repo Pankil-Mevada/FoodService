@@ -4,11 +4,13 @@
 #include "PaymentController.h"
 #include "PaymentRepository.h"
 #include "PaymentService.h"
+#include "RequestLoggingMiddleware.h"
 #include <cstdlib>
 
 int main()
 {
-    crow::SimpleApp app;
+    crow::App<RequestLoggingMiddleware> app;
+    RequestLoggingMiddleware::setServiceName("payment");
 
     const char* databasePath = std::getenv("PAYMENT_DATABASE_PATH");
     Database database(databasePath ? databasePath : "payment.db");
@@ -74,7 +76,7 @@ int main()
 
     const char* portValue = std::getenv("PAYMENT_SERVICE_PORT");
     const unsigned short port = portValue ? static_cast<unsigned short>(std::stoi(portValue)) : 8083;
-    app.port(port)
+    app.loglevel(configuredLogLevel()).port(port)
        .concurrency(128)
        .run();
 

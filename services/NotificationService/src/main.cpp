@@ -4,10 +4,12 @@
 #include "NotificationController.h"
 #include "NotificationRepository.h"
 #include "NotificationService.h"
+#include "RequestLoggingMiddleware.h"
 
 int main()
 {
-    crow::SimpleApp app;
+    crow::App<RequestLoggingMiddleware> app;
+    RequestLoggingMiddleware::setServiceName("notification");
 
     Database database("notification.db");
 
@@ -64,7 +66,7 @@ int main()
         return controller.deleteNotification(id);
     });
 
-    app.port(8084)
+    app.loglevel(configuredLogLevel()).port(8084)
        .concurrency(64)
        .run();
 

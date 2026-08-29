@@ -4,14 +4,16 @@
 #include "UserController.h"
 #include "UserRepository.h"
 #include "UserService.h"
+#include "RequestLoggingMiddleware.h"
 
 int main()
 {
     // Create Crow application
 //    crow::SimpleApp app;
-	using App = crow::App<JwtMiddleware>;
+	using App = crow::App<JwtMiddleware, RequestLoggingMiddleware>;
 
 	App app;
+    RequestLoggingMiddleware::setServiceName("user");
     Database database("foodservice.db");
 
     // Create users table
@@ -76,7 +78,7 @@ int main()
     });
 
     // Start server
-    app.port(8080)
+    app.loglevel(configuredLogLevel()).port(8080)
        .multithreaded()
        .run();
 

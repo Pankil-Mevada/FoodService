@@ -24,6 +24,14 @@ The ingestion route accepts only the next lifecycle state after the configured
 an API invariant; hiding controls in the browser is only an additional UX rule.
 Delivered orders cannot be cancelled through the gateway.
 
+## Cross-service request logs
+
+All six C++ processes use the shared `RequestLoggingMiddleware`. Successful,
+client-failure, and server-failure responses are classified as INFO, WARNING,
+and ERROR respectively, with request duration and correlation ID. DEBUG arrival
+records are opt-in through `FOODSERVICE_LOG_LEVEL=DEBUG`. See
+[Runtime logging](LOGGING.md) for safe fields and live log commands.
+
 ## Payment-gated delivery invariant
 
 The browser opens `frontend/payment.html` as a separate checkout surface. It

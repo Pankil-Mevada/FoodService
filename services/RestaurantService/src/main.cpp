@@ -4,10 +4,12 @@
 #include "RestaurantController.h"
 #include "RestaurantRepository.h"
 #include "RestaurantService.h"
+#include "RequestLoggingMiddleware.h"
 
 int main()
 {
-    crow::SimpleApp app;
+    crow::App<RequestLoggingMiddleware> app;
+    RequestLoggingMiddleware::setServiceName("restaurant");
 
     Database database("restaurant.db");
 
@@ -64,7 +66,7 @@ int main()
         return controller.deleteRestaurant(id);
     });
 
-    app.port(8081)
+    app.loglevel(configuredLogLevel()).port(8081)
        .concurrency(64)
        .run();
 

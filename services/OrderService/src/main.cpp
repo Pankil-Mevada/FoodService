@@ -4,6 +4,7 @@
 #include "OrderController.h"
 #include "OrderRepository.h"
 #include "OrderService.h"
+#include "RequestLoggingMiddleware.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -30,7 +31,8 @@ bool internalOrderSyncAuthorized(const crow::request& req)
 
 int main()
 {
-    crow::SimpleApp app;
+    crow::App<RequestLoggingMiddleware> app;
+    RequestLoggingMiddleware::setServiceName("order");
 
     // Open database
     Database database("order.db");
@@ -131,7 +133,7 @@ int main()
         return crow::response(updated ? 200 : 409, response);
     });
 
-    app.port(8082)
+    app.loglevel(configuredLogLevel()).port(8082)
        .concurrency(128)
        .run();
 
