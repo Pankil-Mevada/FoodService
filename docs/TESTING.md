@@ -14,6 +14,9 @@ as a locked summary, **Change** returns to the address book, successful order
 creation navigates directly to `payment.html?orderId=...`, and **Orders** opens
 the dedicated history dialog. The E2E suite asserts that `POST /orders` returns
 the ID of the order that was persisted.
+After successful Razorpay test verification, verify that checkout counts down
+for three seconds and navigates to `/?view=orders`, where the paid order appears
+in the dedicated history dialog.
 
 ## Continuous integration
 

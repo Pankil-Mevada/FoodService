@@ -54,6 +54,9 @@ Checkout shows the selected server-backed address as a non-editable summary.
 After the backend returns the new `orderId`, the browser navigates directly to
 the separate Razorpay Test Mode page. Order history is available from the
 dedicated **Orders** navigation dialog rather than occupying the discovery page.
+After successful backend signature verification, checkout shows a three-second
+confirmation and automatically returns to that dialog. The manual return link
+remains available as a fallback.
 
 ## Files
 
