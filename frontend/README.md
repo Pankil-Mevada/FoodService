@@ -45,6 +45,10 @@ The discovery experience uses common food-marketplace patterns—photo-led searc
 craving shortcuts, offer cards, ratings, ETA, distance, and filters—while keeping
 the original Plated brand. It is not a copy of Zomato branding or proprietary UI.
 Choosing a craving preselects that test-menu item when the customer opens a restaurant.
+The responsive shell switches the hero to one column at tablet widths so its
+headline, search control, photograph, rating, and ETA badge never overlap. On
+phones, compact proof points and horizontally scrollable food cards preserve
+comfortable touch targets.
 
 ## Files
 
