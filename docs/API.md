@@ -137,3 +137,24 @@ All `/addresses` operations require the customer's bearer JWT.
 `POST /orders` accepts an optional `addressId`. The gateway verifies ownership, loads its coordinates, recalculates the delivery quote, rejects an outside-zone order, and replaces browser-provided delivery fee/total with server-calculated values.
 
 Restaurant configuration supports `deliveryRadiusKm`, `deliveryPolygon` (JSON `[[latitude,longitude], ...]`), `baseDeliveryFee`, `perKmFee`, and `preparationMinutes`. A valid polygon takes precedence over radius.
+
+## Restaurant partner APIs
+
+Partner login uses the normal `POST /login` User Service identity. Every
+`/partner/*` route requires a bearer JWT; Restaurant Service verifies it again
+and resolves an ACTIVE user/restaurant membership from `restaurant.db`.
+
+| Method and path | Behavior |
+| --- | --- |
+| `GET/POST /partner/restaurants` | List assigned restaurants or create a private DRAFT and OWNER membership. |
+| `GET/PUT /partner/restaurants/{id}` | Read or version-update an authorized DRAFT/REJECTED restaurant. |
+| `POST /partner/restaurants/{id}/submit` | Require a menu and move to PENDING_REVIEW; never self-approves. |
+| `GET/POST /partner/restaurants/{id}/menu-items` | List/add authorized items; empty lists are `[]`, not `null`. |
+| `PUT/DELETE /partner/restaurants/{id}/menu-items/{itemId}` | Version-update or remove an authorized item. |
+| `GET /partner/restaurants/{id}/audit` | Latest 50 restaurant-scoped server audit events. |
+
+Another user's resource returns 404. Stale versions return 409. Invalid
+state/readiness returns 409/422. Successful writes and success audit events are
+atomic. DRAFT, REJECTED and PENDING_REVIEW rows are excluded from customer
+reads. Persistent partner-command idempotency is not yet implemented even
+though the UI prepares idempotency headers.

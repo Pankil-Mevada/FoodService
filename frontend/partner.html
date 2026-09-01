@@ -1,11 +1,98 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Plated Partner</title><link rel="stylesheet" href="partner.css"></head>
-<body><header><a href="index.html" class="brand">P <span>plated.partner</span></a><button id="signout">Sign out</button></header><main>
-<aside><p>RESTAURANT PARTNER</p><h1>Run your kitchen, clearly.</h1><nav><button data-view="overview" class="active">Overview</button><button data-view="restaurant">Restaurant</button><button data-view="menu">Menu</button><button data-view="orders">Orders</button><button data-view="team">Team & access</button><button data-view="audit">Audit log</button></nav><small>JWT · least privilege · audited drafts</small></aside>
-<section class="workspace"><div id="notice" role="status"></div>
-<section data-panel="overview"><p>TODAY</p><h2>Good service starts backstage.</h2><div class="metrics"><article><b>DRAFT</b><span>Onboarding status</span></article><article><b id="item-count">0</b><span>Menu items</span></article><article><b>—</b><span>Orders waiting</span></article></div><div class="card"><h3>Launch checklist</h3><label><input type="checkbox" disabled> Ownership verified</label><label><input type="checkbox" disabled> Food licence reviewed</label><label><input type="checkbox" disabled> Menu and hours complete</label><label><input type="checkbox" disabled> Payout account verified</label></div></section>
-<section data-panel="restaurant" hidden><p>BUSINESS PROFILE</p><h2>Restaurant details</h2><form id="restaurant-form"><div class="grid"><label>Name<input name="name" required minlength="2" maxlength="120"></label><label>Phone<input name="phone" required></label><label>Address<input name="address" required maxlength="300"></label><label>Delivery radius km<input name="radius" type="number" min=".5" max="50" value="8"></label><label>Latitude<input name="latitude" type="number" min="-90" max="90" step="any"></label><label>Longitude<input name="longitude" type="number" min="-180" max="180" step="any"></label></div><button class="primary">Save draft</button></form></section>
-<section data-panel="menu" hidden><p>CATALOG</p><h2>Menu management</h2><form id="item-form" class="inline"><input name="name" placeholder="Item name" required maxlength="120"><input name="price" type="number" placeholder="Price ₹" min="0" max="1000000" step=".01" required><select name="diet"><option>VEG</option><option>NON_VEG</option><option>VEGAN</option></select><button class="primary">Add item</button></form><div id="items"></div></section>
-<section data-panel="orders" hidden><p>OPERATIONS</p><h2>Incoming orders</h2><div class="card">No live feed connected. Launch requires a server-authorized restaurant order subscription.</div></section>
-<section data-panel="team" hidden><p>ACCESS</p><h2>Team & roles</h2><div class="card">Owner: all partner actions<br>Manager: restaurant, menu, submission<br>Staff: view and menu availability</div><div class="warning">Invitations are disabled until verified-email delivery and revocation exist.</div></section>
-<section data-panel="audit" hidden><p>SECURITY</p><h2>Audit trail</h2><div id="audit-list"></div></section>
-</section></main><script src="partner.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Plated Partner</title>
+  <link rel="stylesheet" href="partner.css?v=20260901-backend">
+</head>
+<body>
+<header>
+  <a href="index.html" class="brand"><span class="brand-mark">P</span><span>plated.partner</span></a>
+  <div class="header-actions"><span id="identity">Not signed in</span><button id="signout" hidden>Sign out</button></div>
+</header>
+<main>
+  <aside>
+    <p class="eyebrow">RESTAURANT PARTNER</p>
+    <h1>Run your kitchen, clearly.</h1>
+    <label class="restaurant-picker">Active restaurant
+      <select id="restaurant-select" disabled><option>No restaurant yet</option></select>
+    </label>
+    <nav>
+      <button data-view="overview" class="active">Overview</button>
+      <button data-view="restaurant">Restaurant</button>
+      <button data-view="menu">Menu</button>
+      <button data-view="orders">Orders</button>
+      <button data-view="team">Team & access</button>
+      <button data-view="audit">Audit log</button>
+    </nav>
+    <small>JWT authenticated · restaurant-scoped access · server audit</small>
+  </aside>
+  <section class="workspace">
+    <div id="notice" role="status" aria-live="polite"></div>
+    <section id="auth-panel">
+      <p class="eyebrow">PARTNER SIGN IN</p>
+      <h2>Use your FoodService identity.</h2>
+      <p>The account is stored by User Service. Restaurant ownership is stored separately by Restaurant Service.</p>
+      <form id="login-form" class="auth-card">
+        <label>Email<input name="email" type="email" autocomplete="username" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary">Sign in securely</button>
+      </form>
+      <a href="index.html">Create an account on the customer site</a>
+    </section>
+    <div id="app-shell" hidden>
+      <section data-panel="overview">
+        <p class="eyebrow">TODAY</p>
+        <h2>Good service starts backstage.</h2>
+        <div class="metrics">
+          <article><b id="status">NO RESTAURANT</b><span>Onboarding status</span></article>
+          <article><b id="item-count">0</b><span>Menu items</span></article>
+          <article><b id="role">—</b><span>Your access role</span></article>
+        </div>
+        <div class="card actions-card">
+          <div><h3>Launch controls</h3><p>Drafts stay private until reviewed by a separate administrator.</p></div>
+          <button id="new-restaurant">Create restaurant</button>
+          <button id="submit-review" class="primary" disabled>Submit for review</button>
+        </div>
+      </section>
+      <section data-panel="restaurant" hidden>
+        <p class="eyebrow">BUSINESS PROFILE</p>
+        <h2>Restaurant details</h2>
+        <form id="restaurant-form">
+          <div class="grid">
+            <label>Name<input name="name" required minlength="2" maxlength="120"></label>
+            <label>Phone<input name="phone" required minlength="7" maxlength="24"></label>
+            <label class="wide">Address<input name="address" required maxlength="300"></label>
+            <label>Latitude<input name="latitude" type="number" min="-90" max="90" step="any" required></label>
+            <label>Longitude<input name="longitude" type="number" min="-180" max="180" step="any" required></label>
+            <label>Delivery radius (km)<input name="deliveryRadiusKm" type="number" min=".5" max="50" step=".1" value="8"></label>
+            <label>Preparation (minutes)<input name="preparationMinutes" type="number" min="1" max="240" value="20"></label>
+            <label>Base delivery fee ₹<input name="baseDeliveryFee" type="number" min="0" max="10000" step=".01" value="39"></label>
+            <label>Per-km fee ₹<input name="perKmFee" type="number" min="0" max="1000" step=".01" value="5"></label>
+            <label class="wide">Image URL<input name="imageUrl" type="url" maxlength="1000" placeholder="https://"></label>
+          </div>
+          <button class="primary">Save to Restaurant Service</button>
+        </form>
+      </section>
+      <section data-panel="menu" hidden>
+        <p class="eyebrow">CATALOG</p>
+        <h2>Menu management</h2>
+        <form id="item-form" class="menu-form">
+          <label>Item name<input name="name" required minlength="2" maxlength="120"></label>
+          <label>Description<input name="description" maxlength="500"></label>
+          <label>Price ₹<input name="price" type="number" min="0" max="1000000" step=".01" required></label>
+          <label>Diet<select name="dietType"><option>VEG</option><option>NON_VEG</option><option>VEGAN</option></select></label>
+          <button class="primary">Add menu item</button>
+        </form>
+        <div id="items"></div>
+      </section>
+      <section data-panel="orders" hidden><p class="eyebrow">OPERATIONS</p><h2>Incoming orders</h2><div class="card">The secure restaurant-scoped order feed is the next service integration. Customer payment and order databases are never read directly here.</div></section>
+      <section data-panel="team" hidden><p class="eyebrow">ACCESS</p><h2>Team & roles</h2><div class="card">Owner manages business and team. Manager edits restaurant and menu. Staff edits menu. Invitations remain disabled until verified-email delivery and revocation are implemented.</div></section>
+      <section data-panel="audit" hidden><p class="eyebrow">SECURITY</p><h2>Server audit trail</h2><div id="audit-list"></div></section>
+    </div>
+  </section>
+</main>
+<script src="partner.js?v=20260901-backend"></script>
+</body>
+</html>

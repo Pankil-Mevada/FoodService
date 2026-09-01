@@ -53,7 +53,8 @@ std::vector<Restaurant> RestaurantRepository::getAllRestaurants()
 
     const char* sql =
         "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url,delivery_polygon,base_delivery_fee,per_km_fee,preparation_minutes FROM restaurants;";
-
+    sql = "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url,delivery_polygon,base_delivery_fee,per_km_fee,preparation_minutes FROM restaurants "
+          "WHERE COALESCE(onboarding_status,'APPROVED')='APPROVED';";
     sqlite3_stmt* stmt = nullptr;
 
     if (sqlite3_prepare_v2(
@@ -97,7 +98,7 @@ std::optional<Restaurant> RestaurantRepository::getRestaurantById(int id)
     const char* sql =
         "SELECT id,name,address,phone,rating,latitude,longitude,delivery_radius_km,image_url,delivery_polygon,base_delivery_fee,per_km_fee,preparation_minutes "
         "FROM restaurants "
-        "WHERE id=?;";
+        "WHERE id=? AND COALESCE(onboarding_status,'APPROVED')='APPROVED';";
 
     sqlite3_stmt* stmt = nullptr;
 

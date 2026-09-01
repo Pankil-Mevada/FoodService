@@ -42,6 +42,26 @@ HttpResult RestaurantClient::deleteRestaurant(
         std::to_string(id));
 }
 
+HttpResult RestaurantClient::partnerGet(const std::string& path, const std::string& authHeader)
+{
+    return m_httpClient.get("http://localhost:8081" + path, authHeader);
+}
+
+HttpResult RestaurantClient::partnerPost(const std::string& path, const std::string& jsonBody, const std::string& authHeader)
+{
+    return m_httpClient.post("http://localhost:8081" + path, jsonBody, authHeader);
+}
+
+HttpResult RestaurantClient::partnerPut(const std::string& path, const std::string& jsonBody, const std::string& authHeader)
+{
+    return m_httpClient.put("http://localhost:8081" + path, jsonBody, authHeader);
+}
+
+HttpResult RestaurantClient::partnerDelete(const std::string& path, const std::string& authHeader)
+{
+    return m_httpClient.remove("http://localhost:8081" + path, authHeader);
+}
+
 HttpResult RestaurantClient::discoverNearby(double latitude, double longitude)
 {
     const std::string query = "[out:json][timeout:15];nwr(around:5000," +

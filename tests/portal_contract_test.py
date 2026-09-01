@@ -13,18 +13,26 @@ class PortalContractTests(unittest.TestCase):
         self.assertIn("plated_profile_user_", script)
         self.assertIn("Authorization", script)
 
-    def test_partner_portal_separates_navigation_and_draft_storage(self):
+    def test_partner_portal_uses_gateway_backed_identity_and_resources(self):
         html = (ROOT / "frontend" / "partner.html").read_text(encoding="utf-8")
         script = (ROOT / "frontend" / "partner.js").read_text(encoding="utf-8")
         for panel in ("overview", "restaurant", "menu", "orders", "team", "audit"):
             self.assertIn(f'data-panel="{panel}"', html)
-        self.assertIn("plated_partner_draft_v1", script)
+        self.assertIn("/login", script)
+        self.assertIn("/partner/restaurants", script)
+        self.assertIn("Authorization", script)
+        self.assertNotIn("plated_partner_draft_v1", script)
+        self.assertNotIn("localhost:8081", html + script)
         self.assertNotIn("FoodServiceSecretKey", html + script)
 
-    def test_partner_preview_does_not_claim_server_authorization(self):
+    def test_partner_submission_remains_hidden_until_independent_review(self):
+        html = (ROOT / "frontend" / "partner.html").read_text(encoding="utf-8")
         script = (ROOT / "frontend" / "partner.js").read_text(encoding="utf-8")
-        self.assertIn("Browser storage is never partner authorization", script)
-        self.assertIn("Publishing is blocked", script)
+        controller = (ROOT / "services" / "RestaurantService" / "src" / "PartnerController.cpp").read_text(encoding="utf-8")
+        self.assertIn("Submit for review", html)
+        self.assertIn("PENDING_REVIEW", controller)
+        self.assertIn("still hidden from customers", script)
+        self.assertNotIn('body["status"]="APPROVED"', controller)
 
 
 if __name__ == "__main__":

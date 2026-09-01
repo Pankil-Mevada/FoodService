@@ -1,17 +1,98 @@
-const storageKey='plated_partner_draft_v1',token=localStorage.getItem('plated_token')||'';
-const blank={restaurant:{name:'',phone:'',address:'',radius:8,latitude:'',longitude:''},items:[],audit:[]};
-let state;try{state={...blank,...JSON.parse(localStorage.getItem(storageKey)||'{}')}}catch{state=blank}
+'use strict';
+const config={apiUrl:localStorage.getItem('plated_api_url')||'http://localhost:8085'};
+const state={token:localStorage.getItem('plated_token')||'',identity:null,restaurants:[],selected:null,items:[],audit:[]};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const esc=v=>{const d=document.createElement('div');d.textContent=v;return d.innerHTML};
-function record(action){state.audit.unshift({action,at:new Date().toISOString()});state.audit=state.audit.slice(0,50)}
-function save(){localStorage.setItem(storageKey,JSON.stringify(state));render()}
-function render(){const f=$('#restaurant-form');Object.entries(state.restaurant).forEach(([k,v])=>{if(f.elements[k])f.elements[k].value=v});$('#item-count').textContent=state.items.length;
- $('#items').innerHTML=state.items.length?state.items.map((x,i)=>`<div class="menu-item"><span><b>${esc(x.name)}</b><br>${x.diet}</span><span>₹${x.price.toFixed(2)} <button data-remove="${i}">Remove</button></span></div>`).join(''):'<div class="card">Add the first menu item. Production stores money as integer paise.</div>';
- $$('[data-remove]').forEach(b=>b.onclick=()=>{state.items.splice(+b.dataset.remove,1);record('MENU_ITEM_REMOVED');save()});
- $('#audit-list').innerHTML=state.audit.length?state.audit.map(x=>`<div class="audit-row"><b>${x.action}</b><span>${new Date(x.at).toLocaleString()}</span></div>`).join(''):'<div class="card">No draft activity yet.</div>'}
-$$('[data-view]').forEach(b=>b.onclick=()=>{$$('[data-view]').forEach(x=>x.classList.toggle('active',x===b));$$('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==b.dataset.view)});
-$('#restaurant-form').onsubmit=e=>{e.preventDefault();state.restaurant=Object.fromEntries(new FormData(e.currentTarget));record('RESTAURANT_DRAFT_UPDATED');save();$('#notice').textContent='Browser preview saved. Publishing is blocked until the authenticated partner API and approval workflow are connected.'};
-$('#item-form').onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.currentTarget)),price=Number(d.price);if(!Number.isFinite(price)||price<0)return;state.items.push({name:String(d.name).trim(),price,diet:d.diet});record('MENU_ITEM_CREATED');e.currentTarget.reset();save()};
-$('#signout').onclick=()=>{localStorage.removeItem('plated_token');location.href='index.html'};
-if(!token)$('#notice').textContent='Sign in first. Browser storage is never partner authorization; production writes require JWT plus server-side membership checks.';
-render();
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function notice(message,type=''){const box=$('#notice');box.textContent=message;box.className=type}
+async function request(path,options={}){
+ const headers={Accept:'application/json',...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})};
+ if(state.token)headers.Authorization='Bearer '+state.token;
+ let response;try{response=await fetch(config.apiUrl+path,{...options,headers})}catch{throw new Error('Cannot reach the API gateway')}
+ const text=await response.text();let data={};try{data=text?JSON.parse(text):{}}catch{data={message:text}}
+ if(!response.ok)throw new Error(data.message||'Request failed ('+response.status+')');return data;
+}
+function showAuth(show){$('#auth-panel').hidden=!show;$('#app-shell').hidden=show;$('#signout').hidden=show}
+function activeId(){return state.selected?.id||0}
+function editable(){return ['DRAFT','REJECTED'].includes(String(state.selected?.status||''))}
+function showPanel(name){$$('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));$$('[data-panel]').forEach(x=>x.hidden=x.dataset.panel!==name)}
+
+async function authenticate(){
+ if(!state.token){showAuth(true);return}
+ try{
+  state.identity=await request('/me');$('#identity').textContent=state.identity.email||state.identity.name||'Partner';
+  showAuth(false);await loadRestaurants();
+ }catch(error){state.token='';localStorage.removeItem('plated_token');showAuth(true);notice(error.message,'error')}
+}
+async function loadRestaurants(){
+ state.restaurants=await request('/partner/restaurants');const picker=$('#restaurant-select');picker.disabled=false;
+ picker.innerHTML='<option value="">Create a restaurant</option>'+state.restaurants.map(r=>'<option value="'+r.id+'">'+esc(r.name)+' · '+esc(r.status)+'</option>').join('');
+ const remembered=Number(sessionStorage.getItem('plated_partner_restaurant')||0);
+ selectRestaurant(state.restaurants.find(r=>r.id===remembered)||state.restaurants[0]||null);
+}
+async function selectRestaurant(restaurant){
+ state.selected=restaurant;$('#restaurant-select').value=restaurant?.id||'';if(restaurant)sessionStorage.setItem('plated_partner_restaurant',restaurant.id);else sessionStorage.removeItem('plated_partner_restaurant');
+ fillRestaurant();await Promise.all([loadItems(),loadAudit()]);renderSummary();
+}
+function fillRestaurant(){
+ const form=$('#restaurant-form'),r=state.selected||{};
+ ['name','phone','address','latitude','longitude','deliveryRadiusKm','preparationMinutes','baseDeliveryFee','perKmFee','imageUrl'].forEach(name=>{form.elements[name].value=r[name]??({deliveryRadiusKm:8,preparationMinutes:20,baseDeliveryFee:39,perKmFee:5}[name]??'')});
+ [...form.elements].forEach(element=>{if(element.tagName!=='BUTTON')element.disabled=Boolean(state.selected&&!editable())});
+}
+function renderSummary(){
+ $('#status').textContent=state.selected?.status||'NO RESTAURANT';$('#role').textContent=state.selected?.role||'—';$('#item-count').textContent=state.items.length;
+ $('#submit-review').disabled=!state.selected||!editable()||state.items.length===0;
+}
+async function loadItems(){
+ state.items=state.selected?await request('/partner/restaurants/'+activeId()+'/menu-items'):[];renderItems();
+}
+function renderItems(){
+ const box=$('#items');if(!state.selected){box.innerHTML='<div class="empty">Create a restaurant before adding menu items.</div>';return}
+ if(!state.items.length){box.innerHTML='<div class="empty">No menu items yet. Add one before submitting for review.</div>';return}
+ box.innerHTML=state.items.map(item=>'<article class="menu-item"><div><b>'+esc(item.name)+'</b><small>'+esc(item.description||'No description')+' · '+esc(item.dietType)+'</small></div><div class="menu-actions"><b>₹'+(Number(item.pricePaise)/100).toFixed(2)+'</b><button class="danger remove-item" data-id="'+item.id+'">Remove</button></div></article>').join('');
+ $$('.remove-item').forEach(button=>button.onclick=()=>removeItem(Number(button.dataset.id)));
+}
+async function loadAudit(){
+ state.audit=state.selected?await request('/partner/restaurants/'+activeId()+'/audit'):[];const box=$('#audit-list');
+ box.innerHTML=state.audit.length?state.audit.map(event=>'<div class="audit-row"><b>'+esc(event.action)+'</b><span>User '+event.actorUserId+' · '+new Date(Number(event.createdEpoch)*1000).toLocaleString()+'</span></div>').join(''):'<div class="empty">No server activity for this restaurant.</div>';
+}
+async function refreshSelected(){
+ if(!activeId())return;const updated=await request('/partner/restaurants/'+activeId());state.restaurants=state.restaurants.map(r=>r.id===updated.id?updated:r);await selectRestaurant(updated);
+}
+
+$('#login-form').onsubmit=async event=>{
+ event.preventDefault();const button=$('button',event.currentTarget),body=Object.fromEntries(new FormData(event.currentTarget));button.disabled=true;
+ try{const result=await request('/login',{method:'POST',body:JSON.stringify(body)});if(!result.token)throw new Error('Login did not return a token');state.token=result.token;localStorage.setItem('plated_token',result.token);notice('Signed in. Loading your restaurants…','success');await authenticate()}catch(error){notice(error.message,'error')}finally{button.disabled=false}
+};
+$('#signout').onclick=()=>{state.token='';localStorage.removeItem('plated_token');sessionStorage.removeItem('plated_partner_restaurant');state.selected=null;showAuth(true);$('#identity').textContent='Not signed in';notice('Signed out','success')};
+$('#restaurant-select').onchange=()=>selectRestaurant(state.restaurants.find(r=>r.id===Number($('#restaurant-select').value))||null);
+$('#new-restaurant').onclick=()=>{selectRestaurant(null);showPanel('restaurant');notice('Enter the restaurant details. Saving creates a private DRAFT.','success')};
+$$('[data-view]').forEach(button=>button.onclick=()=>showPanel(button.dataset.view));
+
+$('#restaurant-form').onsubmit=async event=>{
+ event.preventDefault();const form=event.currentTarget,button=$('button',form),data=Object.fromEntries(new FormData(form));
+ const body={name:data.name.trim(),phone:data.phone.trim(),address:data.address.trim(),latitude:Number(data.latitude),longitude:Number(data.longitude),deliveryRadiusKm:Number(data.deliveryRadiusKm),preparationMinutes:Number(data.preparationMinutes),baseDeliveryFee:Number(data.baseDeliveryFee),perKmFee:Number(data.perKmFee),imageUrl:data.imageUrl.trim()};
+ if(state.selected)body.version=state.selected.version;button.disabled=true;
+ try{
+  const path=state.selected?'/partner/restaurants/'+activeId():'/partner/restaurants';
+  const result=await request(path,{method:state.selected?'PUT':'POST',body:JSON.stringify(body)});
+  notice(state.selected?'Restaurant saved in Restaurant Service':'Private restaurant draft created','success');
+  if(!state.selected)sessionStorage.setItem('plated_partner_restaurant',result.restaurantId);await loadRestaurants();
+ }catch(error){notice(error.message,'error')}finally{button.disabled=false}
+};
+$('#item-form').onsubmit=async event=>{
+ event.preventDefault();if(!state.selected){notice('Create a restaurant first','error');return}
+ const form=event.currentTarget,button=$('button',form),data=Object.fromEntries(new FormData(form));
+ const body={name:data.name.trim(),description:data.description.trim(),pricePaise:Math.round(Number(data.price)*100),dietType:data.dietType,available:true};button.disabled=true;
+ try{await request('/partner/restaurants/'+activeId()+'/menu-items',{method:'POST',body:JSON.stringify(body),headers:{'Idempotency-Key':crypto.randomUUID()}});form.reset();notice('Menu item saved in Restaurant Service','success');await Promise.all([loadItems(),loadAudit()]);renderSummary()}catch(error){notice(error.message,'error')}finally{button.disabled=false}
+};
+async function removeItem(itemId){
+ if(!confirm('Remove this menu item?'))return;
+ try{await request('/partner/restaurants/'+activeId()+'/menu-items/'+itemId,{method:'DELETE'});notice('Menu item removed','success');await Promise.all([loadItems(),loadAudit()]);renderSummary()}catch(error){notice(error.message,'error')}
+}
+$('#submit-review').onclick=async()=>{
+ if(!state.selected)return;
+ try{await request('/partner/restaurants/'+activeId()+'/submit',{method:'POST',body:JSON.stringify({version:state.selected.version}),headers:{'Idempotency-Key':crypto.randomUUID()}});notice('Submitted for independent review. It is still hidden from customers.','success');await refreshSelected()}catch(error){notice(error.message,'error')}
+};
+
+showAuth(true);authenticate();

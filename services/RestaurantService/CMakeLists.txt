@@ -4,6 +4,8 @@ add_executable(RestaurantService
     src/Restaurant.cpp
     src/RestaurantService.cpp
     src/RestaurantRepository.cpp
+    src/PartnerController.cpp
+    src/PartnerRepository.cpp
 )
 
 

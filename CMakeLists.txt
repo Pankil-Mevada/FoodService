@@ -45,4 +45,20 @@ if(BUILD_TESTING)
     add_executable(account_security_test tests/account_security_test.cpp)
     target_link_libraries(account_security_test PRIVATE Common)
     add_test(NAME account_security COMMAND account_security_test)
+
+    add_executable(partner_access_policy_test tests/partner_access_policy_test.cpp)
+    target_include_directories(partner_access_policy_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/common/include)
+    add_test(NAME partner_access_policy COMMAND partner_access_policy_test)
+
+    add_executable(partner_repository_test
+        tests/partner_repository_test.cpp
+        services/RestaurantService/src/PartnerRepository.cpp
+        services/RestaurantService/src/RestaurantRepository.cpp
+        services/RestaurantService/src/Restaurant.cpp)
+    target_include_directories(partner_repository_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/common/include
+        ${CMAKE_SOURCE_DIR}/services/RestaurantService/include)
+    target_link_libraries(partner_repository_test PRIVATE Common)
+    add_test(NAME partner_repository COMMAND partner_repository_test)
 endif()

@@ -4,6 +4,8 @@
 #include "RestaurantController.h"
 #include "RestaurantRepository.h"
 #include "RestaurantService.h"
+#include "PartnerController.h"
+#include "PartnerRepository.h"
 #include "RequestLoggingMiddleware.h"
 
 int main()
@@ -18,6 +20,9 @@ int main()
     RestaurantRepository repository(database);
     RestaurantService service(repository);
     RestaurantController controller(service);
+    PartnerRepository partnerRepository(database);
+    if (!partnerRepository.ready()) return 1;
+    PartnerController partnerController(partnerRepository);
 
     // Health Check
     CROW_ROUTE(app, "/health")
@@ -64,6 +69,50 @@ int main()
     ([&controller](int id)
     {
         return controller.deleteRestaurant(id);
+    });
+
+    CROW_ROUTE(app, "/partner/restaurants")
+    .methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
+    ([&partnerController](const crow::request& req) {
+        return req.method == crow::HTTPMethod::GET
+            ? partnerController.listRestaurants(req)
+            : partnerController.createRestaurant(req);
+    });
+
+    CROW_ROUTE(app, "/partner/restaurants/<int>")
+    .methods(crow::HTTPMethod::GET, crow::HTTPMethod::PUT)
+    ([&partnerController](const crow::request& req, int restaurantId) {
+        return req.method == crow::HTTPMethod::GET
+            ? partnerController.getRestaurant(req, restaurantId)
+            : partnerController.updateRestaurant(req, restaurantId);
+    });
+
+    CROW_ROUTE(app, "/partner/restaurants/<int>/submit")
+    .methods(crow::HTTPMethod::POST)
+    ([&partnerController](const crow::request& req, int restaurantId) {
+        return partnerController.submitRestaurant(req, restaurantId);
+    });
+
+    CROW_ROUTE(app, "/partner/restaurants/<int>/menu-items")
+    .methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
+    ([&partnerController](const crow::request& req, int restaurantId) {
+        return req.method == crow::HTTPMethod::GET
+            ? partnerController.listMenuItems(req, restaurantId)
+            : partnerController.createMenuItem(req, restaurantId);
+    });
+
+    CROW_ROUTE(app, "/partner/restaurants/<int>/menu-items/<int>")
+    .methods(crow::HTTPMethod::PUT, crow::HTTPMethod::DELETE)
+    ([&partnerController](const crow::request& req, int restaurantId, int itemId) {
+        return req.method == crow::HTTPMethod::PUT
+            ? partnerController.updateMenuItem(req, restaurantId, itemId)
+            : partnerController.deleteMenuItem(req, restaurantId, itemId);
+    });
+
+    CROW_ROUTE(app, "/partner/restaurants/<int>/audit")
+    .methods(crow::HTTPMethod::GET)
+    ([&partnerController](const crow::request& req, int restaurantId) {
+        return partnerController.listAudit(req, restaurantId);
     });
 
     app.loglevel(configuredLogLevel()).port(8081)

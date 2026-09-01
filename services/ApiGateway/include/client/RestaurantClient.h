@@ -25,6 +25,13 @@ public:
         double latitude,
         double longitude);
 
+    HttpResult partnerGet(const std::string& path, const std::string& authHeader);
+    HttpResult partnerPost(const std::string& path, const std::string& jsonBody,
+        const std::string& authHeader);
+    HttpResult partnerPut(const std::string& path, const std::string& jsonBody,
+        const std::string& authHeader);
+    HttpResult partnerDelete(const std::string& path, const std::string& authHeader);
+
 private:
 
     HttpClient m_httpClient;

@@ -170,11 +170,18 @@ review, and proper geocoding/routing.
 
 ### Current security debt
 
-User Service currently persists and compares passwords as plaintext and writes
-password values to logs. `PasswordHasher` is incomplete and unused. Only dummy
-credentials may be used until Argon2 hashing, migration, and log removal land.
-JWT also uses a hard-coded development secret. Authorization remains incomplete
-beyond customer identity and tracking ownership checks.
+User Service now persists Argon2id hashes and does not log credentials. JWTs
+check issuer, audience, expiry and token version; production requires an
+environment-managed secret. Gateway CORS uses a configured origin instead of a
+wildcard. Email ownership verification/recovery, session revocation, rate
+limiting, security headers and managed secret rotation remain open.
+
+Restaurant partner authorization is service-owned. User Service owns login in
+`foodservice.db`; Restaurant Service links that user ID to restaurant roles,
+menus, lifecycle and audit in `restaurant.db`. Partner writes and success audits
+are transactional, and customer reads include only APPROVED rows. Admin
+approval, compliance, order operations, durable idempotency/outbox and
+production database operations remain. See `RESTAURANT_PARTNER_BACKEND.md`.
 
 - Services use fixed localhost ports and direct HTTP discovery.
 - SQLite databases are service-local files; there is no distributed transaction.

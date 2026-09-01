@@ -240,3 +240,23 @@ recorded source or vcpkg paths do not exist.
 The dependency-free `tests/delivery_quote_test.cpp` covers near/far radius decisions, polygon inclusion/exclusion, rain pricing, and ETA. UI/API testing should also verify: address JWT isolation; invalid phone/coordinates; selecting/deleting another user's address returns no data/change; GPS denial leaves manual/map entry available; Nominatim failure leaves manual/GPS available; an outside-zone quote and order both return 422; browser fee tampering is replaced by the server quote; and surge/rain/late-night flags appear in the quote.
 
 For local rain/surge checks, start API Gateway with `DELIVERY_RAIN_MODE=1` and/or `DELIVERY_SURGE_MODE=1`. These flags are development controls, not real weather or demand detection.
+
+# Restaurant partner tests
+
+`partner_access_policy_test` covers role/transition policy.
+`partner_repository_test` uses isolated SQLite for tenant isolation, stale
+versions, menu ownership, submission visibility and audit scope.
+`tests.portal_contract_test` verifies Gateway-backed login/resources rather
+than browser drafts or private service ports.
+
+With all services running:
+
+```bash
+python3 tests/partner_api_e2e_test.py
+```
+
+The E2E test creates randomized `.test` identities and a private restaurant, so
+use only disposable local/test databases. It verifies anonymous denial, `[]`
+empty collections, two-user isolation, private DRAFT/PENDING_REVIEW state, menu
+persistence and audit events. Verified 2026-09-01: CTest 7/7, portal contracts
+3/3 and partner API E2E passed.

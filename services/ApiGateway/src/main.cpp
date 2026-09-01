@@ -225,7 +225,7 @@ int main()
 
     auto& cors = app.get_middleware<crow::CORSHandler>();
     cors.global()
-        .origin("*")
+        .origin(std::getenv("FOODSERVICE_ALLOWED_ORIGIN") ? std::getenv("FOODSERVICE_ALLOWED_ORIGIN") : "http://localhost:5173")
         .headers("Content-Type", "Authorization", "Idempotency-Key", "X-Webhook-Secret", "X-Driver-Token", "X-Correlation-ID")
         .expose("X-Correlation-ID")
         .methods(
@@ -300,44 +300,87 @@ CROW_ROUTE(app, "/users/<int>")
     }
 });
 CROW_ROUTE(app, "/restaurants")
-.methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
-([&restaurantClient](const crow::request& req)
+.methods(crow::HTTPMethod::GET)
+([&restaurantClient](const crow::request&)
 {
-    switch (req.method)
-    {
-        case crow::HTTPMethod::GET:
-            return downstreamResponse(restaurantClient.getAllRestaurants());
-
-        case crow::HTTPMethod::POST:
-            return downstreamResponse(restaurantClient.registerRestaurant(req.body));
-
-        default:
-            return crow::response(405);
-    }
+    return downstreamResponse(restaurantClient.getAllRestaurants());
 });
 
 CROW_ROUTE(app, "/restaurants/<int>")
-.methods(
-    crow::HTTPMethod::GET,
-    crow::HTTPMethod::PUT,
-    crow::HTTPMethod::DELETE)
-([&restaurantClient](const crow::request& req, int id)
+.methods(crow::HTTPMethod::GET)
+([&restaurantClient](const crow::request&, int id)
 {
-    switch (req.method)
-    {
-        case crow::HTTPMethod::GET:
-            return downstreamResponse(restaurantClient.getRestaurantById(id));
-
-        case crow::HTTPMethod::PUT:
-            return downstreamResponse(restaurantClient.updateRestaurant(id, req.body));
-
-        case crow::HTTPMethod::DELETE:
-            return downstreamResponse(restaurantClient.deleteRestaurant(id));
-
-        default:
-            return crow::response(405);
-    }
+    return downstreamResponse(restaurantClient.getRestaurantById(id));
 });
+
+CROW_ROUTE(app, "/partner/restaurants")
+.methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
+([&restaurantClient](const crow::request& req)
+{
+    if (!authenticatedUserId(req)) return unauthorized();
+    const std::string auth=req.get_header_value("Authorization");
+    return downstreamResponse(req.method==crow::HTTPMethod::GET
+        ? restaurantClient.partnerGet("/partner/restaurants",auth)
+        : restaurantClient.partnerPost("/partner/restaurants",req.body,auth));
+});
+
+CROW_ROUTE(app, "/partner/restaurants/<int>")
+.methods(crow::HTTPMethod::GET, crow::HTTPMethod::PUT)
+([&restaurantClient](const crow::request& req,int id)
+{
+    if (!authenticatedUserId(req)) return unauthorized();
+    const std::string path="/partner/restaurants/"+std::to_string(id);
+    const std::string auth=req.get_header_value("Authorization");
+    return downstreamResponse(req.method==crow::HTTPMethod::GET
+        ? restaurantClient.partnerGet(path,auth)
+        : restaurantClient.partnerPut(path,req.body,auth));
+});
+
+CROW_ROUTE(app, "/partner/restaurants/<int>/submit")
+.methods(crow::HTTPMethod::POST)
+([&restaurantClient](const crow::request& req,int id)
+{
+    if (!authenticatedUserId(req)) return unauthorized();
+    return downstreamResponse(restaurantClient.partnerPost(
+        "/partner/restaurants/"+std::to_string(id)+"/submit",req.body,
+        req.get_header_value("Authorization")));
+});
+
+CROW_ROUTE(app, "/partner/restaurants/<int>/menu-items")
+.methods(crow::HTTPMethod::GET, crow::HTTPMethod::POST)
+([&restaurantClient](const crow::request& req,int id)
+{
+    if (!authenticatedUserId(req)) return unauthorized();
+    const std::string path="/partner/restaurants/"+std::to_string(id)+"/menu-items";
+    const std::string auth=req.get_header_value("Authorization");
+    return downstreamResponse(req.method==crow::HTTPMethod::GET
+        ? restaurantClient.partnerGet(path,auth)
+        : restaurantClient.partnerPost(path,req.body,auth));
+});
+
+CROW_ROUTE(app, "/partner/restaurants/<int>/menu-items/<int>")
+.methods(crow::HTTPMethod::PUT, crow::HTTPMethod::DELETE)
+([&restaurantClient](const crow::request& req,int restaurantId,int itemId)
+{
+    if (!authenticatedUserId(req)) return unauthorized();
+    const std::string path="/partner/restaurants/"+std::to_string(restaurantId)+
+        "/menu-items/"+std::to_string(itemId);
+    const std::string auth=req.get_header_value("Authorization");
+    return downstreamResponse(req.method==crow::HTTPMethod::PUT
+        ? restaurantClient.partnerPut(path,req.body,auth)
+        : restaurantClient.partnerDelete(path,auth));
+});
+
+CROW_ROUTE(app, "/partner/restaurants/<int>/audit")
+.methods(crow::HTTPMethod::GET)
+([&restaurantClient](const crow::request& req,int id)
+{
+    if (!authenticatedUserId(req)) return unauthorized();
+    return downstreamResponse(restaurantClient.partnerGet(
+        "/partner/restaurants/"+std::to_string(id)+"/audit",
+        req.get_header_value("Authorization")));
+});
+
     CROW_ROUTE(app, "/health")
     ([]()
     {

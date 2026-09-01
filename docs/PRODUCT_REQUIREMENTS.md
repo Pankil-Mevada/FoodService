@@ -48,8 +48,8 @@ The first commercial milestone is a complete single-city ordering journey:
 - no menu, category, item, variation, or add-on data model
 - current menu is a frontend test fixture; prices are not yet sourced from an authoritative server-side catalogue
 - no cart or itemized order lines
-- passwords are stored/compared/logged as plaintext; hashing utility is incomplete
-- no roles or authorization rules for customer, restaurant, delivery, or admin
+- passwords use Argon2id; email ownership verification, recovery and session revocation remain
+- restaurant membership/roles exist; delivery/admin authorization remains incomplete
 - public restaurant/order mutation routes are insufficiently protected
 - API Gateway uses bounded synchronous service calls and preserves downstream
   status codes; API versioning, correlation IDs, shared errors, retries, and
@@ -60,7 +60,7 @@ The first commercial milestone is a complete single-city ordering journey:
 - OpenStreetMap photo coverage is sparse; production needs licensed photo ingestion and owner moderation
 - driver assignment remains manual and the shared local driver token is not production driver identity
 - no tax, fee, coupon, or authoritative pricing engine
-- no restaurant, delivery-partner, or administrator web portal
+- restaurant partner onboarding/menu portal exists; operational restaurant orders, delivery and admin portals remain
 - no production payment-provider integration
 - profile photo, phone, favourites, and UPI ID are browser-local test data rather than synchronized account records
 - no production database, deployment, monitoring, backup, or disaster recovery
@@ -409,7 +409,7 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 ### Security — P0
 
 - OWASP-aligned input validation and output encoding
-- password hashing with Argon2 using reviewed parameters (required; not yet implemented)
+- password hashing with Argon2id using reviewed parameters (implemented; parameter review and migration monitoring continue)
 - short-lived access tokens and rotated refresh tokens
 - secrets from a managed secret store; none in source or frontend code
 - least-privilege service and database credentials
@@ -743,7 +743,7 @@ order after its prerequisites and product/provider decisions are resolved.
 |---|---|---|---|
 | Customer responsive web app | 🟡 Partial | Discovery, auth, addresses/map, fixture menu/cart, payment, orders, profile, and tracking exist; restaurant detail, authoritative cart, support, and full offline/error coverage remain. | Phase 1 |
 | Accessibility foundation | 🟡 Partial | Labels, dialogs, focusable controls, status regions, responsive layouts, and reduced clutter exist; no WCAG audit or cross-browser automation has been completed. | Phases 1–2 |
-| Restaurant portal | ⬜ Not started | No secure staff UI or operational order/menu workflow exists. | Phase 1 |
+| Restaurant portal | 🟡 Partial | Authenticated partner UI, restaurant membership, private draft/menu CRUD, submission and audit exist; orders, team, compliance and admin review remain. | Phase 1 |
 | Admin portal | ⬜ Not started | No admin search, approval, refund, audit, or configuration UI exists. | Phase 1 basic; Phase 2 complete |
 | Delivery portal/app | 🟡 Partial | Live GPS sharing form exists; task list, navigation handoff, verification, and earnings do not. | Phase 3 |
 
@@ -753,7 +753,7 @@ order after its prerequisites and product/provider decisions are resolved.
 |---|---|---|---|
 | API Gateway and domain microservices | ✅ Done | User, restaurant, order, payment, notification services and a gateway communicate over HTTP. | Now / completed |
 | `/api/v1`, status/error consistency, correlation IDs | 🟡 Partial | Gateway preserves downstream status, maps transport failures, and now returns/forwards/logs a safe correlation ID; routes remain unversioned and shared error codes plus downstream structured tracing are absent. | Phase 0 |
-| Authentication and server-derived customer identity | 🟡 Partial | Customer identity is server-derived on critical flows; role/restaurant/admin policies are absent. | Phase 0 |
+| Authentication and server-derived customer identity | 🟡 Partial | Customer identity and restaurant membership/role are server-derived; email verification, session revocation and admin authorization remain. | Phase 0 |
 | Validation, pagination, filtering, sorting | 🟡 Partial | Important fields have targeted validation, but there is no shared field-error framework or bounded collections. | Phase 0 |
 | Idempotency | 🟡 Partial | Payment creation is idempotent; orders, refunds, and raw webhook events are not fully covered. | Phase 0 |
 | Rate limiting and OpenAPI | ⬜ Not started | No limiter or generated/validated API contract exists. | Phase 0 |
@@ -767,11 +767,11 @@ order after its prerequisites and product/provider decisions are resolved.
 | Requirement area | Status | Why | When |
 |---|---|---|---|
 | Users and customer addresses | 🟡 Partial | Basic users and JWT-owned addresses exist; roles, sessions, verification, secure profiles, and retention do not. | Phases 0–1 |
-| Restaurant and service zones | 🟡 Partial | Restaurant/outlet-like record, radius/polygon, and pricing inputs exist; brands, staff, hours, documents, and availability do not. | Phase 1 |
-| Catalogue and carts | ⬜ Not started | All authoritative catalogue/cart entities are absent. | Phase 1 |
+| Restaurant and service zones | 🟡 Partial | Restaurant profiles, partner membership, lifecycle/version, radius/polygon, and pricing inputs exist; brands, hours, documents and operational availability remain. | Phase 1 |
+| Catalogue and carts | 🟡 Partial | Restaurant-scoped menu item persistence exists; categories, variants, add-ons, authoritative customer cart/pricing and stock remain. | Phase 1 |
 | Orders and payments | 🟡 Partial | Core records and price/address snapshots exist; line items, full history, attempts/events/refunds, and minor-unit currency do not. | Phases 1–2 |
 | Notifications and delivery attempts | 🟡 Partial | Notifications and latest driver fix persist; channel attempts and full delivery-task/history models do not. | Phases 2–3 |
-| Audit events | ⬜ Not started | No immutable audit entity exists. | Phase 0 |
+| Audit events | 🟡 Partial | Restaurant partner success events persist atomically and are tenant-scoped; denied events, admin/customer audit, outbox and retention controls remain. | Phase 0–2 |
 | PostgreSQL, constraints, encryption, retention, backups | ⬜ Not started | SQLite is appropriate only for local development; production data governance/operations are absent. | Phase 2 before pilot |
 | UTC timestamps and integer money | 🟡 Partial | Some epochs/timestamps exist, but timezone treatment is inconsistent and money remains floating point. | Phase 1 migration |
 
@@ -779,7 +779,7 @@ order after its prerequisites and product/provider decisions are resolved.
 
 | Requirement area | Status | Why | When |
 |---|---|---|---|
-| Security | 🟡 Partial | JWT checks, output escaping, payment signatures, internal/driver secrets, and no raw-card storage exist; plaintext password handling, missing RBAC, permissive CORS, secret management, rate limits, and audit gaps block production. | Immediate Phase 0 |
+| Security | 🟡 Partial | Argon2id, strengthened JWT checks, output escaping, payment signatures, partner RBAC, configured CORS and no raw-card storage exist; verification/recovery, admin RBAC, rate limits, secret operations and audit gaps block production. | Immediate Phase 0 |
 | Reliability | 🟡 Partial | Idempotent payment flow, database busy handling, polling fallback, bounded 2-second connect/10-second gateway calls, status propagation, and explicit failures exist; circuit breakers, reconciliation, queues, backups, rollback, and incident procedures do not. | Phases 0–2 |
 | Performance targets | 🟡 Partial | Concurrency/load harnesses and bounded payment fetching exist; current claims are not production capacity evidence and no repeatable environment measures every target. | Phase 0 baseline; Phase 2 pilot verification |
 | Accessibility/browser compatibility | 🟡 Partial | Responsive and semantic foundations exist; WCAG 2.2 AA audit, reduced-motion/high-contrast coverage, and browser matrix tests remain. | Phases 1–2 |
@@ -789,9 +789,9 @@ order after its prerequisites and product/provider decisions are resolved.
 
 | Requirement | Status | Why | When |
 |---|---|---|---|
-| Focused unit tests | 🟡 Partial | Delivery quote, payment/order transition, and gateway HTTP status/failure mapping tests exist; coverage is not comprehensive. | Phase 0, continuous |
+| Focused unit tests | 🟡 Partial | Delivery, payment/order, gateway transport, account security, partner policy and partner repository tests exist; coverage is not comprehensive. | Phase 0, continuous |
 | API/E2E tests | 🟡 Partial | Dependency-free local E2E covers major auth/order/payment/tracking/address failures and successes; it is not a complete contract suite. | Phase 0, continuous |
-| Repository/migration tests | ⬜ Not started | Isolated database fixtures and versioned migrations do not exist. | Phase 0 |
+| Repository/migration tests | 🟡 Partial | Partner repository has an isolated SQLite fixture; versioned migrations and broader repositories remain. | Phase 0 |
 | Browser tests | ⬜ Not started | Critical customer/operator paths are not automated in a browser runner. | Phase 1 |
 | Load tests | 🟡 Partial | A 1,000-client development harness exists; results depend on services/environment and are not a production capacity guarantee. | Phase 0 baseline; Phase 2 sizing |
 | Security tests | 🟡 Partial | JWT, forged signature, unsigned webhook, and tampering cases exist; OWASP/RBAC/rate-limit scanning is incomplete. | Phase 0 |
@@ -813,15 +813,15 @@ order after its prerequisites and product/provider decisions are resolved.
 |---:|---|---|---|
 | 1 | Verified customer signs in without manual user ID | 🟡 Partial | No manual ID and JWT identity work; email/phone verification and secure password/session lifecycle remain for Phase 0–1. |
 | 2 | Valid address and serviceable restaurants | 🟡 Partial | Structured address and server enforcement work; card browsing needs authoritative polygon/hours evaluation in Phase 1. |
-| 3 | Available itemized restaurant menu | ⬜ Not started | Phase 1 catalogue. |
+| 3 | Available itemized restaurant menu | 🟡 Partial | Partner item storage exists; customer ordering still needs authoritative categories/options/availability/pricing integration. Phase 1. |
 | 4 | Cart with server-calculated breakdown | ⬜ Not started | Phase 1 cart/pricing engine. |
 | 5 | Exactly one order/payment attempt | 🟡 Partial | Payment is idempotent; order creation is not yet idempotent. Phase 0. |
 | 6 | Sandbox success/failure/cancel/timeout | 🟡 Partial | Success/failure/cancel work; provider timeout/reconciliation remains for Phase 2. |
 | 7 | Consistent live payment/order status | ✅ Done | Authenticated state mapping plus UI status refresh are implemented locally. |
-| 8 | Restaurant preparation workflow | ⬜ Not started | Phase 1 restaurant portal/state workflow. |
+| 8 | Restaurant preparation workflow | 🟡 Partial | Secure partner portal and menu onboarding exist; paid order feed and accept/prepare/ready workflow remain. Phase 1. |
 | 9 | Complete timeline and notifications | 🟡 Partial | Current states/notifications exist; complete append-only history and channels remain for Phases 1–2. |
-| 10 | Admin transaction audit | ⬜ Not started | Phase 1–2 admin/audit portal. |
-| 11 | Cross-user/restaurant authorization | 🟡 Partial | Customer ownership works on core flows; restaurant/admin RBAC remains Phase 0. |
+| 10 | Admin transaction audit | 🟡 Partial | Partner restaurant success audit exists; admin portal, denied events and full transaction audit remain. Phase 1–2. |
+| 11 | Cross-user/restaurant authorization | 🟡 Partial | Customer ownership and restaurant membership/role isolation work on implemented routes; admin RBAC remains Phase 0. |
 | 12 | Critical CI tests without charges | ✅ Done | Clean GitHub Actions builds and tests the service flow using only test/dummy credentials. |
 | 13 | Logs, metrics, backups, recovery | ⬜ Not started | Phase 2 operational readiness. |
 
