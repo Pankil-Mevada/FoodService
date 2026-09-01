@@ -1,0 +1,80 @@
+{
+  "documentType": "codex-security.hardening-analysis",
+  "schemaVersion": "1.0",
+  "analysisId": "hardening_20260901_partner_portal",
+  "sourceEvidence": {
+    "kind": "source_collection",
+    "label": "FoodService partner authorization boundary at develop ee225bd",
+    "collectionSha256": "unsealed-working-tree-source-review",
+    "artifactCount": 4,
+    "sourceDrift": "present"
+  },
+  "assessment": {
+    "outcome": "opportunities_identified",
+    "summary": "Move partner authorization from convention to service-owned resource membership checks."
+  },
+  "constraints": {
+    "profile": "balanced",
+    "changeHorizons": ["incremental", "medium_term"],
+    "nonNegotiables": ["Customer reads remain available", "Partner routes cannot self-approve"],
+    "assumptions": ["No measured production load or selected compliance providers were supplied."]
+  },
+  "opportunities": [{
+    "opportunityId": "partner-resource-authorization",
+    "title": "Own partner authorization at the resource boundary",
+    "summary": "Authorize final restaurant identity against service-owned membership.",
+    "diagnosis": "Restaurant mutation currently lacks authenticated actor and ownership state.",
+    "evidence": [
+      {"claimType":"observed","sourceKind":"source","evidenceId":"E1","path":"services/RestaurantService/src/main.cpp","claim":"Restaurant mutations do not authenticate an actor."},
+      {"claimType":"observed","sourceKind":"source","evidenceId":"E4","path":"common/src/Database.cpp","claim":"Restaurant persistence has no ownership or membership data."},
+      {"claimType":"inferred","sourceKind":"source","evidenceId":"E3","path":"services/ApiGateway/src/main.cpp","claim":"Gateway and service can drift because no component owns the full resource policy."}
+    ],
+    "desiredInvariants": [
+      "Every mutation authorizes the final restaurant ID.",
+      "Partner routes cannot approve or clear suspension.",
+      "Mutation and audit/outbox event commit together."
+    ],
+    "proposalPath": "proposals/partner-resource-authorization.md",
+    "options": [
+      {
+        "optionId": "gateway-guards",
+        "title": "Gateway guards",
+        "kind": "baseline",
+        "summary": "Authenticate and authorize only at the gateway.",
+        "diagramPaths": {"before":"diagrams/partner-resource-authorization-before.mmd","after":"diagrams/partner-resource-authorization-gateway-guards-after.mmd"},
+        "evidenceCoverage": [{"evidenceId":"E1","effect":"mitigates","tacticalFixRequired":true,"rationale":"Public calls narrow, but direct service bypass remains."}],
+        "tradeoffs": [
+          {"dimension":"security","direction":"improves","confidence":"medium","basis":"source-derived","assessment":"Internet path is guarded; direct bypass remains.","validationPlan":"Call gateway and service directly with the authorization matrix."},
+          {"dimension":"performance","direction":"regresses","confidence":"low","basis":"hypothetical","assessment":"Adds one membership lookup.","validationPlan":"Compare p95 writes under target load."},
+          {"dimension":"memory","direction":"neutral","confidence":"medium","basis":"source-derived","assessment":"No material retained state required.","validationPlan":"Compare gateway RSS."},
+          {"dimension":"reliability","direction":"regresses","confidence":"low","basis":"hypothetical","assessment":"Membership lookup adds a dependency.","validationPlan":"Inject lookup failures."},
+          {"dimension":"operability","direction":"regresses","confidence":"medium","basis":"source-derived","assessment":"Business policy lives in gateway.","validationPlan":"Review route coverage each release."},
+          {"dimension":"migration","direction":"improves","confidence":"high","basis":"source-derived","assessment":"Fast containment.","validationPlan":"Canary authenticated routes."}
+        ],
+        "residualRisks":["Direct service bypass and policy drift."],
+        "implementationReadiness":{"affectedComponents":["services/ApiGateway"],"workPackages":["Add gateway checks."],"acceptanceCriteria":["Unauthenticated public writes fail."],"migrationNotes":["Temporary control."],"rollback":"Disable new partner writes; do not reopen public writes."}
+      },
+      {
+        "optionId": "service-owned-policy",
+        "title": "Service-owned membership policy",
+        "kind": "structural",
+        "summary": "Restaurant service authorizes membership and final resource.",
+        "diagramPaths": {"before":"diagrams/partner-resource-authorization-before.mmd","after":"diagrams/partner-resource-authorization-service-policy-after.mmd"},
+        "evidenceCoverage": [{"evidenceId":"E1","effect":"addresses","tacticalFixRequired":true,"rationale":"The resource service rejects unauthorized writes; legacy routes still require removal."}],
+        "tradeoffs": [
+          {"dimension":"security","direction":"improves","confidence":"high","basis":"source-derived","assessment":"Final resource is authorized at the owner boundary.","validationPlan":"Run role, tenant and direct-service tests."},
+          {"dimension":"performance","direction":"regresses","confidence":"low","basis":"hypothetical","assessment":"Indexed membership query adds work.","validationPlan":"Benchmark p95 and DB wait."},
+          {"dimension":"memory","direction":"neutral","confidence":"medium","basis":"source-derived","assessment":"Policy is stateless absent caching.","validationPlan":"Compare service RSS."},
+          {"dimension":"reliability","direction":"improves","confidence":"medium","basis":"source-derived","assessment":"Transactional audit and outbox improve recovery.","validationPlan":"Kill process around commit and replay outbox."},
+          {"dimension":"operability","direction":"regresses","confidence":"medium","basis":"source-derived","assessment":"Migrations and audit monitoring are added.","validationPlan":"Rehearse deploy, alert and restore."},
+          {"dimension":"migration","direction":"regresses","confidence":"high","basis":"source-derived","assessment":"Existing restaurants require owner backfill.","validationPlan":"Dry-run and reconcile migration."}
+        ],
+        "residualRisks":["Compromised owner accounts, upload abuse and malicious administrators."],
+        "implementationReadiness":{"affectedComponents":["common","services/RestaurantService","services/ApiGateway","frontend"],"workPackages":["Policy","schema","routes","portal","migration"],"acceptanceCriteria":["No cross-restaurant write succeeds."],"migrationNotes":["Dual-read and reviewed owner backfill."],"rollback":"Disable partner writes while preserving data and audit history."}
+      }
+    ],
+    "recommendedOptionId": "service-owned-policy",
+    "recommendation": "Use service-owned policy with gateway defense in depth."
+  }],
+  "openQuestions": ["Identity/KYC providers", "Owner backfill", "Admin dual-control", "Peak workload"]
+}

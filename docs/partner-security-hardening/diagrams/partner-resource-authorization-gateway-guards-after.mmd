@@ -1,0 +1,5 @@
+flowchart LR
+  P[Partner] -->|JWT| G[Gateway authorization]
+  G --> R[Restaurant service]
+  R --> D[(Restaurant DB)]
+  X[Direct client] -. bypass risk .-> R

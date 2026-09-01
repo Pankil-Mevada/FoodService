@@ -1,0 +1,5 @@
+flowchart LR
+  A[Internet client] --> G[API Gateway]
+  G -->|public restaurant mutation| R[Restaurant service]
+  R --> D[(Restaurant DB)]
+  X[Direct network client] --> R

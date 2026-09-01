@@ -1,0 +1,6 @@
+flowchart LR
+  P[Partner] -->|JWT| G[API Gateway]
+  G --> R[Restaurant service policy]
+  R --> M[(Membership and restaurant DB)]
+  R --> A[(Audit outbox)]
+  X[Direct client] -->|must authenticate and authorize| R
