@@ -6,13 +6,15 @@ Status: real frontend/backend foundation, 2026-09-01.
 
 Restaurant owners and authorized staff can onboard a business, maintain its
 profile and menu, submit it for independent review, and inspect server activity.
-Customer and partner experiences share identity but never share authorization.
+Customer and partner experiences share the central User Service identity but
+never share restaurant authorization or browser-session storage. A partner can
+register and sign in without leaving `partner.html`.
 
 ## Release scope and status
 
 | Capability | Status | Acceptance criteria / remaining work |
 | --- | --- | --- |
-| Responsive partner workspace | ✅ Implemented | Separate partner page, authenticated state, responsive navigation and recoverable server feedback. |
+| Responsive partner workspace | ✅ Implemented | Separate partner page, in-portal registration/login, isolated partner browser session, responsive navigation and recoverable server feedback. |
 | Restaurant draft and menu editor | ✅ Core implemented | Restaurant Service persists private drafts/menu items; optimistic versions return 409 on stale writes. |
 | Owner/manager/staff policy | ✅ Implemented foundation | Central policy denies unknown roles; every implemented resource resolves ACTIVE membership server-side. |
 | Secure ownership enforcement | ✅ Implemented for current routes | Gateway and Restaurant Service verify JWT; Restaurant Service checks user, restaurant and role. Browser selection is never authority. |

@@ -1,6 +1,6 @@
 # Restaurant Partner Portal Sequences
 
-## Login and membership resolution
+## Registration, login and membership resolution
 
 ~~~mermaid
 sequenceDiagram
@@ -11,7 +11,14 @@ sequenceDiagram
  participant RS as Restaurant Service
  participant UDB as foodservice.db
  participant RDB as restaurant.db
- Partner->>UI: Email and password
+ alt New partner identity
+  Partner->>UI: Name, email and strong password
+  UI->>GW: POST /register
+  GW->>US: Create central identity
+  US->>UDB: Store user and Argon2id password hash
+  US-->>UI: Account created
+ end
+ Partner->>UI: Email and password on partner.html
  UI->>GW: POST /login
  GW->>US: Forward credentials
  US->>UDB: Verify Argon2id password hash

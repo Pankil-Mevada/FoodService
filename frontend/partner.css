@@ -4,6 +4,7 @@ body{margin:0;background:#edf2e8;color:var(--ink);font:15px/1.5 Inter,system-ui,
 header{height:76px;padding:0 4vw;display:flex;align-items:center;justify-content:space-between;background:var(--paper);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;font:bold 25px Georgia;color:var(--ink);text-decoration:none}.brand-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--green);color:var(--lime)}
 .header-actions{display:flex;gap:18px;align-items:center;color:var(--muted)}
+.customer-link{color:var(--green);font-weight:750;text-decoration:none}.customer-link:hover{text-decoration:underline}
 button{border:1px solid var(--line);border-radius:999px;background:white;padding:11px 18px;font-weight:750;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}
 main{display:grid;grid-template-columns:minmax(300px,32%) 1fr;min-height:calc(100vh - 76px)}
 aside{background:linear-gradient(145deg,var(--green),var(--deep));color:white;padding:58px 5vw}
@@ -13,6 +14,7 @@ nav{display:grid;gap:8px}nav button{border:0;border-radius:12px;background:trans
 aside small{display:block;margin-top:42px;color:#b8d0c7}.workspace{padding:52px clamp(24px,6vw,90px);background:var(--paper)}
 #notice:not(:empty){padding:14px 16px;margin-bottom:20px;border-radius:12px;background:#fff1d6;color:var(--warning)}#notice.error{background:#fde5e2;color:var(--danger)}#notice.success{background:#e6f5e9;color:var(--green)}
 .auth-card,.card{background:white;border:1px solid var(--line);border-radius:20px;padding:24px}.auth-card{display:grid;gap:16px;max-width:560px;margin-bottom:20px}
+.auth-tabs{display:flex;gap:8px;max-width:560px;margin:22px 0 10px;padding:5px;border:1px solid var(--line);border-radius:999px;background:#edf2e8}.auth-tabs button{flex:1;border:0;background:transparent}.auth-tabs button.active{background:var(--green);color:white;box-shadow:0 5px 14px #0b443326}.auth-footnote{max-width:560px;color:var(--muted);font-size:13px}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metrics article{background:white;border:1px solid var(--line);border-radius:20px;padding:24px}.metrics b{display:block;font-size:25px}.metrics span{color:var(--muted)}
 .actions-card{display:flex;align-items:center;gap:14px;margin-top:20px}.actions-card div{margin-right:auto}.actions-card h3,.actions-card p{margin:0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.wide{grid-column:1/-1}label{font-weight:750}
@@ -22,3 +24,4 @@ input,select{width:100%;display:block;margin-top:7px;padding:14px;border:1px sol
 .menu-item,.audit-row{display:flex;justify-content:space-between;align-items:center;padding:18px;border-bottom:1px solid var(--line);gap:20px}.menu-item small,.audit-row span{color:var(--muted)}.menu-actions{display:flex;align-items:center;gap:10px}.danger{color:var(--danger)}
 .empty{margin-top:18px;padding:28px;border:1px dashed #c6d0c5;border-radius:18px;color:var(--muted)}
 @media(max-width:900px){main{grid-template-columns:1fr}aside,.workspace{padding:32px 20px}.metrics,.grid,.menu-form{grid-template-columns:1fr}.wide{grid-column:auto}.actions-card{align-items:stretch;flex-direction:column}.actions-card div{margin:0}nav{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){header{padding:0 18px}.header-actions{gap:10px}.header-actions #identity{display:none}.auth-tabs{border-radius:18px;flex-direction:column}.auth-tabs button{border-radius:14px}}

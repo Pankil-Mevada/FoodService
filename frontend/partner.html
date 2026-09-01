@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Plated Partner</title>
-  <link rel="stylesheet" href="partner.css?v=20260901-backend">
+  <link rel="stylesheet" href="partner.css?v=20260901-auth">
 </head>
 <body>
 <header>
-  <a href="index.html" class="brand"><span class="brand-mark">P</span><span>plated.partner</span></a>
-  <div class="header-actions"><span id="identity">Not signed in</span><button id="signout" hidden>Sign out</button></div>
+  <a href="partner.html" class="brand"><span class="brand-mark">P</span><span>plated.partner</span></a>
+  <div class="header-actions"><a class="customer-link" href="index.html">Customer site</a><span id="identity">Not signed in</span><button id="signout" hidden>Sign out</button></div>
 </header>
 <main>
   <aside>
@@ -31,15 +31,20 @@
   <section class="workspace">
     <div id="notice" role="status" aria-live="polite"></div>
     <section id="auth-panel">
-      <p class="eyebrow">PARTNER SIGN IN</p>
-      <h2>Use your FoodService identity.</h2>
-      <p>The account is stored by User Service. Restaurant ownership is stored separately by Restaurant Service.</p>
-      <form id="login-form" class="auth-card">
+      <p class="eyebrow">PARTNER ACCOUNT</p>
+      <h2 id="auth-title">Sign in to your restaurant workspace.</h2>
+      <p id="auth-description">Your partner session stays in this portal. Identity is verified by User Service; restaurant access is enforced separately by Restaurant Service.</p>
+      <div class="auth-tabs" role="tablist" aria-label="Restaurant partner account">
+        <button type="button" class="active" data-auth-mode="login" role="tab" aria-selected="true">Partner sign in</button>
+        <button type="button" data-auth-mode="register" role="tab" aria-selected="false">Create partner account</button>
+      </div>
+      <form id="partner-auth-form" class="auth-card">
+        <label class="register-field" hidden>Full name<input name="name" autocomplete="name" minlength="3" maxlength="60"></label>
         <label>Email<input name="email" type="email" autocomplete="username" required></label>
-        <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required><small class="register-field" hidden>Use 10+ characters with uppercase, lowercase, a number, and a symbol.</small></label>
         <button class="primary">Sign in securely</button>
       </form>
-      <a href="index.html">Create an account on the customer site</a>
+      <p class="auth-footnote">This creates a FoodService identity for restaurant onboarding; it does not create or expose a customer order.</p>
     </section>
     <div id="app-shell" hidden>
       <section data-panel="overview">
@@ -93,6 +98,6 @@
     </div>
   </section>
 </main>
-<script src="partner.js?v=20260901-backend"></script>
+<script src="partner.js?v=20260901-auth"></script>
 </body>
 </html>

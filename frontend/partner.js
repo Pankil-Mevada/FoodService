@@ -1,6 +1,6 @@
 'use strict';
 const config={apiUrl:localStorage.getItem('plated_api_url')||'http://localhost:8085'};
-const state={token:localStorage.getItem('plated_token')||'',identity:null,restaurants:[],selected:null,items:[],audit:[]};
+const state={token:localStorage.getItem('plated_partner_token')||'',authMode:'login',identity:null,restaurants:[],selected:null,items:[],audit:[]};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -22,7 +22,7 @@ async function authenticate(){
  try{
   state.identity=await request('/me');$('#identity').textContent=state.identity.email||state.identity.name||'Partner';
   showAuth(false);await loadRestaurants();
- }catch(error){state.token='';localStorage.removeItem('plated_token');showAuth(true);notice(error.message,'error')}
+ }catch(error){state.token='';localStorage.removeItem('plated_partner_token');showAuth(true);notice(error.message,'error')}
 }
 async function loadRestaurants(){
  state.restaurants=await request('/partner/restaurants');const picker=$('#restaurant-select');picker.disabled=false;
@@ -60,11 +60,26 @@ async function refreshSelected(){
  if(!activeId())return;const updated=await request('/partner/restaurants/'+activeId());state.restaurants=state.restaurants.map(r=>r.id===updated.id?updated:r);await selectRestaurant(updated);
 }
 
-$('#login-form').onsubmit=async event=>{
- event.preventDefault();const button=$('button',event.currentTarget),body=Object.fromEntries(new FormData(event.currentTarget));button.disabled=true;
- try{const result=await request('/login',{method:'POST',body:JSON.stringify(body)});if(!result.token)throw new Error('Login did not return a token');state.token=result.token;localStorage.setItem('plated_token',result.token);notice('Signed in. Loading your restaurants…','success');await authenticate()}catch(error){notice(error.message,'error')}finally{button.disabled=false}
+function setAuthMode(mode){
+ state.authMode=mode;const register=mode==='register',form=$('#partner-auth-form');
+ $$('[data-auth-mode]').forEach(button=>{const active=button.dataset.authMode===mode;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active))});
+ $$('.register-field').forEach(element=>element.hidden=!register);form.elements.name.required=register;form.elements.password.autocomplete=register?'new-password':'current-password';
+ $('#auth-title').textContent=register?'Create your restaurant partner account.':'Sign in to your restaurant workspace.';
+ $('#auth-description').textContent=register?'Create the identity used to own and manage restaurants. You will stay on the partner portal.':'Your partner session stays in this portal. Identity is verified by User Service; restaurant access is enforced separately by Restaurant Service.';
+ $('button.primary',form).textContent=register?'Create partner account':'Sign in securely';notice('');
+}
+$$('[data-auth-mode]').forEach(button=>button.onclick=()=>setAuthMode(button.dataset.authMode));
+$('#partner-auth-form').onsubmit=async event=>{
+ event.preventDefault();const form=event.currentTarget,button=$('button.primary',form),body=Object.fromEntries(new FormData(form));body.email=String(body.email||'').trim().toLowerCase();
+ if(state.authMode==='login')delete body.name;else if(!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,128}$/.test(String(body.password||''))){notice('Use 10+ characters with uppercase, lowercase, a number, and a symbol','error');return}
+ button.disabled=true;
+ try{
+  if(state.authMode==='register'){await request('/register',{method:'POST',body:JSON.stringify(body)});notice('Partner account created. Signing you in…','success')}
+  const credentials={email:body.email,password:body.password},result=await request('/login',{method:'POST',body:JSON.stringify(credentials)});
+  if(!result.token)throw new Error('Login did not return a token');state.token=result.token;localStorage.setItem('plated_partner_token',result.token);form.reset();notice('Signed in. Loading your restaurants…','success');await authenticate();
+ }catch(error){notice(error.message,'error')}finally{button.disabled=false}
 };
-$('#signout').onclick=()=>{state.token='';localStorage.removeItem('plated_token');sessionStorage.removeItem('plated_partner_restaurant');state.selected=null;showAuth(true);$('#identity').textContent='Not signed in';notice('Signed out','success')};
+$('#signout').onclick=()=>{state.token='';localStorage.removeItem('plated_partner_token');sessionStorage.removeItem('plated_partner_restaurant');state.selected=null;showAuth(true);$('#identity').textContent='Not signed in';setAuthMode('login');notice('Signed out','success')};
 $('#restaurant-select').onchange=()=>selectRestaurant(state.restaurants.find(r=>r.id===Number($('#restaurant-select').value))||null);
 $('#new-restaurant').onclick=()=>{selectRestaurant(null);showPanel('restaurant');notice('Enter the restaurant details. Saving creates a private DRAFT.','success')};
 $$('[data-view]').forEach(button=>button.onclick=()=>showPanel(button.dataset.view));
@@ -95,4 +110,4 @@ $('#submit-review').onclick=async()=>{
  try{await request('/partner/restaurants/'+activeId()+'/submit',{method:'POST',body:JSON.stringify({version:state.selected.version}),headers:{'Idempotency-Key':crypto.randomUUID()}});notice('Submitted for independent review. It is still hidden from customers.','success');await refreshSelected()}catch(error){notice(error.message,'error')}
 };
 
-showAuth(true);authenticate();
+showAuth(true);setAuthMode('login');authenticate();

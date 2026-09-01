@@ -19,8 +19,13 @@ class PortalContractTests(unittest.TestCase):
         for panel in ("overview", "restaurant", "menu", "orders", "team", "audit"):
             self.assertIn(f'data-panel="{panel}"', html)
         self.assertIn("/login", script)
+        self.assertIn("/register", script)
         self.assertIn("/partner/restaurants", script)
         self.assertIn("Authorization", script)
+        self.assertIn("plated_partner_token", script)
+        self.assertNotIn("localStorage.getItem('plated_token')", script)
+        self.assertIn('data-auth-mode="register"', html)
+        self.assertNotIn("Create an account on the customer site", html)
         self.assertNotIn("plated_partner_draft_v1", script)
         self.assertNotIn("localhost:8081", html + script)
         self.assertNotIn("FoodServiceSecretKey", html + script)
