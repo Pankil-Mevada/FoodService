@@ -1,6 +1,6 @@
 'use strict';
 const config={apiUrl:localStorage.getItem('plated_api_url')||'http://localhost:8085'};
-const state={token:localStorage.getItem('plated_partner_token')||'',authMode:'login',identity:null,restaurants:[],selected:null,items:[],audit:[]};
+const state={token:localStorage.getItem('plated_partner_token')||'',authMode:'login',identity:null,restaurants:[],selected:null,items:[],orders:[],audit:[],pendingCommands:new Map()};
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -10,7 +10,7 @@ async function request(path,options={}){
  if(state.token)headers.Authorization='Bearer '+state.token;
  let response;try{response=await fetch(config.apiUrl+path,{...options,headers})}catch{throw new Error('Cannot reach the API gateway')}
  const text=await response.text();let data={};try{data=text?JSON.parse(text):{}}catch{data={message:text}}
- if(!response.ok)throw new Error(data.message||'Request failed ('+response.status+')');return data;
+ if(!response.ok){const error=new Error(data.message||'Request failed ('+response.status+')');error.status=response.status;throw error}return data;
 }
 function showAuth(show){$('#auth-panel').hidden=!show;$('#app-shell').hidden=show;$('#signout').hidden=show}
 function activeId(){return state.selected?.id||0}
@@ -32,7 +32,7 @@ async function loadRestaurants(){
 }
 async function selectRestaurant(restaurant){
  state.selected=restaurant;$('#restaurant-select').value=restaurant?.id||'';if(restaurant)sessionStorage.setItem('plated_partner_restaurant',restaurant.id);else sessionStorage.removeItem('plated_partner_restaurant');
- fillRestaurant();await Promise.all([loadItems(),loadAudit()]);renderSummary();
+ fillRestaurant();await Promise.all([loadItems(),loadOrders(),loadAudit()]);renderSummary();
 }
 function fillRestaurant(){
  const form=$('#restaurant-form'),r=state.selected||{};
@@ -51,6 +51,31 @@ function renderItems(){
  if(!state.items.length){box.innerHTML='<div class="empty">No menu items yet. Add one before submitting for review.</div>';return}
  box.innerHTML=state.items.map(item=>'<article class="menu-item"><div><b>'+esc(item.name)+'</b><small>'+esc(item.description||'No description')+' · '+esc(item.dietType)+'</small></div><div class="menu-actions"><b>₹'+(Number(item.pricePaise)/100).toFixed(2)+'</b><button class="danger remove-item" data-id="'+item.id+'">Remove</button></div></article>').join('');
  $$('.remove-item').forEach(button=>button.onclick=()=>removeItem(Number(button.dataset.id)));
+}
+function nextOrderAction(order){
+ const actions={NEW:['ACCEPTED','Accept order'],ACCEPTED:['PREPARING','Start preparing'],PREPARING:['READY_FOR_PICKUP','Mark ready'],READY_FOR_PICKUP:['HANDED_OFF','Confirm handoff']};
+ return actions[order.restaurantStatus]||null;
+}
+async function loadOrders(){
+ const box=$('#partner-orders');
+ if(!state.selected){state.orders=[];box.innerHTML='<div class="empty">Choose or create a restaurant to load its paid orders.</div>';return}
+ box.innerHTML='<div class="empty">Loading paid orders…</div>';
+ try{state.orders=await request('/partner/restaurants/'+activeId()+'/orders');renderOrders()}
+ catch(error){state.orders=[];box.innerHTML='<div class="empty error-state"><b>Could not load orders</b><span>'+esc(error.message)+'</span><button type="button" id="retry-orders">Retry</button></div>';$('#retry-orders').onclick=loadOrders}
+}
+function renderOrders(){
+ const box=$('#partner-orders');
+ if(!state.orders.length){box.innerHTML='<div class="empty"><b>No paid orders waiting</b><span>New orders appear after payment is verified.</span></div>';return}
+ box.innerHTML=state.orders.map(order=>{const action=nextOrderAction(order),handoffBlocked=action&&action[0]==='HANDED_OFF'&&!order.driverAssigned;return '<article class="partner-order '+(order.restaurantStatus==='NEW'?'new-order':'')+'"><div class="order-top"><div><span class="order-number">ORDER #'+order.id+'</span><h3>'+esc(order.itemSummary||'Order items unavailable')+'</h3></div><span class="kitchen-status">'+esc(order.restaurantStatus.replaceAll('_',' '))+'</span></div><p class="delivery-address">Deliver to · '+esc(order.deliveryAddress||'Address unavailable')+'</p><div class="order-meta"><span><small>TOTAL</small><b>₹'+Number(order.totalAmount).toFixed(2)+'</b></span><span><small>DELIVERY</small><b>'+esc(order.orderStatus.replaceAll('_',' '))+'</b></span><span><small>PREP TIME</small><b>'+Number(order.preparationMinutes)+' min</b></span></div>'+(action?'<div class="order-action">'+(action[0]==='ACCEPTED'?'<label>Preparation minutes<input class="prep-minutes" data-order-id="'+order.id+'" type="number" min="1" max="240" value="'+Number(order.preparationMinutes||20)+'"></label>':'')+'<button type="button" class="primary advance-order" data-order-id="'+order.id+'" '+(handoffBlocked?'disabled title="A driver must be assigned first"':'')+'>'+action[1]+'</button>'+(handoffBlocked?'<small>Waiting for driver assignment before handoff.</small>':'')+'</div>':'<p class="complete-state">Kitchen workflow complete · handed to delivery</p>')+'</article>'}).join('');
+ $$('.advance-order').forEach(button=>button.onclick=()=>advanceOrder(Number(button.dataset.orderId),button));
+}
+async function advanceOrder(orderId,button){
+ const order=state.orders.find(value=>value.id===orderId),action=order&&nextOrderAction(order);if(!action)return;
+ const commandKey=orderId+':'+action[0];let idempotencyKey=state.pendingCommands.get(commandKey);if(!idempotencyKey){idempotencyKey=crypto.randomUUID();state.pendingCommands.set(commandKey,idempotencyKey)}
+ const body={status:action[0],expectedVersion:order.version};if(action[0]==='ACCEPTED')body.preparationMinutes=Number($('.prep-minutes[data-order-id="'+orderId+'"]')?.value||20);
+ button.disabled=true;
+ try{await request('/partner/restaurants/'+activeId()+'/orders/'+orderId+'/status',{method:'POST',body:JSON.stringify(body),headers:{'Idempotency-Key':idempotencyKey}});state.pendingCommands.delete(commandKey);notice('Order #'+orderId+' moved to '+action[0].replaceAll('_',' ')+'.','success');await loadOrders()}
+ catch(error){if(error.status===409){state.pendingCommands.delete(commandKey);await loadOrders()}notice(error.message,'error');button.disabled=false}
 }
 async function loadAudit(){
  state.audit=state.selected?await request('/partner/restaurants/'+activeId()+'/audit'):[];const box=$('#audit-list');
@@ -81,6 +106,7 @@ $('#partner-auth-form').onsubmit=async event=>{
 };
 $('#signout').onclick=()=>{state.token='';localStorage.removeItem('plated_partner_token');sessionStorage.removeItem('plated_partner_restaurant');state.selected=null;showAuth(true);$('#identity').textContent='Not signed in';setAuthMode('login');notice('Signed out','success')};
 $('#restaurant-select').onchange=()=>selectRestaurant(state.restaurants.find(r=>r.id===Number($('#restaurant-select').value))||null);
+$('#refresh-orders').onclick=loadOrders;
 $('#new-restaurant').onclick=()=>{selectRestaurant(null);showPanel('restaurant');notice('Enter the restaurant details. Saving creates a private DRAFT.','success')};
 $$('[data-view]').forEach(button=>button.onclick=()=>showPanel(button.dataset.view));
 

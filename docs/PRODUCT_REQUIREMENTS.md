@@ -333,10 +333,10 @@ PAYMENT_FAILED, REJECTED, CANCELLED, REFUND_PENDING, REFUNDED
 
 ### Restaurant portal — P0
 
-- secure restaurant/staff login
-- incoming-order queue with audible/visual alert
-- accept/reject, preparation time, status updates, and item availability
-- menu and restaurant-profile management
+- ✅ secure restaurant/staff login foundation
+- 🟡 verified-payment incoming-order queue and visual NEW state; audible alert and SLA escalation remain
+- 🟡 accept, preparation time, sequential status updates, and guarded handoff work; reject/refund and availability-driven cancellation remain
+- 🟡 menu and restaurant-profile management core; categories/options/inventory/hours remain
 
 ### Admin portal — P0
 
@@ -743,7 +743,7 @@ order after its prerequisites and product/provider decisions are resolved.
 |---|---|---|---|
 | Customer responsive web app | 🟡 Partial | Discovery, auth, addresses/map, fixture menu/cart, payment, orders, profile, and tracking exist; restaurant detail, authoritative cart, support, and full offline/error coverage remain. | Phase 1 |
 | Accessibility foundation | 🟡 Partial | Labels, dialogs, focusable controls, status regions, responsive layouts, and reduced clutter exist; no WCAG audit or cross-browser automation has been completed. | Phases 1–2 |
-| Restaurant portal | 🟡 Partial | Authenticated partner UI, restaurant membership, private draft/menu CRUD, submission and audit exist; orders, team, compliance and admin review remain. | Phase 1 |
+| Restaurant portal | 🟡 Partial | Authenticated partner UI, membership, private draft/menu CRUD, paid-order queue, versioned preparation workflow, durable order-command idempotency and audit exist; reject/refund, alerts/SLA, team, compliance and admin review remain. | Phase 1 |
 | Admin portal | ⬜ Not started | No admin search, approval, refund, audit, or configuration UI exists. | Phase 1 basic; Phase 2 complete |
 | Delivery portal/app | 🟡 Partial | Live GPS sharing form exists; task list, navigation handoff, verification, and earnings do not. | Phase 3 |
 
@@ -818,7 +818,7 @@ order after its prerequisites and product/provider decisions are resolved.
 | 5 | Exactly one order/payment attempt | 🟡 Partial | Payment is idempotent; order creation is not yet idempotent. Phase 0. |
 | 6 | Sandbox success/failure/cancel/timeout | 🟡 Partial | Success/failure/cancel work; provider timeout/reconciliation remains for Phase 2. |
 | 7 | Consistent live payment/order status | ✅ Done | Authenticated state mapping plus UI status refresh are implemented locally. |
-| 8 | Restaurant preparation workflow | 🟡 Partial | Secure partner portal and menu onboarding exist; paid order feed and accept/prepare/ready workflow remain. Phase 1. |
+| 8 | Restaurant preparation workflow | 🟡 Partial | Paid restaurant-scoped queue and versioned accept/prepare/ready/handoff workflow now work with durable command deduplication; reject/refund, SLA alerts and availability handling remain. Phase 1. |
 | 9 | Complete timeline and notifications | 🟡 Partial | Current states/notifications exist; complete append-only history and channels remain for Phases 1–2. |
 | 10 | Admin transaction audit | 🟡 Partial | Partner restaurant success audit exists; admin portal, denied events and full transaction audit remain. Phase 1–2. |
 | 11 | Cross-user/restaurant authorization | 🟡 Partial | Customer ownership and restaurant membership/role isolation work on implemented routes; admin RBAC remains Phase 0. |

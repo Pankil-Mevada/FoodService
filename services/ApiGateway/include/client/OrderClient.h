@@ -27,6 +27,19 @@ public:
         int id,
         const std::string& status);
 
+    HttpResult getPartnerOrders(
+        int restaurantId,
+        int partnerUserId,
+        const std::string& partnerRole);
+
+    HttpResult updatePartnerOrderStatus(
+        int restaurantId,
+        int orderId,
+        int partnerUserId,
+        const std::string& partnerRole,
+        const std::string& jsonBody,
+        const std::string& idempotencyKey);
+
 private:
 
     HttpClient m_httpClient;

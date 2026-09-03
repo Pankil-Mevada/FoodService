@@ -152,9 +152,14 @@ and resolves an ACTIVE user/restaurant membership from `restaurant.db`.
 | `GET/POST /partner/restaurants/{id}/menu-items` | List/add authorized items; empty lists are `[]`, not `null`. |
 | `PUT/DELETE /partner/restaurants/{id}/menu-items/{itemId}` | Version-update or remove an authorized item. |
 | `GET /partner/restaurants/{id}/audit` | Latest 50 restaurant-scoped server audit events. |
+| `GET /partner/restaurants/{id}/orders` | Newest 100 paid orders for an ACTIVE authorized restaurant membership; unpaid and foreign orders are excluded. |
+| `POST /partner/restaurants/{id}/orders/{orderId}/status` | Advance one kitchen step using `status`, `expectedVersion`, and required `Idempotency-Key`. |
 
 Another user's resource returns 404. Stale versions return 409. Invalid
 state/readiness returns 409/422. Successful writes and success audit events are
 atomic. DRAFT, REJECTED and PENDING_REVIEW rows are excluded from customer
-reads. Persistent partner-command idempotency is not yet implemented even
-though the UI prepares idempotency headers.
+reads. Kitchen states are `NEW`, `ACCEPTED`, `PREPARING`,
+`READY_FOR_PICKUP`, and `HANDED_OFF`. They are separate from payment/delivery
+status. Handoff requires driver assignment. Order transitions persist durable
+command deduplication and audit atomically; profile/menu commands still need the
+same backend idempotency guarantee.

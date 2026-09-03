@@ -1,6 +1,6 @@
 # Restaurant Partner Portal — Product Requirements
 
-Status: real frontend/backend foundation, 2026-09-01.
+Status: real frontend/backend foundation, 2026-09-03.
 
 ## Product outcome
 
@@ -22,7 +22,7 @@ register and sign in without leaving `partner.html`.
 | Approval and suspension | 🟡 Partial | Partner submits to PENDING_REVIEW and cannot self-approve; separate admin API/UI, dual control and suspension remain. |
 | Menu/category/options CRUD | 🟡 Partial | Secure item CRUD, integer paise and versions exist; categories, variants, add-ons, tax, stock and bulk import remain. |
 | Hours/closures/service area | 🔴 Launch blocker | Radius/profile inputs exist; timezone schedules, holiday overrides and production polygon operations remain. |
-| Incoming-order operations | 🔴 Launch blocker | Restaurant-scoped paid-order feed, transitions and timeout policy remain. |
+| Incoming-order operations | 🟡 Core implemented | Restaurant-scoped verified-payment queue, preparation time, sequential accept/prepare/ready/handoff states, durable transition idempotency, versions and audit exist. Reject/refund, SLA timers, alerts and availability-driven cancellation remain. |
 | Team invitations | 🔴 Launch blocker | Disabled until verified email, expiring one-time invites, last-owner protection, revocation and audit exist. |
 | Audit history | ✅ Core implemented | Server success events are restaurant-scoped and atomic with writes; denied-event/outbox/retention work remains. |
 | Analytics and payouts | 🔴 Future | Read models, settlement provider and reconciliation are not implemented. |
@@ -34,6 +34,8 @@ register and sign in without leaving `partner.html`.
 - `restaurant_partners` links a JWT user ID to a restaurant and role.
 - `partner_menu_items` stores integer-paise items and optimistic versions.
 - `partner_audit_events` stores actor, action, resource, result, correlation ID and time.
+- Order Service `restaurant_order_workflows`, `restaurant_order_commands`, and
+  `restaurant_order_events` own kitchen state, deduplication, and order audit.
 - Browser storage is never restaurant authority.
 
 ## Non-functional requirements
@@ -49,6 +51,7 @@ register and sign in without leaving `partner.html`.
 
 The portal has a real frontend/backend path, but it is not launch-ready until
 email verification/recovery, independent admin approval, compliance/KYC,
-restaurant order operations, durable command idempotency/outbox, rate limiting,
-managed database migrations/backups, accessibility, load, penetration and
+paid-order rejection/refunds, SLA alerts, idempotency for remaining profile/menu
+commands, an outbox, rate limiting, managed database migrations/backups,
+accessibility, load, penetration and
 incident-response gates pass. See `RESTAURANT_PARTNER_BACKEND.md`.

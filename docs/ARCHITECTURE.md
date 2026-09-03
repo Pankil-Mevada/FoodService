@@ -180,8 +180,11 @@ Restaurant partner authorization is service-owned. User Service owns login in
 `foodservice.db`; Restaurant Service links that user ID to restaurant roles,
 menus, lifecycle and audit in `restaurant.db`. Partner writes and success audits
 are transactional, and customer reads include only APPROVED rows. Admin
-approval, compliance, order operations, durable idempotency/outbox and
-production database operations remain. See `RESTAURANT_PARTNER_BACKEND.md`.
+approval, compliance, paid-order rejection/refunds, remaining command
+idempotency/outbox and production database operations remain. The partner paid
+order queue is authorized through Restaurant Service membership, while Order
+Service owns kitchen workflow/version, durable transition commands, and events
+in `order.db`. See `RESTAURANT_PARTNER_BACKEND.md`.
 
 - Services use fixed localhost ports and direct HTTP discovery.
 - SQLite databases are service-local files; there is no distributed transaction.

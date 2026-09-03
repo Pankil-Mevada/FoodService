@@ -4,6 +4,8 @@
 #include "OrderController.h"
 #include "OrderRepository.h"
 #include "OrderService.h"
+#include "PartnerOrderController.h"
+#include "PartnerOrderRepository.h"
 #include "RequestLoggingMiddleware.h"
 
 #include <algorithm>
@@ -44,6 +46,9 @@ int main()
     OrderRepository repository(database);
     OrderService service(repository);
     OrderController controller(service);
+    PartnerOrderRepository partnerOrderRepository(database);
+    if (!partnerOrderRepository.ready()) return 1;
+    PartnerOrderController partnerOrderController(partnerOrderRepository);
 
     // Health Check
     CROW_ROUTE(app, "/health")
@@ -131,6 +136,24 @@ int main()
         const auto order = service.getOrderById(id);
         if (order) response["orderStatus"] = order->getStatus();
         return crow::response(updated ? 200 : 409, response);
+    });
+
+    CROW_ROUTE(app, "/internal/partner/restaurants/<int>/orders")
+        .methods(crow::HTTPMethod::GET)
+    ([&partnerOrderController](const crow::request& req, int restaurantId)
+    {
+        if (!internalOrderSyncAuthorized(req))
+            return crow::response(401, "Invalid internal order-sync secret");
+        return partnerOrderController.listOrders(req, restaurantId);
+    });
+
+    CROW_ROUTE(app, "/internal/partner/restaurants/<int>/orders/<int>/status")
+        .methods(crow::HTTPMethod::POST)
+    ([&partnerOrderController](const crow::request& req, int restaurantId, int orderId)
+    {
+        if (!internalOrderSyncAuthorized(req))
+            return crow::response(401, "Invalid internal order-sync secret");
+        return partnerOrderController.transitionOrder(req, restaurantId, orderId);
     });
 
     app.loglevel(configuredLogLevel()).port(8082)

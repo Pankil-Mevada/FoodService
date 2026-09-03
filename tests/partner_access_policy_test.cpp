@@ -3,6 +3,8 @@
 int main(){using namespace partner;
  assert(allowed(Role::Owner,Permission::ManageStaff));
  assert(allowed(Role::Manager,Permission::EditMenu));
+ assert(allowed(Role::Manager,Permission::ManageOrders));
+ assert(allowed(Role::Staff,Permission::ManageOrders));
  assert(!allowed(Role::Manager,Permission::ManageStaff));
  assert(!allowed(Role::Staff,Permission::EditRestaurant));
  assert(canTransition(Status::Draft,Status::PendingReview));

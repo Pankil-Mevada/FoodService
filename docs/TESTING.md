@@ -246,6 +246,12 @@ For local rain/surge checks, start API Gateway with `DELIVERY_RAIN_MODE=1` and/o
 `partner_access_policy_test` covers role/transition policy.
 `partner_repository_test` uses isolated SQLite for tenant isolation, stale
 versions, menu ownership, submission visibility and audit scope.
+`restaurant_order_workflow_test` covers paid-state classification and the
+one-step kitchen state machine. `partner_order_repository_test` uses isolated
+SQLite for unpaid/foreign filtering, durable idempotency, optimistic conflicts,
+driver-before-handoff and atomic audit. `partner_order_controller_test` covers
+trusted identity, stable empty arrays, malformed fields, version validation and
+exact idempotent replay.
 `tests.portal_contract_test` verifies Gateway-backed login/resources rather
 than browser drafts or private service ports.
 
@@ -258,5 +264,10 @@ python3 tests/partner_api_e2e_test.py
 The E2E test creates randomized `.test` identities and a private restaurant, so
 use only disposable local/test databases. It verifies anonymous denial, `[]`
 empty collections, two-user isolation, private DRAFT/PENDING_REVIEW state, menu
-persistence and audit events. Verified 2026-09-01: CTest 7/7, portal contracts
-3/3 and partner API E2E passed.
+persistence and audit events.
+
+Latest focused verification on 2026-09-03: a clean Debug build completed for
+all services and the API Gateway; CTest passed **10/10**, including the partner
+access, order workflow, order repository and partner repository tests. The
+browser contract suite passed **3/3**. The partner API E2E test still requires a
+running disposable local stack and remains part of CI/manual acceptance.

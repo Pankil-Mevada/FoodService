@@ -15,17 +15,26 @@ flowchart LR
   C[Customer browser] --> G
   G --> I[User Service :8080]
   G --> R[Restaurant Service :8081]
+  G --> O[Order Service :8082]
   I --> UDB[(foodservice.db)]
   R --> RDB[(restaurant.db)]
+  O --> ODB[(order.db)]
   RDB --> PROF[restaurants + lifecycle/version]
   RDB --> MEM[restaurant_partners]
   RDB --> MENU[partner_menu_items]
   RDB --> AUDIT[partner_audit_events]
+  ODB --> FLOW[restaurant_order_workflows]
+  ODB --> CMD[restaurant_order_commands]
+  ODB --> OEVENT[restaurant_order_events]
   ADMIN[Future admin portal] -. separate admin role .-> G
 ~~~
 
 The gateway is the only browser-facing backend. Restaurant Service verifies the
-JWT again. Production network policy must make ports 8080–8084 private.
+JWT again. For order operations, Gateway asks Restaurant Service to resolve the
+ACTIVE membership and role, then calls an internal Order Service route using a
+server-only shared secret and derived partner user ID. Order Service always
+scopes reads and writes by both restaurant ID and order ID. Production network
+policy must make ports 8080–8084 private.
 
 ## Authorization sequence
 
@@ -41,10 +50,12 @@ approve, suspend, alter payout identity or access payment credentials.
 ## Data and consistency
 
 Current partner writes use service-owned SQLite. Membership has a composite
-primary key, versions prevent lost updates, and implemented writes plus success
-audit commit or roll back together. Persistent command idempotency and an
-outbox/event bus are target architecture; a browser idempotency header alone is
-not backend deduplication.
+primary key and versions prevent lost updates. Restaurant profile/menu writes
+and their audits commit together in Restaurant Service. Kitchen workflow,
+command idempotency, and order audit commit together in Order Service; a unique
+`(restaurant_id, idempotency_key)` key performs backend deduplication. Profile
+and menu commands still need durable idempotency. A cross-service outbox/event
+bus remains target architecture.
 
 ## Generic expansion
 
@@ -70,5 +81,5 @@ not backend deduplication.
 Existing approved rows need reviewed ownership backfill before production.
 SQLite startup alterations must become versioned migrations to managed SQL.
 Add reconciliation, backups/restore drills, private service networking, admin
-approval, command idempotency/outbox, load/accessibility/security evidence and
+approval, remaining command idempotency/outbox, load/accessibility/security evidence and
 operational rollback before an external pilot.

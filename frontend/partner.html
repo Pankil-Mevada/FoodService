@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Plated Partner</title>
-  <link rel="stylesheet" href="partner.css?v=20260901-auth">
+  <link rel="stylesheet" href="partner.css?v=20260903-orders">
 </head>
 <body>
 <header>
@@ -92,12 +92,18 @@
         </form>
         <div id="items"></div>
       </section>
-      <section data-panel="orders" hidden><p class="eyebrow">OPERATIONS</p><h2>Incoming orders</h2><div class="card">The secure restaurant-scoped order feed is the next service integration. Customer payment and order databases are never read directly here.</div></section>
+      <section data-panel="orders" hidden>
+        <div class="orders-heading">
+          <div><p class="eyebrow">OPERATIONS</p><h2>Paid order queue</h2><p>Only orders with verified payment appear here.</p></div>
+          <button id="refresh-orders" type="button">Refresh orders</button>
+        </div>
+        <div id="partner-orders" class="partner-orders" aria-live="polite"><div class="empty">Choose a restaurant to load its orders.</div></div>
+      </section>
       <section data-panel="team" hidden><p class="eyebrow">ACCESS</p><h2>Team & roles</h2><div class="card">Owner manages business and team. Manager edits restaurant and menu. Staff edits menu. Invitations remain disabled until verified-email delivery and revocation are implemented.</div></section>
       <section data-panel="audit" hidden><p class="eyebrow">SECURITY</p><h2>Server audit trail</h2><div id="audit-list"></div></section>
     </div>
   </section>
 </main>
-<script src="partner.js?v=20260901-auth"></script>
+<script src="partner.js?v=20260903-orders"></script>
 </body>
 </html>

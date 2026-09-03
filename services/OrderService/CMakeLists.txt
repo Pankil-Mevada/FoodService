@@ -8,6 +8,8 @@ add_executable(OrderService
     src/Order.cpp
     src/OrderService.cpp
     src/OrderRepository.cpp
+    src/PartnerOrderController.cpp
+    src/PartnerOrderRepository.cpp
     src/client/PaymentClient.cpp
     src/client/RestaurantClient.cpp
 )

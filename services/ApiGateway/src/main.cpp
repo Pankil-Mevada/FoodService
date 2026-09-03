@@ -9,6 +9,7 @@
 #include "DeliveryQuote.h"
 #include "CorrelationMiddleware.h"
 #include "RequestLoggingMiddleware.h"
+#include "PartnerAccessPolicy.h"
 #include <algorithm>
 #include <cstdlib>
 #include <chrono>
@@ -238,6 +239,7 @@ int main()
 RestaurantClient restaurantClient;
 UserClient userClient;
 PaymentClient paymentClient;
+OrderClient partnerOrderClient;
 
 
 CROW_ROUTE(app, "/register")
@@ -379,6 +381,50 @@ CROW_ROUTE(app, "/partner/restaurants/<int>/audit")
     return downstreamResponse(restaurantClient.partnerGet(
         "/partner/restaurants/"+std::to_string(id)+"/audit",
         req.get_header_value("Authorization")));
+});
+
+CROW_ROUTE(app, "/partner/restaurants/<int>/orders")
+.methods(crow::HTTPMethod::GET)
+([&restaurantClient, &partnerOrderClient](const crow::request& req, int restaurantId)
+{
+    const auto userId = authenticatedUserId(req);
+    if (!userId) return unauthorized();
+    const auto membership = restaurantClient.partnerGet(
+        "/partner/restaurants/" + std::to_string(restaurantId),
+        req.get_header_value("Authorization"));
+    if (!membership.transportSucceeded() || membership.statusCode != 200)
+        return downstreamResponse(membership);
+    const auto restaurant = crow::json::load(membership.body);
+    if (!restaurant || !restaurant.has("role"))
+        return jsonError(502, "Restaurant Service returned invalid membership data");
+    const std::string role(restaurant["role"].s());
+    if (!partner::allowed(partner::parseRole(role), partner::Permission::ManageOrders))
+        return jsonError(403, "Your partner role cannot manage orders");
+    return downstreamResponse(partnerOrderClient.getPartnerOrders(
+        restaurantId, *userId, role));
+});
+
+CROW_ROUTE(app, "/partner/restaurants/<int>/orders/<int>/status")
+.methods(crow::HTTPMethod::POST)
+([&restaurantClient, &partnerOrderClient](
+    const crow::request& req, int restaurantId, int orderId)
+{
+    const auto userId = authenticatedUserId(req);
+    if (!userId) return unauthorized();
+    const auto membership = restaurantClient.partnerGet(
+        "/partner/restaurants/" + std::to_string(restaurantId),
+        req.get_header_value("Authorization"));
+    if (!membership.transportSucceeded() || membership.statusCode != 200)
+        return downstreamResponse(membership);
+    const auto restaurant = crow::json::load(membership.body);
+    if (!restaurant || !restaurant.has("role"))
+        return jsonError(502, "Restaurant Service returned invalid membership data");
+    const std::string role(restaurant["role"].s());
+    if (!partner::allowed(partner::parseRole(role), partner::Permission::ManageOrders))
+        return jsonError(403, "Your partner role cannot manage orders");
+    return downstreamResponse(partnerOrderClient.updatePartnerOrderStatus(
+        restaurantId, orderId, *userId, role, req.body,
+        req.get_header_value("Idempotency-Key")));
 });
 
     CROW_ROUTE(app, "/health")

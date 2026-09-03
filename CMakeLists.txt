@@ -51,6 +51,31 @@ if(BUILD_TESTING)
         ${CMAKE_SOURCE_DIR}/common/include)
     add_test(NAME partner_access_policy COMMAND partner_access_policy_test)
 
+    add_executable(restaurant_order_workflow_test tests/restaurant_order_workflow_test.cpp)
+    target_include_directories(restaurant_order_workflow_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/common/include)
+    add_test(NAME restaurant_order_workflow COMMAND restaurant_order_workflow_test)
+
+    add_executable(partner_order_repository_test
+        tests/partner_order_repository_test.cpp
+        services/OrderService/src/PartnerOrderRepository.cpp)
+    target_include_directories(partner_order_repository_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/common/include
+        ${CMAKE_SOURCE_DIR}/services/OrderService/include)
+    target_link_libraries(partner_order_repository_test PRIVATE Common)
+    add_test(NAME partner_order_repository COMMAND partner_order_repository_test)
+
+    add_executable(partner_order_controller_test
+        tests/partner_order_controller_test.cpp
+        services/OrderService/src/PartnerOrderController.cpp
+        services/OrderService/src/PartnerOrderRepository.cpp)
+    target_include_directories(partner_order_controller_test PRIVATE
+        ${CMAKE_SOURCE_DIR}/common/include
+        ${CMAKE_SOURCE_DIR}/services/OrderService/include
+        ${CMAKE_SOURCE_DIR}/third_party/Crow/include)
+    target_link_libraries(partner_order_controller_test PRIVATE Common)
+    add_test(NAME partner_order_controller COMMAND partner_order_controller_test)
+
     add_executable(partner_repository_test
         tests/partner_repository_test.cpp
         services/RestaurantService/src/PartnerRepository.cpp

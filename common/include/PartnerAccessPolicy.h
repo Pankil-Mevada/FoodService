@@ -6,11 +6,17 @@
 namespace partner {
 enum class Role{Owner,Manager,Staff,Unknown};
 enum class Status{Draft,PendingReview,Approved,Suspended,Rejected};
-enum class Permission{View,EditRestaurant,EditMenu,ManageStaff,Submit};
+inline Role parseRole(std::string_view value){
+ if(value=="OWNER")return Role::Owner;
+ if(value=="MANAGER")return Role::Manager;
+ if(value=="STAFF")return Role::Staff;
+ return Role::Unknown;
+}
+enum class Permission{View,EditRestaurant,EditMenu,ManageOrders,ManageStaff,Submit};
 inline bool allowed(Role r,Permission p){
  if(r==Role::Owner)return true;
- if(r==Role::Manager)return p==Permission::View||p==Permission::EditRestaurant||p==Permission::EditMenu||p==Permission::Submit;
- return r==Role::Staff&&(p==Permission::View||p==Permission::EditMenu);
+ if(r==Role::Manager)return p==Permission::View||p==Permission::EditRestaurant||p==Permission::EditMenu||p==Permission::ManageOrders||p==Permission::Submit;
+ return r==Role::Staff&&(p==Permission::View||p==Permission::EditMenu||p==Permission::ManageOrders);
 }
 inline bool canTransition(Status from,Status to){
  return (from==Status::Draft&&to==Status::PendingReview)||(from==Status::Rejected&&to==Status::Draft);

@@ -89,5 +89,59 @@ sequenceDiagram
  Note over Partner,RS: Partner routes cannot set APPROVED or clear suspension
 ~~~
 
-The current implementation has no durable command-idempotency store, admin API
-or outbox yet; those remain launch work and are not implied by a browser header.
+The restaurant-profile implementation still has no durable command-idempotency
+store, admin API, or outbox; those remain launch work.
+
+## Paid order queue
+
+~~~mermaid
+sequenceDiagram
+ actor Partner
+ participant UI as Partner portal
+ participant GW as API Gateway
+ participant RS as Restaurant Service
+ participant OS as Order Service
+ participant ODB as order.db
+ Partner->>UI: Open Orders for Restaurant A
+ UI->>GW: GET /partner/restaurants/A/orders + JWT
+ GW->>GW: Verify JWT and derive user ID
+ GW->>RS: GET /partner/restaurants/A + JWT
+ RS->>RS: Verify ACTIVE membership and return role
+ GW->>GW: Require ManageOrders permission
+ GW->>OS: Internal GET + restaurant A + derived actor + secret
+ OS->>ODB: Select Restaurant A paid orders only
+ OS-->>UI: Stable newest-first JSON array, including []
+ Note over OS,ODB: PAYMENT_PENDING/FAILED and other restaurants are excluded
+~~~
+
+## Kitchen status transition
+
+~~~mermaid
+sequenceDiagram
+ actor Partner
+ participant UI as Partner portal
+ participant GW as API Gateway
+ participant RS as Restaurant Service
+ participant OS as Order Service
+ participant ODB as order.db
+ Partner->>UI: Accept / prepare / ready / handoff
+ UI->>GW: POST status + expectedVersion + Idempotency-Key
+ GW->>RS: Recheck ACTIVE membership and ManageOrders role
+ GW->>OS: Internal command + derived actor + secret
+ OS->>ODB: BEGIN IMMEDIATE
+ OS->>ODB: Check paid order, restaurant scope, command key and version
+ OS->>OS: Enforce one-step state machine
+ alt valid new command
+  OS->>ODB: Upsert workflow + insert command + audit event
+  OS->>ODB: COMMIT
+  OS-->>UI: 200, next version
+ else exact command replay
+  OS-->>UI: 200, idempotentReplay=true
+ else stale, skipped, foreign, or handoff before driver
+  OS-->>UI: 404/409, no state change
+ end
+~~~
+
+Restaurant order transitions now have durable server-side idempotency. Profile,
+menu, submit, admin, and cross-service event propagation still need complete
+idempotency/outbox coverage before launch.

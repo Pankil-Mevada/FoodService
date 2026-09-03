@@ -6,6 +6,13 @@
   transitions, price, name and coordinate bounds.
 - `partner_repository_test`: owner isolation, cross-tenant denial, optimistic
   conflicts, menu ownership, submission, customer visibility and audit scope.
+- `restaurant_order_workflow_test`: paid-state classification, initial-state
+  recovery, one-step transitions, terminal state, and driver-before-handoff.
+- `partner_order_repository_test`: unpaid/foreign filtering, optimistic conflict,
+  durable replay, changed-payload/key-reuse conflict, skipped state, handoff guard
+  and audit.
+- `partner_order_controller_test`: trusted actor requirement, `[]` response,
+  malformed field types, negative version and exact replay response.
 - `portal_contract_test.py`: gateway-backed login/resources, no private-port
   calls/browser draft authority, and no partner self-approval.
 - `partner_api_e2e_test.py`: new-account empty arrays, anonymous denial, two-user
@@ -22,8 +29,9 @@ python3 -m unittest tests.portal_contract_test
 python3 tests/partner_api_e2e_test.py  # local stack required
 ```
 
-Verified 2026-09-01: CTest 7/7, portal contracts 3/3, and live partner API passed.
-The live test mutates local data; use disposable development/test databases.
+Verified 2026-09-03: clean Debug build, CTest **10/10**, and portal contract
+suite **3/3** passed. The live partner API scenario remains a running-stack/CI
+check and mutates local data; use disposable development/test databases.
 
 ## Partner cases
 
@@ -35,7 +43,7 @@ The live test mutates local data; use disposable development/test databases.
 | Restaurant | Create/update/submit valid draft | blank/control chars, huge payload, invalid coordinates, stale version, invalid state |
 | Menu | Item CRUD with integer paise | negative/overflow price, invalid diet, foreign item, stale version, concurrent edits |
 | Documents | Future clean encrypted upload | MIME spoof, polyglot, malware, bomb, oversized, expired/foreign download |
-| Orders | Future paid restaurant feed | unpaid/cancelled/delivered/duplicate/stale/other restaurant/timeout race |
+| Orders | Paid own-restaurant queue; accept/prepare/ready/handoff | unpaid/foreign order, missing/reused idempotency key, replay, stale version, skipped/backward state, handoff before driver, concurrent clicks, service timeout |
 | Team | Future verified invitation once | guessed/expired/reused/email mismatch/last-owner removal/revoke race |
 | Audit | Actor/action/resource/request/time | missing denied event, PII/secret leak, tampering, partial commit, retention expiry |
 | Availability | Retry/read-only behavior | DB/provider failure, timeout, outbox backlog, retry storm, backup restore |

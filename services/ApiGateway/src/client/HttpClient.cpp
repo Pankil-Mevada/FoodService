@@ -92,9 +92,10 @@ HttpResult perform(const std::string& method, const std::string& url,
 }
 }
 
-HttpResult HttpClient::get(const std::string& url, const std::string& authHeader)
+HttpResult HttpClient::get(const std::string& url, const std::string& authHeader,
+    const std::vector<std::string>& extraHeaders)
 {
-    return perform("GET", url, "", authHeader, {});
+    return perform("GET", url, "", authHeader, extraHeaders);
 }
 
 HttpResult HttpClient::post(const std::string& url, const std::string& body,

@@ -30,7 +30,8 @@ inline int gatewayStatusFor(const HttpResult& result)
 class HttpClient
 {
 public:
-    HttpResult get(const std::string& url, const std::string& authHeader = "");
+    HttpResult get(const std::string& url, const std::string& authHeader = "",
+        const std::vector<std::string>& extraHeaders = {});
     HttpResult post(const std::string& url, const std::string& body,
         const std::string& authHeader = "",
         const std::vector<std::string>& extraHeaders = {});
